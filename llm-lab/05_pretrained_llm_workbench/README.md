@@ -1484,3 +1484,38 @@ pip install -U huggingface_hub
 ```
 
 Modern `huggingface_hub` versions install the Xet integration used for large model-file downloads.
+
+
+---
+
+## Troubleshooting: square brackets in the project path
+
+If the model file exists but MLX-LM still reports:
+
+```text
+FileNotFoundError: No safetensors found in ...
+```
+
+check whether any parent directory contains square brackets, for example:
+
+```text
+curso [Sistemas Multiagentes e Inteligencia Artificial]
+```
+
+MLX-LM discovers local weight files using a glob pattern similar to:
+
+```python
+glob.glob(str(model_path / "model*.safetensors"))
+```
+
+In glob syntax, `[` and `]` have special meaning. Therefore an otherwise valid absolute path containing brackets can prevent the weight file from matching.
+
+The course workbench handles this automatically by temporarily entering the model directory and loading it through the relative path:
+
+```text
+.
+```
+
+instead of passing the bracket-containing absolute path to MLX-LM.
+
+The model does not need to be downloaded again when `model.safetensors` is already present.
