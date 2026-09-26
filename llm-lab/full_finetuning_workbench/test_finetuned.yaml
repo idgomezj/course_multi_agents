@@ -1,0 +1,19 @@
+model: "models/qwen3-0.6b-base-bf16"
+
+train: false
+
+fine_tune_type: full
+
+data: "data"
+
+num_layers: -1
+
+adapter_path: "outputs/full_weights"
+
+test: true
+
+test_batches: -1
+
+max_seq_length: 256
+
+mask_prompt: true
