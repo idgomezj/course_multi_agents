@@ -112,7 +112,8 @@ def main():
     command = [
         sys.executable,
         "-m",
-        "mlx_lm.lora",
+        "mlx_lm",
+        "lora",
         "--config",
         "lora_finetune.yaml",
     ]
