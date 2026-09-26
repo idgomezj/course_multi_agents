@@ -1,0 +1,14 @@
+juan studies artificial intelligence.
+juan learns how language models work.
+a language model predicts the next token.
+machine learning models learn from examples.
+neural networks contain parameters.
+training modifies the parameters of a neural network.
+gradient descent reduces the training loss.
+a language model receives tokens as input.
+the model predicts probabilities for the next token.
+artificial intelligence uses mathematical models.
+neural networks use matrix multiplication.
+python is a programming language.
+computational models simulate real world systems.
+supervised learning uses labeled examples.
