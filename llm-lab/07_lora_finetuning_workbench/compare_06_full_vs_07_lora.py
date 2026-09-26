@@ -44,6 +44,31 @@ def find_chapter_06():
         ),
     ]
 
+    # Prefer the location that actually contains
+    # chapter-06 local training artifacts. This
+    # matters after the repository directory was
+    # renamed: ignored model/output files may still
+    # live under the legacy path.
+
+    for candidate in candidates:
+
+        if (
+            (
+                candidate
+                / "outputs"
+                / "full_weights"
+                / "adapters.safetensors"
+            ).exists()
+            or
+            (
+                candidate
+                / "outputs"
+                / "before_after.json"
+            ).exists()
+        ):
+
+            return candidate
+
     for candidate in candidates:
 
         if candidate.exists():
