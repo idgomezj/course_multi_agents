@@ -16,18 +16,14 @@ from config import (
 )
 
 
+from model_files import (
+    require_complete_model,
+)
+
+
 def main():
 
-    if not (
-        MODEL_DIR
-        / "config.json"
-    ).exists():
-
-        raise FileNotFoundError(
-            f"Model not found at: {MODEL_DIR}\n\n"
-            "Download it first with:\n"
-            "python download_model.py"
-        )
+    require_complete_model()
 
     print(
         "Loading pretrained base model..."
