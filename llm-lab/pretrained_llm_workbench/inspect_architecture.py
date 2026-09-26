@@ -374,21 +374,24 @@ def main():
 
             with safe_open(
                 model_file,
-                framework="numpy"
+                framework="np"
             ) as file:
 
                 for key in file.keys():
 
-                    tensor = (
-                        file.get_tensor(
+                    tensor_slice = (
+                        file.get_slice(
                             key
                         )
                     )
 
+                    shape = (
+                        tensor_slice.get_shape()
+                    )
+
                     print(
                         f"{key:70} "
-                        f"shape={str(tensor.shape):18} "
-                        f"dtype={tensor.dtype}"
+                        f"shape={str(shape):18}"
                     )
 
                     tensor_count += 1
