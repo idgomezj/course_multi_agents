@@ -1,0 +1,49 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+# Control Plane owns checked-in runtime templates for Docker and production
+# troubleshooting. LOCAL uses cmd/controlplane/env/.env, which must remain
+# untracked; real production secrets continue to come from Kubernetes
+# Secrets/ConfigMaps and mounted files.
+!cmd/controlplane/env/.docker.env
+!cmd/controlplane/env/.prod.env
+*.key
+*.pem
+*.p12
+*.pfx
+*.enc
+*.age
+*.secret
+secrets/
+credentials/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+coverage/
+dist/
+build/
+node_modules/
+web/dist/
+*.log
+*.tmp
+.idea/
+.vscode/
+
+# go build ./cmd/<name>/... with no -o writes a binary named <name> here
+/controlplane
+/gateway
+/migrator
+/rebalancer
+
+# Anchored to the repository root on purpose. Unanchored, this rule matches a
+# directory named `design` at any depth, which silently swallowed the new
+# web/src/design source directory. It exists to keep the root-level folder of
+# reference mockup images out of Git, nothing more.
+/design/
+# Impeccable working artifacts: review captures and build state are
+# regenerable evidence, not source. The surface briefs ARE kept.
+.impeccable/review/
+.impeccable/build/
