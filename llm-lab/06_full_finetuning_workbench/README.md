@@ -182,7 +182,7 @@ Por eso:
 # 4. Estructura del laboratorio
 
 ```text
-full_finetuning_workbench/
+06_full_finetuning_workbench/
 │
 ├── README.md
 ├── config.py
@@ -581,7 +581,7 @@ Solo sumamos posiciones pertenecientes a la completion.
 Desde:
 
 ```bash
-cd llm-lab/full_finetuning_workbench
+cd llm-lab/06_full_finetuning_workbench
 ```
 
 Instala:
@@ -701,7 +701,7 @@ Queremos tener:
     4-bit model
     inference reference
 
-full_finetuning_workbench/
+06_full_finetuning_workbench/
     BF16 model
     trainable reference
 ```
@@ -1670,7 +1670,7 @@ Nuestro YAML controla el método real.
 Desde:
 
 ```bash
-cd llm-lab/full_finetuning_workbench
+cd llm-lab/06_full_finetuning_workbench
 ```
 
 ### 1. Environment
