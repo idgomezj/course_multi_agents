@@ -76,7 +76,7 @@ def main():
         "--show-tensors",
         action="store_true",
         help=(
-            "Print tensor names, shapes and dtypes "
+            "Print tensor names and shapes "
             "from the safetensors files."
         )
     )
