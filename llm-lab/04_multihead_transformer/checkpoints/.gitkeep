@@ -1,0 +1,2 @@
+This directory stores local training checkpoints.
+The generated mini_gpt.pt file is intentionally not committed.

@@ -1,0 +1,87 @@
+artificial intelligence learns patterns from data.
+language models predict the next token in a sequence.
+machine learning uses data to adjust model parameters.
+neural networks contain layers of mathematical operations.
+training changes the weights of a neural network.
+gradient descent attempts to reduce the loss function.
+a language model receives tokens and predicts probabilities.
+tokens are numerical representations of pieces of text.
+embeddings convert tokens into vectors of numbers.
+vectors allow neural networks to represent information.
+a model begins training with mostly random parameters.
+the optimizer changes parameters using calculated gradients.
+backpropagation calculates gradients through the network.
+cross entropy measures prediction error in classification.
+a lower training loss usually means better predictions.
+validation data helps measure generalization.
+a model can memorize training data and still perform poorly.
+overfitting happens when training improves but validation worsens.
+a context window determines how much previous text is visible.
+larger context allows a model to use more previous information.
+position embeddings describe where tokens occur in a sequence.
+token embeddings represent the identity of each token.
+attention allows tokens to exchange information with other tokens.
+transformers use attention to process sequences efficiently.
+multi head attention creates several attention representations.
+queries keys and values are central parts of self attention.
+a transformer contains multiple mathematical processing blocks.
+language model training requires many examples.
+large language models contain millions or billions of parameters.
+small models are useful for understanding machine learning.
+python is frequently used for machine learning experiments.
+pytorch provides automatic differentiation.
+automatic differentiation calculates gradients automatically.
+apple silicon can accelerate pytorch using metal.
+the mps device allows pytorch to use apple graphics hardware.
+the cpu can also execute neural network operations.
+training consists of many repeated optimization steps.
+each optimization step attempts to reduce prediction error.
+the learning rate controls the size of parameter updates.
+a learning rate that is too large can make training unstable.
+a learning rate that is too small can make training very slow.
+batching allows multiple examples to be processed together.
+a batch contains several training examples.
+the batch size controls how many examples are processed together.
+the sequence length controls the number of tokens in a context.
+a character tokenizer treats individual characters as tokens.
+modern language models usually use subword tokenization.
+a vocabulary contains all tokens understood by a tokenizer.
+each vocabulary token is assigned an integer identifier.
+neural networks operate on numbers rather than raw text.
+text must therefore be converted into numerical representations.
+the model output before softmax is called logits.
+softmax converts logits into probabilities.
+probabilities describe possible next tokens.
+sampling selects one token from a probability distribution.
+temperature can modify the randomness of token sampling.
+model checkpoints store learned parameters.
+a checkpoint can be loaded without training again.
+training and inference are different phases.
+training modifies model parameters.
+inference uses existing parameters to generate predictions.
+machine learning experiments should be reproducible.
+random seeds can help make experiments reproducible.
+evaluation compares model predictions with expected results.
+model quality should be measured rather than guessed.
+a good experiment separates training and validation data.
+language models learn statistical relationships between tokens.
+a bigram model only observes one previous token.
+a context model observes several previous tokens.
+context makes more complex predictions possible.
+attention will later provide a better way to process context.
+transformers scale context processing more effectively.
+learning how small models work helps explain large models.
+multi head attention divides the embedding space across several attention heads.
+each attention head can learn a different relationship between tokens.
+the outputs of all attention heads are concatenated into one representation.
+a projection mixes information after the attention heads are concatenated.
+residual connections preserve information while adding learned transformations.
+layer normalization helps stabilize the values flowing through a transformer.
+pre layer normalization applies normalization before attention and feed forward layers.
+a feed forward network processes each token after attention mixes contextual information.
+gelu is a nonlinear activation function often used inside transformer feed forward networks.
+dropout randomly removes some activations during training to reduce overfitting.
+a transformer block combines self attention with a feed forward network.
+multiple transformer blocks create progressively deeper token representations.
+the final language model head converts token representations into vocabulary logits.
+cross entropy compares vocabulary logits with the correct next token.
