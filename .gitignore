@@ -47,3 +47,8 @@ web/dist/
 # regenerable evidence, not source. The surface briefs ARE kept.
 .impeccable/review/
 .impeccable/build/
+
+
+# LLM course generated artifacts
+llm-lab/**/checkpoints/*.pt
+llm-lab/**/training_loss.png
