@@ -6,7 +6,6 @@ from datetime import (
 
 from mlx_lm import (
     generate,
-    load,
 )
 
 from mlx_lm.sample_utils import (
@@ -23,6 +22,7 @@ from config import (
 
 from model_files import (
     require_complete_model,
+    load_local_mlx_model,
 )
 
 
@@ -47,10 +47,8 @@ def main():
         "Loading model once for baseline evaluation..."
     )
 
-    model, tokenizer = load(
-        str(
-            MODEL_DIR
-        )
+    model, tokenizer = (
+        load_local_mlx_model()
     )
 
     # Greedy decoding makes this baseline
