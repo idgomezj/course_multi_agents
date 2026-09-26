@@ -29,7 +29,8 @@ def main():
         [
             sys.executable,
             "-m",
-            "mlx_lm.fuse",
+            "mlx_lm",
+            "fuse",
             "--model",
             "models/qwen3-0.6b-base-bf16",
             "--adapter-path",
