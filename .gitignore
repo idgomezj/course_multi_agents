@@ -52,3 +52,10 @@ web/dist/
 # LLM course generated artifacts
 llm-lab/**/checkpoints/*.pt
 llm-lab/**/training_loss.png
+
+
+# Pretrained LLM workbench local artifacts
+llm-lab/pretrained_llm_workbench/models/*
+!llm-lab/pretrained_llm_workbench/models/.gitkeep
+llm-lab/pretrained_llm_workbench/outputs/*
+!llm-lab/pretrained_llm_workbench/outputs/.gitkeep
