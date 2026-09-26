@@ -12,20 +12,9 @@ from config import (
 )
 
 
-def require_model():
-
-    config_file = (
-        MODEL_DIR
-        / "config.json"
-    )
-
-    if not config_file.exists():
-
-        raise FileNotFoundError(
-            f"Model not found at: {MODEL_DIR}\n\n"
-            "Run first:\n"
-            "python download_model.py"
-        )
+from model_files import (
+    require_complete_model,
+)
 
 
 def human_size(
@@ -93,7 +82,7 @@ def main():
 
     args = parser.parse_args()
 
-    require_model()
+    require_complete_model()
 
     config_file = (
         MODEL_DIR
