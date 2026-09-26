@@ -1443,3 +1443,44 @@ Ese es el punto donde pasamos de:
 a:
 
 > **"entiendo cómo especializar un modelo existente."**
+
+
+---
+
+## Troubleshooting: No safetensors found
+
+If MLX-LM reports:
+
+```text
+FileNotFoundError: No safetensors found in .../models/qwen3-0.6b-base-4bit
+```
+
+the model directory exists but the actual weight file was not downloaded completely.
+
+The official MLX repository contains a large `model.safetensors` file, so first resume the download:
+
+```bash
+python download_model.py
+```
+
+Then verify:
+
+```bash
+ls -lh models/qwen3-0.6b-base-4bit/*.safetensors
+```
+
+If the file is still missing, force the download:
+
+```bash
+python download_model.py --force
+```
+
+The downloader now validates that at least one non-empty `.safetensors` weight file exists before reporting success.
+
+The model weights are hosted through Hugging Face's large-file storage backend. Keep `huggingface_hub` current:
+
+```bash
+pip install -U huggingface_hub
+```
+
+Modern `huggingface_hub` versions install the Xet integration used for large model-file downloads.
