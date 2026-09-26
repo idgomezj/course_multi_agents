@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ai_definition",
+    "prompt": "Artificial intelligence is"
+  },
+  {
+    "id": "neural_network_learning",
+    "prompt": "A neural network learns by"
+  },
+  {
+    "id": "gradient_descent",
+    "prompt": "The purpose of gradient descent is"
+  },
+  {
+    "id": "overfitting",
+    "prompt": "In machine learning, overfitting happens when"
+  },
+  {
+    "id": "transformer_attention",
+    "prompt": "A transformer uses attention to"
+  },
+  {
+    "id": "python_ml",
+    "prompt": "Python is useful for machine learning because"
+  }
+]
