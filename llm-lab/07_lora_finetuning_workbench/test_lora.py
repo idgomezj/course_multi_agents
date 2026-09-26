@@ -30,7 +30,8 @@ def main():
         [
             sys.executable,
             "-m",
-            "mlx_lm.lora",
+            "mlx_lm",
+        "lora",
             "--config",
             "test_lora.yaml",
         ],
