@@ -59,3 +59,10 @@ llm-lab/pretrained_llm_workbench/models/*
 !llm-lab/pretrained_llm_workbench/models/.gitkeep
 llm-lab/pretrained_llm_workbench/outputs/*
 !llm-lab/pretrained_llm_workbench/outputs/.gitkeep
+
+
+# Full fine-tuning workbench local artifacts
+llm-lab/full_finetuning_workbench/models/*
+!llm-lab/full_finetuning_workbench/models/.gitkeep
+llm-lab/full_finetuning_workbench/outputs/*
+!llm-lab/full_finetuning_workbench/outputs/.gitkeep

@@ -1,0 +1,54 @@
+# Full fine-tuning configuration for MLX-LM.
+#
+# IMPORTANT:
+# Run from this directory so all paths remain relative.
+# This avoids issues caused by square brackets in the
+# user's parent course directory.
+
+model: "models/qwen3-0.6b-base-bf16"
+
+train: true
+
+fine_tune_type: full
+
+optimizer: adamw
+
+optimizer_config:
+  adamw:
+    weight_decay: 0.01
+
+data: "data"
+
+seed: 42
+
+# -1 means all Transformer layers in current MLX-LM.
+num_layers: -1
+
+batch_size: 1
+
+iters: 80
+
+val_batches: -1
+
+learning_rate: 5e-6
+
+steps_per_report: 5
+
+steps_per_eval: 10
+
+grad_accumulation_steps: 4
+
+adapter_path: "outputs/full_weights"
+
+save_every: 20
+
+test: false
+
+max_seq_length: 256
+
+# Trade compute for lower activation memory.
+grad_checkpoint: true
+
+# For prompt/completion data, calculate supervised
+# loss only on completion tokens.
+mask_prompt: true
