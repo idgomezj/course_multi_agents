@@ -18,18 +18,9 @@ from config import (
 )
 
 
-def require_model():
-
-    if not (
-        MODEL_DIR
-        / "config.json"
-    ).exists():
-
-        raise FileNotFoundError(
-            f"Model not found at: {MODEL_DIR}\n\n"
-            "Download it first with:\n"
-            "python download_model.py"
-        )
+from model_files import (
+    require_complete_model,
+)
 
 
 def main():
@@ -97,7 +88,7 @@ def main():
 
     args = parser.parse_args()
 
-    require_model()
+    require_complete_model()
 
     print(
         "Loading model..."
