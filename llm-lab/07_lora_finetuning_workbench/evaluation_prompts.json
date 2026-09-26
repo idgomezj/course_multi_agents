@@ -1,0 +1,26 @@
+[
+  {
+    "id": "gradient_accumulation",
+    "prompt": "What is gradient accumulation?"
+  },
+  {
+    "id": "attention_vs_ffn",
+    "prompt": "How are attention and feed forward layers different?"
+  },
+  {
+    "id": "full_vs_lora",
+    "prompt": "Why does full fine tuning require more memory than LoRA?"
+  },
+  {
+    "id": "baseline",
+    "prompt": "What is the purpose of a baseline before fine tuning?"
+  },
+  {
+    "id": "test_set",
+    "prompt": "Why should a test set remain untouched during training?"
+  },
+  {
+    "id": "catastrophic_forgetting",
+    "prompt": "What is catastrophic forgetting?"
+  }
+]
