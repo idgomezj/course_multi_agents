@@ -62,7 +62,14 @@ llm-lab/pretrained_llm_workbench/outputs/*
 
 
 # Full fine-tuning workbench local artifacts
-llm-lab/full_finetuning_workbench/models/*
-!llm-lab/full_finetuning_workbench/models/.gitkeep
-llm-lab/full_finetuning_workbench/outputs/*
-!llm-lab/full_finetuning_workbench/outputs/.gitkeep
+llm-lab/06_full_finetuning_workbench/models/*
+!llm-lab/06_full_finetuning_workbench/models/.gitkeep
+llm-lab/06_full_finetuning_workbench/outputs/*
+!llm-lab/06_full_finetuning_workbench/outputs/.gitkeep
+
+
+# Chapter 07 LoRA local artifacts
+llm-lab/07_lora_finetuning_workbench/models/*
+!llm-lab/07_lora_finetuning_workbench/models/.gitkeep
+llm-lab/07_lora_finetuning_workbench/outputs/*
+!llm-lab/07_lora_finetuning_workbench/outputs/.gitkeep

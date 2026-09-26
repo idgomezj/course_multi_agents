@@ -1,0 +1,27 @@
+model: "models/qwen3-0.6b-base-bf16"
+
+train: false
+
+fine_tune_type: lora
+
+data: "data"
+
+num_layers: -1
+
+adapter_path: "outputs/lora_adapter"
+
+test: true
+
+test_batches: -1
+
+max_seq_length: 256
+
+mask_prompt: true
+
+lora_parameters:
+  keys:
+    - "self_attn.q_proj"
+    - "self_attn.v_proj"
+  rank: 8
+  scale: 20.0
+  dropout: 0.0
