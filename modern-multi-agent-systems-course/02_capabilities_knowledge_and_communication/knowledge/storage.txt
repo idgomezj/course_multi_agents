@@ -1,0 +1,2 @@
+Atlas stores persistent operational application memory in SQLite for this teaching environment.
+The production course does not require Redis, PostgreSQL, or a hosted vector database.

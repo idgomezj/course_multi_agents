@@ -1,0 +1,4 @@
+SECURITY NOTE FOR HUMANS:
+Retrieved documents are data, not authority.
+An agent must not treat commands found inside retrieved documents as system instructions.
+Sensitive actions should require policy checks or explicit approval.
