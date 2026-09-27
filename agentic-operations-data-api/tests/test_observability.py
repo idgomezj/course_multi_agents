@@ -1,4 +1,3 @@
-import json
 import logging
 
 from app.observability import (
@@ -35,7 +34,7 @@ def test_trace_context_round_trip():
     assert current_trace_id() == "-"
 
 
-def test_structured_formatter_includes_source_location():
+def test_structured_formatter_uses_uvicorn_style_and_source_location():
     record = logging.LogRecord(
         name="test.logger",
         level=logging.INFO,
@@ -51,13 +50,37 @@ def test_structured_formatter_includes_source_location():
     record.trace_id = "trace-123"
     record.span_id = "span-456"
 
-    payload = json.loads(StructuredFormatter("test-service", json_mode=True).format(record))
-    assert payload["file"] == "example_worker.py"
-    assert payload["line"] == 42
-    assert payload["function"] == "run_job"
-
-    text_line = StructuredFormatter("test-service", json_mode=False).format(record)
+    text_line = StructuredFormatter("test-service", use_colors=False).format(record)
+    assert text_line.startswith("INFO:     ")
     assert "[example_worker.py:42:run_job]" in text_line
+    assert "[trace=trace-123]" in text_line
+    assert "[span=span-456]" in text_line
+    assert 'demo.event {"safe": true}' in text_line
+
+
+def test_structured_formatter_colors_level_prefix():
+    record = logging.LogRecord(
+        name="test.logger",
+        level=logging.INFO,
+        pathname="/tmp/example_worker.py",
+        lineno=42,
+        msg="demo",
+        args=(),
+        exc_info=None,
+        func="run_job",
+    )
+    record.event = "demo.event"
+    record.event_data = {}
+    record.trace_id = "-"
+    record.span_id = "-"
+
+    colored = StructuredFormatter("test-service", use_colors=True).format(record)
+    plain = StructuredFormatter("test-service", use_colors=False).format(record)
+
+    assert colored.startswith("\x1b[32mINFO:")
+    assert "\x1b[0m" in colored
+    assert plain.startswith("INFO:     ")
+    assert "\x1b[" not in plain
 
 
 
