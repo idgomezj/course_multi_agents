@@ -40,7 +40,7 @@ Only:
 
 ```text
 student/team_X/
-├── models/   # model_a.pt + model_b.pt
+├── models/   # model_a.pt2 + model_b.pt2
 ├── rag/      # retrieval configuration
 └── skills/   # procedural Skills
 ```
