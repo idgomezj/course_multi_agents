@@ -76,3 +76,4 @@ class EvaluationResult(BaseModel):
     violations: list[ConstraintViolation]
     trace: list[ToolTraceEntry]
     plan: MonthlyOperationsPlan
+    evaluation_breakdown: dict[str, Any] = Field(default_factory=dict)
