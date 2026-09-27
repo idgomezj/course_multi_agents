@@ -87,3 +87,7 @@ pydantic-ai-lab/.env
 pydantic-ai-lab/**/data/*.sqlite3
 pydantic-ai-lab/**/outputs/*
 !pydantic-ai-lab/**/outputs/.gitkeep
+
+
+*draft*
+*.pptx
