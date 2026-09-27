@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from pathlib import Path
 import sys
 
@@ -19,7 +20,14 @@ TEAM_ID = "team_0"
 
 
 class ReferenceNet(nn.Module):
-    def __init__(self, input_dim: int, output_dim: int, x_mean: torch.Tensor, x_std: torch.Tensor, classification: bool):
+    def __init__(
+        self,
+        input_dim: int,
+        output_dim: int,
+        x_mean: torch.Tensor,
+        x_std: torch.Tensor,
+        classification: bool,
+    ):
         super().__init__()
         self.register_buffer("x_mean", x_mean)
         self.register_buffer("x_std", torch.where(x_std < 1e-6, torch.ones_like(x_std), x_std))
@@ -37,6 +45,39 @@ class ReferenceNet(nn.Module):
         x = (x - self.x_mean) / self.x_std
         y = self.layers(x)
         return torch.sigmoid(y) if self.classification else y
+
+
+def metrics(
+    model: nn.Module,
+    x_val: torch.Tensor,
+    y_val: torch.Tensor,
+    classification: bool,
+) -> str:
+    model.eval()
+    with torch.no_grad():
+        prediction = model(x_val)
+
+    if not classification:
+        mse = torch.mean((prediction - y_val) ** 2).item()
+        rmse = math.sqrt(mse)
+        mae = torch.mean(torch.abs(prediction - y_val)).item()
+        return f"mse={mse:.3f} rmse={rmse:.3f} mae={mae:.3f}"
+
+    eps = 1e-8
+    bce = nn.BCELoss()(prediction, y_val).item()
+    predicted = prediction >= 0.5
+    actual = y_val >= 0.5
+    accuracy = (predicted == actual).float().mean().item()
+    tp = (predicted & actual).float().sum().item()
+    fp = (predicted & ~actual).float().sum().item()
+    fn = (~predicted & actual).float().sum().item()
+    precision = tp / (tp + fp + eps)
+    recall = tp / (tp + fn + eps)
+    f1 = 2 * precision * recall / (precision + recall + eps)
+    return (
+        f"bce={bce:.4f} accuracy={accuracy:.3f} "
+        f"precision={precision:.3f} recall={recall:.3f} f1={f1:.3f}"
+    )
 
 
 def train(model_key: str, output_dir: Path) -> None:
@@ -98,11 +139,14 @@ def train(model_key: str, output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     artifact = output_dir / spec["artifact"]
     example = torch.zeros((1, len(spec["features"])), dtype=torch.float32)
-    torch.jit.trace(model, example).save(str(artifact))
-    print(f"{model_key}: validation_loss={best_loss:.6f}; saved={artifact}")
+    exported_program = torch.export.export(model, (example,))
+    torch.export.save(exported_program, str(artifact))
+
+    print(f"{model_key}: {metrics(model, x_val, y_val, classification)}; saved={artifact}")
 
 
 if __name__ == "__main__":
+    torch.manual_seed(42)
     target = Path("demo_case_0_solution/models")
     train("model_a", target)
     train("model_b", target)
