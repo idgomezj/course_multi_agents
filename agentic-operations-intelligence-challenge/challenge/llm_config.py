@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import os
+import logging
 from dataclasses import dataclass
 from typing import Any
 
 from pydantic_ai.models.openai import OpenAIChatModelSettings
+
+from .observability import log_event
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -104,12 +109,23 @@ def resolve_manager_model(model_id: str | None = None) -> tuple[str, Any | None]
     if model.startswith("deepseek:"):
         settings = OpenAIChatModelSettings(thinking=False)
 
+    provider = model.split(":", 1)[0] if ":" in model else "custom"
+    option = next((x for x in manager_model_options() if x.id == (model_id or default_manager_model_id())), None)
+    log_event(
+        logger,
+        "llm.model.resolved",
+        requested_model_id=model_id,
+        resolved_model=model,
+        provider=provider,
+        configured=bool(os.getenv(option.api_key_env)) if option else None,
+        has_custom_settings=settings is not None,
+    )
     return model, settings
 
 
 def manager_model_status() -> list[dict[str, Any]]:
     default_id = default_manager_model_id()
-    return [
+    status = [
         {
             "id": option.id,
             "label": option.label,
@@ -121,3 +137,11 @@ def manager_model_status() -> list[dict[str, Any]]:
         }
         for option in manager_model_options()
     ]
+    log_event(
+        logger,
+        "llm.providers.status",
+        level=logging.DEBUG,
+        default_model_id=default_id,
+        providers=[{"id": x["id"], "model": x["model"], "configured": x["configured"]} for x in status],
+    )
+    return status
