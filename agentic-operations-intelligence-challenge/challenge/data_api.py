@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 import os
+import logging
+from time import perf_counter
 from functools import lru_cache
 from typing import Any
 
 import httpx
 from dotenv import load_dotenv
 
+from .observability import current_trace_id, log_event
+
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 class DataApiError(RuntimeError):
@@ -39,15 +45,45 @@ class DataApiClient:
 
     def _get(self, path: str, params: dict[str, Any] | None = None) -> Any:
         url = f"{self.base_url}{path}"
+        started = perf_counter()
+        headers = self._headers()
+        headers["X-Trace-Id"] = current_trace_id()
+        log_event(
+            logger,
+            "data_api.request.started",
+            method="GET",
+            base_url=self.base_url,
+            path=path,
+            params=params or {},
+            timeout_seconds=self.timeout,
+            auth_mode="instructor" if self.instructor_token else ("team" if self.team_token else "none"),
+        )
         try:
             response = httpx.get(
                 url,
-                headers=self._headers(),
+                headers=headers,
                 params=params,
                 timeout=self.timeout,
             )
         except httpx.HTTPError as exc:
+            log_event(
+                logger,
+                "data_api.request.failed",
+                level=logging.ERROR,
+                path=path,
+                duration_ms=round((perf_counter() - started) * 1000, 2),
+                error=str(exc),
+            )
             raise DataApiError(f"Could not reach Data API at {self.base_url}: {exc}") from exc
+
+        log_event(
+            logger,
+            "data_api.request.completed",
+            path=path,
+            status_code=response.status_code,
+            duration_ms=round((perf_counter() - started) * 1000, 2),
+            response_bytes=len(response.content),
+        )
 
         if response.status_code >= 400:
             detail = response.text
