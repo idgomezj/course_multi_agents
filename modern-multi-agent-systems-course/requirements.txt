@@ -1,0 +1,10 @@
+pydantic-ai
+pydantic-ai-harness
+pydantic-graph
+pydantic-evals
+python-dotenv
+numpy
+sentence-transformers
+fastmcp
+fasta2a[pydantic-ai]>=0.6.1
+uvicorn
