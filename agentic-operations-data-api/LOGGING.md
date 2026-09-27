@@ -24,6 +24,7 @@ Use environment variables:
 
 LOG_LEVEL=INFO
 LOG_FORMAT=text
+LOG_COLORS=true
 LOG_FILE=logs/data-api.log
 LOG_MAX_BYTES=10485760
 LOG_BACKUP_COUNT=5
@@ -33,9 +34,21 @@ LOG_MAX_COLLECTION_ITEMS=100
 
 Use LOG_LEVEL=DEBUG for the most detailed simulator and training logs.
 
-Runtime logs are intentionally emitted as human-readable text in this branch.
+Runtime logs use a compact Uvicorn-style human-readable format. Interactive terminals color the level prefix when `LOG_COLORS=true`: DEBUG cyan, INFO green, WARNING yellow, ERROR red, and CRITICAL bold red. Rotating log files remain plain text without ANSI color codes.
 
 JSON logs include `file`, `line`, and `function`. Text logs show the same source location as `[filename.py:line:function]`, for example `[manager.py:214:run]`. This makes it possible to jump directly from a runtime event to the code that emitted it.
+
+## Console format
+
+Example:
+
+```text
+INFO:     [model_registry.py:114:_load] [trace=4c1cea...] [span=b0de...] models.load.started {"model_key":"model_a","format":".pt2"}
+WARNING:  [manager.py:88:run_manager] [trace=4c1cea...] manager.retry {"reason":"candidate too expensive"}
+ERROR:    [main.py:206:demo_run_agent] [trace=4c1cea...] demo.ai_run.failed {"error":"..."}
+```
+
+The level prefix is colored in an interactive terminal and aligned like Uvicorn output.
 
 ## Trace IDs
 
