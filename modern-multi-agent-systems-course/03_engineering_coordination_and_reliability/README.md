@@ -246,3 +246,24 @@ Students should be able to explain:
 4. what lifecycle hooks are for,
 5. why agent evaluation must inspect behavior, not only final text,
 6. the difference between persistence and durable execution.
+
+
+## 4. Local Contract Net Coordination
+
+Run:
+
+```bash
+python 04_contract_net_coordination.py
+```
+
+This fully local example demonstrates:
+
+- manager/contractor roles,
+- call for proposals,
+- local agent bids,
+- refusals,
+- proposal ranking,
+- task award,
+- commitment.
+
+Review `COORDINATION_PATTERNS.md` first for social organization, cooperation, coordination, control, common MAS architectures, and negotiation.
