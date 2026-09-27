@@ -163,3 +163,14 @@ A student should be able to answer:
 2. What is the difference between free-form and structured output?
 3. Who owns conversation history?
 4. Why does usage accounting become important before introducing multiple agents?
+
+
+## Classical MAS Reference
+
+Before the LLM practices, review:
+
+```text
+FOUNDATIONS.md
+```
+
+It covers Distributed AI, agent vs. object, beliefs, goals, capabilities, commitments, and the main classical agent types.
