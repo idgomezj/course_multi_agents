@@ -1,49 +1,127 @@
 # Agentic Operations Intelligence Challenge
 
-Proyecto final del curso orientado a **LLM Agents, RAG, Skills, PyTorch y toma de decisiones operacionales**.
+Final project platform for **LLM Agents + Pydantic AI + RAG + Skills + PyTorch + operations planning**.
 
-## Idea central
+This folder now contains both the project specification **and a runnable public MVP**.
 
-El profesor entrega una plataforma completamente funcional: frontend, backend, Manager Agent con Pydantic AI, catálogo de tools, motor de simulación, motor de costos, contratos de entrada/salida y evaluador público.
+## What students change
 
-Los estudiantes **no construyen la aplicación**. Solo pueden mejorar tres componentes:
+Only:
 
-1. **Modelos PyTorch especializados** para el caso asignado.
-2. **RAG** del Manager: chunking, metadata, retrieval y configuración permitida.
-3. **Skills** que enseñan al Manager cómo abordar los problemas de su operación y cuándo usar las tools disponibles.
+```text
+student/team_X/
+├── models/   # train/export PyTorch TorchScript models
+├── rag/      # improve retrieval configuration
+└── skills/   # improve procedural Skills
+```
 
-Todos los equipos deben producir un **plan mensual integrado de producción y abastecimiento**, cumplir restricciones operacionales y de negocio, y **minimizar el costo total**.
+They do **not** modify the Manager, application, tools, simulator, cost engine, schemas or evaluator.
 
-## Cinco casos distintos
+## What the instructor provides
 
-| Equipo | Familia del caso | Incertidumbre/restricción dominante | Modelos PyTorch principales |
-|---|---|---|---|
-| 1 | Volatile Demand | demanda, promociones, estacionalidad | Demand Forecast + Demand Uncertainty |
-| 2 | Stable Make-to-Stock | exceso de inventario y capital | Stable Demand Forecast + Excess Inventory Risk |
-| 3 | Just-in-Time | sincronización y confiabilidad de entregas | Supplier Delay + Arrival-Time Prediction |
-| 4 | Unreliable Supply Network | retrasos, calidad y alternativas | Supplier Delay + Supplier Quality Risk |
-| 5 | Capacity-Constrained Plant | capacidad, downtime y changeovers | Downtime Risk + Production Feasibility |
+- FastAPI backend;
+- frontend dashboard;
+- Pydantic AI Manager;
+- common toolbox;
+- RAG runtime;
+- Skill loader;
+- PyTorch model adapter;
+- manufacturing data/contracts/policies;
+- public development scenarios;
+- independent simulator and cost engine;
+- public evaluation feedback.
 
-Los cinco reciben la misma plataforma y toolbox, pero **no la misma solución**. Sus datos, documentos, costos, modelos, Skills relevantes y familias de escenarios son diferentes.
+The final hidden evaluator, seeds, holdouts and benchmark solutions remain outside this public repository.
 
-## Principio de evaluación
+## Five different problem families
 
-El sistema no se califica comparando una respuesta textual contra una respuesta escrita por el profesor.
+| Team | Case | PyTorch models |
+|---|---|---|
+| 1 | Volatile Demand | Demand Forecast + Demand Uncertainty |
+| 2 | Stable Make-to-Stock | Demand Forecast + Excess Inventory Risk |
+| 3 | Just-in-Time | Supplier Delay + Arrival-Time Prediction |
+| 4 | Unreliable Supply | Supplier Delay + Supplier Quality Risk |
+| 5 | Capacity-Constrained Plant | Downtime Risk + Production Feasibility |
 
-El Manager debe producir un plan estructurado. Un evaluador independiente:
+All teams use the same application/toolbox but different business economics, RAG knowledge, Skills, model targets and scenario families.
 
-1. valida restricciones duras;
-2. simula el mes;
-3. mide servicio y cumplimiento;
-4. calcula el costo real del plan;
-5. compara el costo contra un benchmark instructor bajo la misma información disponible;
-6. evalúa por separado PyTorch, RAG y comportamiento producido por las Skills.
+## Evaluation idea
 
-## Estructura de este folder
+The Manager returns a structured monthly plan. The evaluator does not compare free text with an answer key.
 
-- `student-package/`: material que **sí puede compartirse** con los estudiantes.
-- `schemas/`: contratos de datos compartibles.
-- `instructor-blueprint/`: diseño para el profesor. **No contiene secretos de evaluación**, pero no es material de la tarea.
-- `SHARING_MATRIX.md`: fuente de verdad sobre qué se comparte y qué no.
+```text
+Manager plan
+   ↓
+constraint validation
+   ↓
+month simulation
+   ↓
+service measurement
+   ↓
+realized cost
+   ↓
+benchmark comparison
+   ↓
+score
+```
 
-> **Importante:** este repositorio es público. Nunca guardar aquí hidden tests reales, seeds secretos, holdout datasets, respuestas esperadas, planes benchmark ni credenciales del evaluador final. Esos activos deben vivir en infraestructura o repositorio privado.
+The cost engine includes purchasing, production, holding, working capital, stockout/lost sales, overtime, changeovers, line stops and expedite costs. The weights differ by case.
+
+## Quick start
+
+```bash
+cd agentic-operations-intelligence-challenge
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+Add a Gemini API key to `.env` if using the default Google model.
+
+Train the two starter models for one team:
+
+```bash
+python student/train_pytorch.py --team team_1 --model model_a
+python student/train_pytorch.py --team team_1 --model model_b
+```
+
+Run the platform:
+
+```bash
+python run.py
+```
+
+Open `http://localhost:8000`.
+
+Run public engine tests:
+
+```bash
+pytest -q
+```
+
+## Create a package for one student team
+
+Do not hand students the entire repository. Build the specific package:
+
+```bash
+python scripts/build_student_package.py --team team_3
+```
+
+The generated ZIP contains the shared runtime plus only Team 3's case, knowledge and editable workspace.
+
+## Sharing boundary
+
+Read **SHARING_MATRIX.md** before distribution.
+
+The following must never be committed to this public repository:
+
+- final hidden scenarios;
+- hidden seeds;
+- final PyTorch holdouts;
+- hidden RAG queries and expected evidence;
+- benchmark plans/costs for final tests;
+- realized hidden future events;
+- final evaluator credentials.
+
+Those belong in private instructor infrastructure.
