@@ -149,8 +149,8 @@ class StructuredFormatter(logging.Formatter):
             suffix = " " + json.dumps(data, default=str, ensure_ascii=False)
         message = (
             f"{timestamp} {record.levelname:<8} "
-            f"[{self.service_name}] [trace={trace_id}] [span={span_id}] "
-            f"{event}{suffix}"
+            f"[{self.service_name}] [{record.filename}:{record.lineno}:{record.funcName}] "
+            f"[trace={trace_id}] [span={span_id}] {event}{suffix}"
         )
         if record.exc_info:
             message += "\n" + "".join(traceback.format_exception(*record.exc_info))
