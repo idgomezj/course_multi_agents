@@ -16,14 +16,10 @@ class Chunk:
 
 
 class RagIndex:
-    """Small local RAG baseline.
+    """Student-editable RAG over documents delivered by the Data API."""
 
-    Students are allowed to improve the RAG configuration and retrieval strategy.
-    The enterprise documents themselves are case inputs and should not be rewritten.
-    """
-
-    def __init__(self, documents_dir: Path, config_path: Path):
-        self.documents_dir = documents_dir
+    def __init__(self, documents: list[dict[str, str]], config_path: Path):
+        self.documents = documents
         self.config_path = config_path
         self.config = self._load_config()
         self.chunks = self._load_chunks()
@@ -45,16 +41,18 @@ class RagIndex:
         overlap = max(0, min(chunk_size - 1, int(self.config.get("overlap", 30))))
         step = max(1, chunk_size - overlap)
         chunks: list[Chunk] = []
-        for path in sorted(self.documents_dir.glob("*.md")):
-            words = path.read_text(encoding="utf-8").split()
+        for document in sorted(self.documents, key=lambda x: x["name"]):
+            words = document["content"].split()
+            source = document["name"]
+            stem = source.rsplit(".", 1)[0]
             for i in range(0, len(words), step):
                 part = words[i : i + chunk_size]
                 if not part:
                     break
                 chunks.append(
                     Chunk(
-                        chunk_id=f"{path.stem}:{i // step}",
-                        source=path.name,
+                        chunk_id=f"{stem}:{i // step}",
+                        source=source,
                         text=" ".join(part),
                     )
                 )
@@ -75,14 +73,12 @@ class RagIndex:
             if float(score) < min_score:
                 continue
             chunk = self.chunks[idx]
-            results.append(
-                {
-                    "chunk_id": chunk.chunk_id,
-                    "source": chunk.source,
-                    "score": round(float(score), 4),
-                    "text": chunk.text,
-                }
-            )
+            results.append({
+                "chunk_id": chunk.chunk_id,
+                "source": chunk.source,
+                "score": round(float(score), 4),
+                "text": chunk.text,
+            })
             if len(results) >= k:
                 break
         return results

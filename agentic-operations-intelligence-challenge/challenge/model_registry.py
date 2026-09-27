@@ -1,23 +1,17 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import torch
 
 
 class StudentModelRegistry:
-    """Loads student-exported TorchScript models.
+    """Loads student TorchScript artifacts using the model contract supplied by the Data API."""
 
-    Each model receives a single 2-D tensor [batch, features]. Students may use any
-    PyTorch architecture as long as the exported TorchScript artifact respects the
-    feature order and output shape declared in spec.json.
-    """
-
-    def __init__(self, model_dir: Path):
+    def __init__(self, model_dir: Path, spec: dict):
         self.model_dir = model_dir
-        self.spec_path = model_dir / "spec.json"
-        self.spec = json.loads(self.spec_path.read_text(encoding="utf-8"))
+        self.model_dir.mkdir(parents=True, exist_ok=True)
+        self.spec = spec
         self._cache: dict[str, torch.jit.ScriptModule] = {}
 
     def model_spec(self, key: str) -> dict:

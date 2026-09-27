@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 import argparse
-import json
 
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from challenge.config import student_path
+from challenge.data_api import get_data_client
 from challenge.training_data import generate_training_frame
 
 
 class StudentNet(nn.Module):
-    """Starter network. Improve architecture/training, but keep the exported interface."""
+    """Starter network. Improve architecture/training, but keep the API model contract."""
 
     def __init__(self, input_dim: int, output_dim: int, mean: torch.Tensor, std: torch.Tensor, probability: bool):
         super().__init__()
@@ -43,7 +43,7 @@ def main() -> None:
     args = parser.parse_args()
 
     workspace = student_path(args.team)
-    spec = json.loads((workspace / "models" / "spec.json").read_text(encoding="utf-8"))
+    spec = get_data_client().get_model_spec(args.team)
     mspec = spec["models"][args.model]
     df = generate_training_frame(args.team, args.model, rows=args.rows, seed=42)
 
@@ -80,7 +80,9 @@ def main() -> None:
 
     model.eval()
     traced = torch.jit.trace(model, torch.zeros((1, len(features)), dtype=torch.float32))
-    output = workspace / "models" / mspec["artifact"]
+    output_dir = workspace / "models"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output = output_dir / mspec["artifact"]
     traced.save(str(output))
     print(f"Saved TorchScript model: {output}")
 

@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 from pydantic_ai import Agent
 
-from .config import CASES_DIR, load_case, student_path
+from .config import student_path
+from .data_api import get_data_client
 from .model_registry import StudentModelRegistry
 from .rag import RagIndex
 from .runtime import RuntimeDeps
@@ -40,15 +40,15 @@ Rules:
 
 
 def build_runtime(team_id: str, scenario: dict[str, Any]) -> RuntimeDeps:
-    case = load_case(team_id)
     workspace = student_path(team_id)
+    bootstrap = get_data_client().bootstrap(team_id)
     return RuntimeDeps(
         team_id=team_id,
-        case=case,
+        case=bootstrap["case"],
         scenario=scenario,
-        rag=RagIndex(CASES_DIR / team_id / "knowledge", workspace / "rag" / "config.yaml"),
+        rag=RagIndex(bootstrap["knowledge"], workspace / "rag" / "config.yaml"),
         skills=SkillLibrary(workspace / "skills"),
-        models=StudentModelRegistry(workspace / "models"),
+        models=StudentModelRegistry(workspace / "models", bootstrap["model_spec"]),
     )
 
 
@@ -83,12 +83,15 @@ def manager_prompt(deps: RuntimeDeps) -> str:
     )
 
 
-async def run_manager(team_id: str, scenario: dict[str, Any], model_name: str | None = None) -> tuple[MonthlyOperationsPlan, RuntimeDeps]:
+async def run_manager(
+    team_id: str,
+    scenario: dict[str, Any],
+    model_name: str | None = None,
+) -> tuple[MonthlyOperationsPlan, RuntimeDeps]:
     deps = build_runtime(team_id, scenario)
     agent = build_agent(model_name)
     result = await agent.run(manager_prompt(deps), deps=deps)
     plan = result.output
-    # Enforce routing identity even if the model returns a wrong team/scenario identifier.
     plan.team_id = team_id
     plan.scenario_id = scenario["id"]
     return plan, deps

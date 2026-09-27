@@ -2,91 +2,97 @@
 
 Final project platform for **LLM Agents + Pydantic AI + RAG + Skills + PyTorch + operations planning**.
 
-This folder now contains both the project specification **and a runnable public MVP**.
+## Architecture
 
-## What students change
+Business/team data is no longer stored in this application. The main application obtains it from the standalone FastAPI service maintained on branch:
+
+`service/agentic-operations-data-api`
+
+```text
+                    DATA API
+     case + knowledge + model contract
+       + training data + public scenarios
+                         │
+                         ▼
+                MAIN APPLICATION
+                         │
+                  Pydantic AI Manager
+                         │
+              ┌──────────┼──────────┐
+              ▼          ▼          ▼
+             RAG       Skills    PyTorch
+              └──────────┼──────────┘
+                         ▼
+                       Tools
+                         │
+                         ▼
+                Structured monthly plan
+                         │
+                         ▼
+              simulator + cost evaluator
+```
+
+Each team receives a different `DATA_API_TOKEN`. The Data API authorizes that token only for the assigned team.
+
+## What students modify
 
 Only:
 
 ```text
 student/team_X/
-├── models/   # train/export PyTorch TorchScript models
-├── rag/      # improve retrieval configuration
-└── skills/   # improve procedural Skills
+├── models/   # model_a.pt + model_b.pt
+├── rag/      # retrieval configuration
+└── skills/   # procedural Skills
 ```
 
-They do **not** modify the Manager, application, tools, simulator, cost engine, schemas or evaluator.
+Students do not modify the Manager, application, tools, schemas, simulator, cost engine or evaluator.
 
-## What the instructor provides
+## What now comes from the Data API
 
-- FastAPI backend;
-- frontend dashboard;
-- Pydantic AI Manager;
-- common toolbox;
-- RAG runtime;
-- Skill loader;
-- PyTorch model adapter;
-- manufacturing data/contracts/policies;
-- public development scenarios;
-- independent simulator and cost engine;
-- public evaluation feedback.
+For the authorized team:
 
-The final hidden evaluator, seeds, holdouts and benchmark solutions remain outside this public repository.
+- products and demand history;
+- materials and initial inventory;
+- BOM;
+- suppliers and commercial parameters;
+- production lines/capacity;
+- open purchase orders;
+- policies and cost parameters;
+- RAG source documents;
+- PyTorch model specification;
+- public PyTorch training data;
+- public development scenarios.
 
-## Five different problem families
+There are no runtime copies of those assets under this folder.
 
-| Team | Case | PyTorch models |
-|---|---|---|
-| 1 | Volatile Demand | Demand Forecast + Demand Uncertainty |
-| 2 | Stable Make-to-Stock | Demand Forecast + Excess Inventory Risk |
-| 3 | Just-in-Time | Supplier Delay + Arrival-Time Prediction |
-| 4 | Unreliable Supply | Supplier Delay + Supplier Quality Risk |
-| 5 | Capacity-Constrained Plant | Downtime Risk + Production Feasibility |
+## Local setup
 
-All teams use the same application/toolbox but different business economics, RAG knowledge, Skills, model targets and scenario families.
-
-## Evaluation idea
-
-The Manager returns a structured monthly plan. The evaluator does not compare free text with an answer key.
-
-```text
-Manager plan
-   ↓
-constraint validation
-   ↓
-month simulation
-   ↓
-service measurement
-   ↓
-realized cost
-   ↓
-benchmark comparison
-   ↓
-score
-```
-
-The cost engine includes purchasing, production, holding, working capital, stockout/lost sales, overtime, changeovers, line stops and expedite costs. The weights differ by case.
-
-## Quick start
+Run the Data API first (from its independent branch/deployment), then:
 
 ```bash
 cd agentic-operations-intelligence-challenge
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Add a Gemini API key to `.env` if using the default Google model.
+Configure:
 
-Train the two starter models for one team:
-
-```bash
-python student/train_pytorch.py --team team_1 --model model_a
-python student/train_pytorch.py --team team_1 --model model_b
+```text
+GOOGLE_API_KEY=...
+DATA_API_URL=http://localhost:8100
+DATA_API_TOKEN=<token assigned to this team>
 ```
 
-Run the platform:
+Train:
+
+```bash
+python student/train_pytorch.py --team team_3 --model model_a
+python student/train_pytorch.py --team team_3 --model model_b
+```
+
+Run:
 
 ```bash
 python run.py
@@ -94,34 +100,16 @@ python run.py
 
 Open `http://localhost:8000`.
 
-Run public engine tests:
-
-```bash
-pytest -q
-```
-
-## Create a package for one student team
-
-Do not hand students the entire repository. Build the specific package:
+## Team packages
 
 ```bash
 python scripts/build_student_package.py --team team_3
 ```
 
-The generated ZIP contains the shared runtime plus only Team 3's case, knowledge and editable workspace.
+The ZIP contains **no case dataset or RAG source documents**. Those arrive at runtime through the API.
 
-## Sharing boundary
+## Security
 
-Read **SHARING_MATRIX.md** before distribution.
+The final hidden evaluator, hidden scenarios, seeds, final holdouts and benchmark solutions must remain outside both the student package and the public Data API.
 
-The following must never be committed to this public repository:
-
-- final hidden scenarios;
-- hidden seeds;
-- final PyTorch holdouts;
-- hidden RAG queries and expected evidence;
-- benchmark plans/costs for final tests;
-- realized hidden future events;
-- final evaluator credentials.
-
-Those belong in private instructor infrastructure.
+Also note: a branch in a public GitHub repository is itself public. For real team-data isolation, deploy the Data API from a private repository/deployment artifact even if this branch remains the development source.

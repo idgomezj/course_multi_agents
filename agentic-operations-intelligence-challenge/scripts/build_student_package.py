@@ -31,15 +31,15 @@ def main() -> None:
         for item in SHARED:
             copy_item(ROOT / item, stage / item)
 
-        (stage / "cases").mkdir(exist_ok=True)
-        copy_item(ROOT / "cases" / "base.yaml", stage / "cases" / "base.yaml")
-        copy_item(ROOT / "cases" / f"{args.team}.yaml", stage / "cases" / f"{args.team}.yaml")
-        copy_item(ROOT / "cases" / args.team, stage / "cases" / args.team)
-
+        # No business data is copied into the package. It is delivered by the Data API.
         (stage / "student").mkdir(exist_ok=True)
         copy_item(ROOT / "student" / "train_pytorch.py", stage / "student" / "train_pytorch.py")
         copy_item(ROOT / "student" / "README.md", stage / "student" / "README.md")
         copy_item(ROOT / "student" / args.team, stage / "student" / args.team)
+
+        env_path = stage / ".env.example"
+        with env_path.open("a", encoding="utf-8") as fh:
+            fh.write(f"\nASSIGNED_TEAM_ID={args.team}\n")
 
         with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zf:
             for path in stage.rglob("*"):

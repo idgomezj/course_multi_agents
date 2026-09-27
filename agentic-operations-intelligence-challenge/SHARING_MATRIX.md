@@ -1,98 +1,67 @@
-# Qué compartir y qué NO compartir
+# Sharing boundary after Data API split
 
-Esta página es la fuente de verdad de la frontera profesor/estudiante.
+## Students receive
 
-## Compartir con estudiantes
-
-### Plataforma
+### Local application
 - frontend;
-- cliente/backend necesario para ejecutar la solución;
-- Manager Agent ya implementado;
-- integración Pydantic AI;
-- wrappers de tools;
-- interfaces de los modelos PyTorch;
-- loader de RAG;
-- loader de Skills;
-- schemas de entrada/salida;
-- documentación completa de la toolbox.
+- FastAPI challenge backend;
+- Pydantic AI Manager;
+- tool implementations;
+- simulator/public evaluator code;
+- schemas;
+- training script;
+- their editable `models/`, `rag/`, and `skills/` workspace.
 
-### Por equipo
-Cada equipo recibe **solo su paquete de caso**:
-- descripción del negocio;
-- objetivo operacional;
-- datasets de entrenamiento;
-- dataset de validación público, si aplica;
-- documentos empresariales para RAG;
-- Skills baseline deliberadamente incompletas;
-- modelos/notebooks baseline;
-- parámetros y reglas que el negocio realmente conocería;
-- acceso al cost tool;
-- escenarios públicos de desarrollo;
-- resultados baseline;
-- URL/credencial del evaluador público de su equipo.
+### Credentials/configuration
+- `DATA_API_URL`;
+- one `DATA_API_TOKEN` authorized only for their assigned team;
+- LLM credentials according to the course deployment model.
 
-### Evaluación visible
-Se puede compartir:
-- rúbrica;
-- categorías evaluadas;
-- restricciones duras conocidas;
-- métricas de modelos;
-- definición del costo total;
-- forma general de calcular el score;
-- ejemplos de errores y traces del servidor público.
+### Delivered through the Data API
+Only for their authorized team:
+- business case data;
+- demand/inventory/BOM/supplier/capacity data;
+- policies and known cost parameters;
+- RAG source documents;
+- PyTorch model contract;
+- public training data;
+- public scenarios.
 
-## NO compartir con estudiantes
+## Do NOT put in the student application
 
-Nunca distribuir:
-- hidden scenarios finales;
-- seeds del generador hidden;
-- holdout dataset final de PyTorch;
-- hidden RAG queries;
-- expected document/chunk IDs de hidden tests;
-- secuencias esperadas de tools;
-- respuestas de referencia;
-- planes benchmark;
-- costos benchmark por escenario;
-- código del final evaluator si permite deducir los tests;
-- realizaciones futuras usadas por el simulador final;
-- team secret keys;
-- credenciales del backend final;
-- logs de evaluación de otros grupos;
-- archivos de entrega de otros grupos.
+Do not copy team data into:
+- `cases/`;
+- local JSON/YAML fixtures;
+- notebooks committed with full datasets;
+- local RAG document folders;
+- model-spec files that duplicate the API contract.
 
-## Qué puede estar en este repositorio público
+The application must fail clearly if the Data API is unavailable rather than silently falling back to embedded data.
 
-Sí:
-- especificaciones;
-- contratos;
-- casos públicos;
-- tool catalog;
-- templates;
-- public evaluator client;
-- starter notebooks;
-- Skills baseline;
-- documentos RAG que se entregarán a los alumnos.
+## Instructor-owned private assets
 
-No:
-- cualquier activo que permita reconstruir la evaluación final.
+Never send through the student-facing Data API:
+- final hidden scenarios;
+- hidden scenario seeds;
+- final PyTorch holdout data;
+- hidden RAG queries/expected evidence;
+- final benchmark plans/costs;
+- hidden realized future events;
+- final evaluator credentials;
+- team-token mapping.
 
-## Recomendación operativa
+## Important repository warning
 
-Mantener dos superficies:
+The repository `idgomezj/course_multi_agents` is public. A Git branch is **not** a security boundary. The service branch is architecturally independent, but its source/data can still be inspected on GitHub while the repo is public.
+
+For the actual class, the recommended deployment is:
 
 ```text
-PUBLIC / STUDENT
-course_multi_agents/
-  agentic-operations-intelligence-challenge/
-
-PRIVATE / INSTRUCTOR
-agentic-ops-evaluator-private/
-  hidden/
-  holdout/
-  oracle/
-  seeds/
-  final_evaluator/
-  credentials/
+PRIVATE instructor source/deployment
+        ↓
+Agentic Operations Data API
+        ↓ team-scoped token
+Student application
 ```
 
-El repositorio privado puede ser un repo privado de GitHub o, preferiblemente, el código/data del backend final sin acceso directo de estudiantes.
+Keep the public service branch as development/reference code only, or move/copy it to a private repository before distributing credentials.

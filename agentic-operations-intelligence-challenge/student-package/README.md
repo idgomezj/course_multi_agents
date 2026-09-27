@@ -2,67 +2,38 @@
 
 ## Su misión
 
-Su equipo recibe una operación manufacturera, una plataforma de IA completamente implementada y un conjunto amplio de tools.
+La aplicación, el Manager, las tools y la infraestructura ya están construidos.
 
-**No deben construir la aplicación.**
+Su equipo solo modifica:
 
-Deben enseñar al sistema cómo operar correctamente su negocio mediante:
+1. sus modelos PyTorch;
+2. la configuración/estrategia RAG permitida;
+3. sus Skills.
 
-1. entrenamiento de los modelos PyTorch asignados;
-2. mejora del RAG;
-3. diseño/mejora de Skills.
+Toda la información empresarial de su caso se obtiene en runtime mediante la **Data API del curso**. Su token solo debe permitir acceso al equipo asignado.
 
-El resultado final debe ser un **plan mensual integrado** que:
-- satisfaga los objetivos de servicio;
-- respete materiales, capacidad, proveedores y políticas;
-- maneje la incertidumbre propia del caso;
-- minimice el costo total.
+## El sistema debe
 
-## Qué NO pueden modificar
+- producir un plan mensual integrado;
+- cumplir demanda/servicio;
+- respetar materiales, capacidad, proveedores y políticas;
+- manejar la incertidumbre particular del caso;
+- minimizar el costo operacional total.
 
-No se puede modificar:
+## No pueden modificar
+
 - Manager Agent;
-- backend;
+- backend/framework;
 - frontend;
-- integración Pydantic AI;
-- definición/implementación de tools;
+- implementación de tools;
 - simulador;
 - motor de costos;
-- evaluador;
+- evaluator;
 - schemas;
-- optimizador proporcionado.
+- Data API.
 
-## Qué SÍ pueden modificar
+## No deben almacenar copias locales de los datos
 
-Solo los directorios/artefactos indicados por el profesor como:
+No creen una copia del dataset o documentos RAG para evitar la API. El training script y el runtime solicitan la información al servicio usando `DATA_API_URL` y `DATA_API_TOKEN`.
 
-```text
-student/
-├── models/
-├── rag/
-└── skills/
-```
-
-## Concepto clave
-
-```text
-PyTorch models
-"What is likely to happen?"
-        ↓
-RAG
-"What are the facts, contracts and policies?"
-        ↓
-Skills
-"How should this operation approach the problem?"
-        ↓
-Tools
-"What capability should the Manager use?"
-        ↓
-Cost tool
-"Which feasible alternative is economically preferable?"
-        ↓
-Manager
-"What should we actually do?"
-```
-
-Su solución será evaluada también con escenarios no vistos durante el desarrollo.
+La evaluación final utilizará escenarios no vistos durante el desarrollo.
