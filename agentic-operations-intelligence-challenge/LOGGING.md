@@ -163,6 +163,12 @@ The HTTP response header `X-Trace-Id` gives the trace ID for the request.
 The runtime evaluation remains documented separately in [EVALUATION.md](./EVALUATION.md). Logging explains **how execution reached the result**; evaluation explains **how the result was scored**.
 
 
+## PyTorch Export inference mode
+
+Exported `.pt2` inference modules must not be passed through `.eval()` or `.train()` after `torch.export.load(...).module()`. PyTorch intentionally rejects those calls on exported GraphModules. The training/export scripts put the source model in evaluation mode before export, so runtime loading executes the exported inference graph directly. Legacy TorchScript `.pt` artifacts still use `.eval()` after loading.
+
+If a runtime reports `Calling eval() is not supported yet.`, make sure the loader is not calling `.eval()` on the `.pt2` module.
+
 ## PyTorch Export concurrency
 
 PyTorch Export deserialization uses process-global state internally. If two `torch.export.load(...)` calls overlap in different threads, PyTorch can raise an error such as:
