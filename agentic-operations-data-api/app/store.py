@@ -103,10 +103,6 @@ def reference_solution(team_id: str, scenario_id: str = "T0-P01") -> dict[str, A
     scenario = public_scenario(team_id, scenario_id)
     path = DATA_DIR.parent / "demo_case_0_solution" / "reference_plans" / f"{scenario_id}.json"
 
-    # Backward compatibility for older checkouts that only had reference_plan.json.
-    if not path.exists() and scenario_id == "T0-P01":
-        path = DATA_DIR.parent / "demo_case_0_solution" / "reference_plan.json"
-
     if not path.exists():
         raise KeyError(f"Case 0 reference plan is missing for {scenario_id}: {path}")
 
