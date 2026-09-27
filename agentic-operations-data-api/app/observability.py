@@ -166,8 +166,7 @@ def setup_logging(service_name: str) -> logging.Logger:
 
     marker = f"_agentic_logging_{service_name}"
     if not getattr(root, marker, False):
-        json_mode = os.getenv("LOG_FORMAT", "text").strip().lower() == "json"
-        formatter = StructuredFormatter(service_name, json_mode=json_mode)
+        formatter = StructuredFormatter(service_name, json_mode=False)
 
         console = logging.StreamHandler()
         console.setLevel(level)
@@ -196,7 +195,7 @@ def setup_logging(service_name: str) -> logging.Logger:
         "logging.configured",
         level=logging.INFO,
         log_level=level_name,
-        log_format=os.getenv("LOG_FORMAT", "text"),
+        log_format="text",
         log_file=os.getenv("LOG_FILE", ""),
         log_payloads=_truthy("LOG_PAYLOADS", "true"),
     )
