@@ -60,7 +60,7 @@ Use the following environment variables:
 
 ```text
 LOG_LEVEL=INFO
-LOG_FORMAT=json
+LOG_FORMAT=text
 LOG_FILE=logs/challenge.log
 LOG_MAX_BYTES=10485760
 LOG_BACKUP_COUNT=5
@@ -78,19 +78,19 @@ LOG_MAX_COLLECTION_ITEMS=100
 
 ### LOG_FORMAT
 
-Use:
-
-```text
-LOG_FORMAT=json
-```
-
-for structured machine-readable logs, or:
+The default is:
 
 ```text
 LOG_FORMAT=text
 ```
 
-for compact terminal-readable lines.
+for human-readable terminal logs. Set:
+
+```text
+LOG_FORMAT=json
+```
+
+only when structured machine-readable output is specifically needed.
 
 Text logs include the source location as `[filename.py:line:function]`, for example `[tools.py:214:forecast_pytorch]`. JSON logs expose the same information as separate `file`, `line`, and `function` fields.
 
@@ -120,31 +120,21 @@ Rotation defaults to 10 MB per file with five backups.
 
 ## Example
 
-```json
-{
-  "timestamp": "2026-09-27T20:00:00+00:00",
-  "level": "INFO",
-  "service": "agentic-operations-challenge",
-  "logger": "agentic-operations-challenge",
-  "file": "tools.py",
-  "line": 214,
-  "function": "forecast_pytorch",
-  "trace_id": "7fd...",
-  "span_id": "41b...",
-  "event": "tool.completed",
-  "data": {
-    "tool": "forecast_pytorch",
-    "team_id": "team_3",
-    "scenario_id": "T3-P01",
-    "tool_inputs": {"product_id": "FG01"},
-    "tool_output": [1012.3, 1008.4, 1021.7, 1015.0]
-  }
-}
+Default text output:
+
+```text
+2026-09-27T20:00:00+00:00 INFO     [agentic-operations-challenge] [tools.py:214:forecast_pytorch] [trace=7fd...] [span=41b...] tool.completed {"tool":"forecast_pytorch","team_id":"team_3","scenario_id":"T3-P01"}
 ```
 
 ## Following one run
 
-For JSON logs with `jq`:
+For the default text logs:
+
+```bash
+tail -f logs/challenge.log
+```
+
+If you explicitly switch to `LOG_FORMAT=json`:
 
 ```bash
 tail -f logs/challenge.log | jq .
