@@ -80,3 +80,10 @@ llm-lab/08_qlora_finetuning_workbench/models/*
 !llm-lab/08_qlora_finetuning_workbench/models/.gitkeep
 llm-lab/08_qlora_finetuning_workbench/outputs/*
 !llm-lab/08_qlora_finetuning_workbench/outputs/.gitkeep
+
+
+# Pydantic AI compressed track local artifacts
+pydantic-ai-lab/.env
+pydantic-ai-lab/**/data/*.sqlite3
+pydantic-ai-lab/**/outputs/*
+!pydantic-ai-lab/**/outputs/.gitkeep

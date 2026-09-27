@@ -1,0 +1,3 @@
+Atlas is a teaching application for external LLM orchestration.
+Its application layer is written in Python with Pydantic AI.
+The project keeps examples intentionally small and typed.

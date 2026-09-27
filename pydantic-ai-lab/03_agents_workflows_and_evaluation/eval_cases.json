@@ -1,0 +1,12 @@
+[
+  {
+    "name": "tool_calling",
+    "prompt": "Explain tool calling in one short paragraph.",
+    "required_terms": ["tool", "function"]
+  },
+  {
+    "name": "rag",
+    "prompt": "Explain RAG in one short paragraph.",
+    "required_terms": ["retriev", "context"]
+  }
+]
