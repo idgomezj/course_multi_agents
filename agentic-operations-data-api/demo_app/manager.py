@@ -1,0 +1,96 @@
+from __future__ import annotations
+
+import json
+import os
+from typing import Any
+
+from dotenv import load_dotenv
+from pydantic_ai import Agent
+
+from app.store import load_case, load_knowledge, load_model_spec
+from .config import DEMO_MODELS_DIR, DEMO_RAG_CONFIG, DEMO_SKILLS_DIR
+from .model_registry import StudentModelRegistry
+from .rag import RagIndex
+from .runtime import RuntimeDeps
+from .schemas import MonthlyOperationsPlan
+from .skills import SkillLibrary
+from .tools import ALL_TOOLS
+
+load_dotenv()
+
+TEAM_ID = "team_0"
+
+BASE_INSTRUCTIONS = """
+You are the Operations Manager Agent for the fully solved Case 0 manufacturing planning demo.
+
+Your job is to create a four-week integrated production and procurement plan that meets
+service and policy requirements while minimizing total operational cost.
+
+This is a worked teaching example. Use the supplied RAG documents, Skills, specialist
+PyTorch models, deterministic calculations, cost tools and validation tools.
+
+Rules:
+1. Never invent inventory, BOM, supplier, capacity, policy or cost data.
+2. Inspect the available Skills and retrieve relevant company evidence.
+3. Forecast demand with the trained PyTorch model when appropriate.
+4. Check inventory and existing POs before recommending new purchases.
+5. Use supplier-delay prediction when delivery timing matters.
+6. Compare total operational cost, not only unit purchase price.
+7. Respect capacity, supplier authorization, MOQ, approvals and the service target.
+8. Run validate_plan before finalizing; revise if critical violations remain.
+9. Return a plan matching the structured output schema.
+"""
+
+
+def build_runtime(scenario: dict[str, Any]) -> RuntimeDeps:
+    case = load_case(TEAM_ID)
+    return RuntimeDeps(
+        team_id=TEAM_ID,
+        case=case,
+        scenario=scenario,
+        rag=RagIndex(list(load_knowledge(TEAM_ID)), DEMO_RAG_CONFIG),
+        skills=SkillLibrary(DEMO_SKILLS_DIR),
+        models=StudentModelRegistry(DEMO_MODELS_DIR, load_model_spec(TEAM_ID)),
+    )
+
+
+def build_agent(model_name: str | None = None) -> Agent:
+    model = model_name or os.getenv("MANAGER_MODEL", "google:gemini-2.5-flash")
+    return Agent(
+        model,
+        deps_type=RuntimeDeps,
+        output_type=MonthlyOperationsPlan,
+        tools=ALL_TOOLS,
+        instructions=BASE_INSTRUCTIONS,
+    )
+
+
+def manager_prompt(deps: RuntimeDeps) -> str:
+    visible = deps.scenario.get("visible", {})
+    business = {
+        "team_id": TEAM_ID,
+        "business_name": deps.case["name"],
+        "operating_context": deps.case["description"],
+        "objective": deps.case["objective"],
+        "cost_priorities": deps.case.get("cost_priorities", []),
+        "service_level_target": deps.case.get("policies", {}).get("service_level_target"),
+        "scenario_id": deps.scenario["id"],
+        "scenario_title": deps.scenario["title"],
+        "visible_information": visible,
+    }
+    return (
+        "Prepare the integrated four-week production and procurement plan for Case 0. "
+        "Use the worked-example Skills and company knowledge, but solve the selected scenario "
+        "through the normal agent/tool pipeline. Optimize total operational cost subject to constraints.\n\n"
+        + json.dumps(business, indent=2)
+    )
+
+
+async def run_manager(scenario: dict[str, Any], model_name: str | None = None):
+    deps = build_runtime(scenario)
+    agent = build_agent(model_name)
+    result = await agent.run(manager_prompt(deps), deps=deps)
+    plan = result.output
+    plan.team_id = TEAM_ID
+    plan.scenario_id = scenario["id"]
+    return plan, deps

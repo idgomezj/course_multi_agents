@@ -1,34 +1,140 @@
 # Agentic Operations Data API
 
-Standalone FastAPI service for all immutable/team-assigned data used by the Agentic Operations Intelligence Challenge.
+Standalone FastAPI service for the Agentic Operations Intelligence Challenge.
 
-## What this service owns
+This branch now has **two roles**:
 
-- merged business case data;
-- inventory, products, BOM, suppliers, costs, policies and capacity;
-- RAG source documents;
-- PyTorch model contracts;
-- **team-specific public training-data distributions**;
-- public development scenarios.
+1. provide team-scoped business/training/RAG data through the Data API;
+2. run **Case 0 completely end-to-end on this branch**, without using `main`.
 
-The student application contains no runtime copy of those assets.
+## Run Case 0 completely from this branch
 
-## Why the training data also lives here
+Checkout:
 
-The five teams are intentionally different at the ML level, not only at the Skill/RAG level.
+```bash
+git checkout service/agentic-operations-data-api
+cd agentic-operations-data-api
+```
 
-Examples:
-- Team 1 receives volatile/promotional demand distributions;
-- Team 2 receives low-variance stable-demand distributions and excess-inventory labels;
-- Team 3 receives short-lead-time JIT supplier patterns;
-- Team 4 receives broad disruption and quality-risk supplier patterns;
-- Team 5 receives high-utilization/downtime/capacity patterns.
+Create the environment:
 
-## Team isolation
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
 
-Each deployment sets `TEAM_TOKENS_JSON`. A student's `X-Team-Token` can access only that team's endpoints. An instructor token can access every team.
+Add your Google API key to `.env`:
 
-## Endpoints
+```text
+MANAGER_MODEL=google:gemini-2.5-flash
+GOOGLE_API_KEY=YOUR_KEY
+```
+
+Train the two solved Case 0 PyTorch models:
+
+```bash
+python demo_case_0_solution/train_models.py
+```
+
+This creates:
+
+```text
+demo_case_0_solution/models/
+├── model_a.pt
+└── model_b.pt
+```
+
+Start the single FastAPI service:
+
+```bash
+python run.py
+```
+
+Then open:
+
+```text
+http://localhost:8100/demo
+```
+
+The page lets you:
+
+- evaluate the published T0-P01 reference plan through the simulator/cost engine without an LLM;
+- run the **AI Manager end-to-end** through RAG, Skills, PyTorch models, tools, structured planning, simulation and scoring;
+- inspect constraint violations;
+- inspect the complete tool trace;
+- inspect the final structured monthly plan.
+
+## Case 0 architecture
+
+```text
+Case 0 local data
+      │
+      ├── PyTorch model contract + training data
+      ├── RAG documents
+      ├── solved RAG configuration
+      └── solved Skills
+      │
+      ▼
+Pydantic AI Manager
+      │
+      ├── RAG retrieval
+      ├── Skills
+      ├── PyTorch prediction tools
+      ├── inventory/BOM/supplier/capacity tools
+      ├── cost tools
+      └── validate_plan
+      │
+      ▼
+Structured Monthly Plan
+      │
+      ▼
+Independent Simulator
+      │
+      ├── feasibility
+      ├── service
+      └── realized total cost
+      │
+      ▼
+Evaluator / Scores
+```
+
+## Case 0 files
+
+```text
+data/teams/team_0.yaml
+data/teams/team_0/
+├── model_spec.json
+└── documents/
+    ├── company_facts.md
+    ├── operations_policy.md
+    └── supplier_contracts.md
+
+demo_case_0_solution/
+├── README.md
+├── train_models.py
+├── reference_plan.json
+├── models/                 # generated locally
+├── rag/config.yaml
+├── skills/
+│   ├── monthly_planning.md
+│   ├── supplier_selection.md
+│   └── cost_optimization.md
+└── frontend/
+
+demo_app/
+├── manager.py
+├── tools.py
+├── rag.py
+├── skills.py
+├── model_registry.py
+├── simulator.py
+├── cost_engine.py
+└── evaluator.py
+```
+
+## Data API endpoints
 
 - `GET /health`
 - `GET /v1/teams`
@@ -39,46 +145,16 @@ Each deployment sets `TEAM_TOKENS_JSON`. A student's `X-Team-Token` can access o
 - `GET /v1/teams/{team_id}/training-data/{model_key}`
 - `GET /v1/teams/{team_id}/scenarios/public`
 - `GET /v1/teams/{team_id}/scenarios/public/{scenario_id}`
+- `GET /v1/teams/team_0/reference-solution`
 
-## Run
+## Authentication
 
-```bash
-cd agentic-operations-data-api
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-python run.py
-```
+The committed values in `.env.example` are demo values only. Team tokens restrict the running Data API by team.
 
-Runs on `http://localhost:8100`.
+Because this GitHub repository/branch is currently public, these demo tokens are not secrets. Generate completely new credentials after moving this service to the private repository.
 
-## Security note
+## Important separation
 
-This branch is architecturally independent from the student application, but a branch in a public GitHub repository is still public. For real anti-copy isolation, deploy this service from a private repository/private artifact and keep the production team datasets and token map there.
+Case 0 lives on this service branch. It does not need `main` to run the demo.
 
-
-## Case 0 worked example
-
-The API branch includes `team_0`, a fully worked reference case for classroom demonstration.
-
-It provides:
-- a balanced manufacturing business case;
-- a demand-forecast model contract;
-- a supplier-delay model contract;
-- company documents for RAG;
-- three public scenarios;
-- a published worked plan for `T0-P01` in `demo_case_0_solution/README.md`.
-
-All Case 0 artifacts now live only on this service branch under `data/teams/team_0*` and `demo_case_0_solution/`.
-
-The solved package includes:
-- Case 0 business/scenario data;
-- Case 0 model contract;
-- RAG source documents;
-- solved RAG configuration;
-- solved Skills;
-- PyTorch training script;
-- structured reference plan and benchmark explanation.
-
-Case 0 is for demonstration only. Teams 1–5 remain the graded cases.
+Teams 1–5 remain the graded cases. Hidden final scenarios, final PyTorch holdouts, hidden RAG queries, benchmark/oracle data and final-evaluator credentials must remain private.

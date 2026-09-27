@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Case 0 — Full Agentic Operations Demo</title>
+  <style>
+    :root{--bg:#f3f5ef;--panel:#fff;--ink:#20251b;--muted:#687064;--deep:#283914;--lime:#dffc62;--line:#d9dfd1;--good:#426c20;--bad:#aa3b36}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    header{background:var(--deep);color:white;padding:30px 34px}header h1{margin:0 0 5px;font-size:30px}header p{margin:0;color:#dce5cf}
+    main{max-width:1250px;margin:24px auto;padding:0 20px 60px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}.full{grid-column:span 12}.half{grid-column:span 6}
+    .metric{grid-column:span 2}.metric span{font-size:12px;color:var(--muted)}.metric strong{display:block;font-size:27px;margin-top:7px}
+    .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:end}label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+    select,button{padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:white;font-size:14px}
+    button{background:var(--lime);border-color:var(--lime);font-weight:800;cursor:pointer}button.secondary{background:white;border-color:#9baa8f}button:disabled{opacity:.5;cursor:wait}
+    pre{white-space:pre-wrap;word-break:break-word;background:#f8faf5;padding:13px;border-radius:12px;max-height:440px;overflow:auto;font-size:12px}
+    table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+    .pill{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef3e6;font-size:12px;margin:3px}.good{color:var(--good);font-weight:800}.bad{color:var(--bad);font-weight:800}
+    #statusText{color:var(--muted);font-size:13px}.subtle{color:var(--muted);font-size:13px}
+    @media(max-width:850px){.metric,.half{grid-column:span 12}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Case 0 — Full Agentic Operations Demo</h1>
+  <p>Data API + PyTorch + RAG + Skills + Pydantic AI + Tools + Simulator + Cost Evaluation</p>
+</header>
+<main>
+  <div class="grid">
+    <section class="card full">
+      <div class="controls">
+        <label>Scenario<select id="scenario"></select></label>
+        <button id="referenceBtn" class="secondary">Evaluate published reference</button>
+        <button id="agentBtn">Run AI Manager end-to-end</button>
+        <span id="statusText">Loading status...</span>
+      </div>
+      <div id="runtimeStatus" style="margin-top:12px"></div>
+    </section>
+
+    <section class="card metric"><span>Feasibility</span><strong id="feasibility">—</strong></section>
+    <section class="card metric"><span>Service</span><strong id="service">—</strong></section>
+    <section class="card metric"><span>Total Cost</span><strong id="totalCost">—</strong></section>
+    <section class="card metric"><span>Cost Score</span><strong id="costScore">—</strong></section>
+    <section class="card metric"><span>RAG</span><strong id="ragScore">—</strong></section>
+    <section class="card metric"><span>Skills/Tools</span><strong id="skillScore">—</strong></section>
+
+    <section class="card half"><h3>Cost breakdown</h3><div id="costBreakdown" class="subtle">Run an evaluation.</div></section>
+    <section class="card half"><h3>Violations</h3><div id="violations" class="subtle">Run an evaluation.</div></section>
+
+    <section class="card full"><h3>Agent tool trace</h3>
+      <table><thead><tr><th>#</th><th>Tool</th><th>Inputs</th><th>Output</th></tr></thead><tbody id="trace"></tbody></table>
+    </section>
+
+    <section class="card full"><h3>Structured monthly plan</h3><pre id="plan">—</pre></section>
+  </div>
+</main>
+<script src="/demo/app.js"></script>
+</body>
+</html>

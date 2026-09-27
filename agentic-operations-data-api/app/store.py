@@ -83,3 +83,12 @@ def case_without_scenarios(team_id: str) -> dict[str, Any]:
     case = deepcopy(load_case(team_id))
     case.pop("public_scenarios", None)
     return case
+
+
+def reference_solution(team_id: str) -> dict[str, Any]:
+    if team_id != "team_0":
+        raise KeyError("A published reference solution exists only for team_0")
+    path = DATA_DIR / "teams" / team_id / "reference_solution.json"
+    if not path.exists():
+        raise KeyError("Case 0 reference solution is not available")
+    return json.loads(path.read_text(encoding="utf-8"))
