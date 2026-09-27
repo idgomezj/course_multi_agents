@@ -37,6 +37,34 @@ async function init(){
 }
 
 function resetTrace(){document.querySelector('#trace').innerHTML='';}
+
+function renderEvaluationBreakdown(data){
+  const b=data.evaluation_breakdown||{};
+  const op=b.operational||{};
+  const rag=b.rag||{};
+  const st=b.skills_tools||{};
+  const components=st.components||{};
+  const tools=st.operational_tools||{};
+  const discipline=st.discipline||{};
+  const efficiency=st.efficiency||{};
+
+  document.querySelector('#evaluationBreakdown').innerHTML=
+    '<b>Operational:</b> '+pct(op.total_score)+' — 35% feasibility + 25% service + 40% cost'+
+    (op.feasible_gate===false?' <span class="bad">(critical-feasibility gate forced score to 0)</span>':'')+
+    '<br><br><b>RAG:</b> '+pct(rag.total_score)+
+    ' — expected sources: '+escapeHtml(JSON.stringify(rag.expected_sources||[]))+
+    '; retrieved expected: '+escapeHtml(JSON.stringify(rag.retrieved_expected_sources||[]))+
+    '<br><br><b>Skills / Tools:</b> '+pct(st.total_score)+
+    '<br>• Skill usage: '+Number(components.skill_usage||0).toFixed(1)+' / 25'+
+    '<br>• Expected operational tools: '+Number(components.expected_operational_tools||0).toFixed(1)+' / 45'+
+    '<br>• Cost + validation: '+Number(components.cost_and_validation||0).toFixed(1)+' / 20'+
+    '<br>• Efficiency: '+Number(components.efficiency||0).toFixed(1)+' / 10'+
+    '<br>• Missing expected operational tools: '+escapeHtml(JSON.stringify(tools.missing||[]))+
+    '<br>• calculate_plan_cost: '+(discipline.calculate_plan_cost_called?'YES':'NO')+
+    '; validate_plan: '+(discipline.validate_plan_called?'YES':'NO')+
+    '<br>• Discouraged calls: '+escapeHtml(JSON.stringify(efficiency.discouraged_calls||[]))+
+    '; exact duplicate calls: '+Number(efficiency.exact_duplicate_calls||0);
+}
 function renderSimulation(sim,benchmark){
   document.querySelector('#feasibility').textContent=sim.feasible?'YES':'NO';
   document.querySelector('#feasibility').className=sim.feasible?'good':'bad';
@@ -58,6 +86,7 @@ function renderReference(data){
   document.querySelector('#skillScore').textContent='N/A';
   resetTrace();
   document.querySelector('#plan').textContent=JSON.stringify(data.plan,null,2);
+  document.querySelector('#evaluationBreakdown').innerHTML='Published-reference mode evaluates the deterministic plan/simulator result. RAG and Skills/Tools are not scored because no AI Manager ran.';
 }
 
 function renderAgent(data){
@@ -74,6 +103,7 @@ function renderAgent(data){
   document.querySelector('#costBreakdown').innerHTML='<div>Benchmark: <b>'+money(data.benchmark_cost)+'</b></div><div>Gap: <b>'+((data.cost_gap||0)*100).toFixed(2)+'%</b></div>';
   document.querySelector('#trace').innerHTML=data.trace.map((t,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+escapeHtml(t.tool)+'</b></td><td><pre>'+escapeHtml(JSON.stringify(t.inputs,null,2))+'</pre></td><td><pre>'+escapeHtml(JSON.stringify(t.output,null,2))+'</pre></td></tr>').join('');
   document.querySelector('#plan').textContent=JSON.stringify(data.plan,null,2);
+  renderEvaluationBreakdown(data);
 }
 
 referenceBtn.addEventListener('click',async()=>{
