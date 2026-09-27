@@ -17,6 +17,6 @@ The additional material purchases are staggered across the month to reduce carry
 - RM05: 2,500 units from SUP03 ordered on day 19;
 - RM06: 2,000 units from SUP03 ordered on day 12 and another 2,000 on day 19.
 
-The reference monthly cost for this public scenario is 73,999.05 and the reference service level is 100 percent.
+The reference monthly cost for this public scenario is 79,249.05 and the reference service level is 100 percent.
 
 This is a teaching example, not a reusable answer. Teams 1–5 have different model tasks, data distributions, constraints and cost structures.
