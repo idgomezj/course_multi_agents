@@ -2,6 +2,9 @@ const team = document.querySelector('#team');
 const scenario = document.querySelector('#scenario');
 const run = document.querySelector('#run');
 const statusEl = document.querySelector('#status');
+const helpDialog = document.querySelector('#helpDialog');
+const helpOpen = document.querySelector('#helpOpen');
+const helpClose = document.querySelector('#helpClose');
 
 async function json(url, options) {
   const r = await fetch(url, options);
@@ -76,6 +79,18 @@ run.addEventListener('click', async function() {
   } finally {
     run.disabled = false;
   }
+});
+
+helpOpen.addEventListener('click', function() {
+  helpDialog.showModal();
+});
+
+helpClose.addEventListener('click', function() {
+  helpDialog.close();
+});
+
+helpDialog.addEventListener('click', function(event) {
+  if (event.target === helpDialog) helpDialog.close();
 });
 
 loadTeams().catch(function(e) { statusEl.textContent = e.message; });
