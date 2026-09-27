@@ -56,3 +56,20 @@ Runs on `http://localhost:8100`.
 ## Security note
 
 This branch is architecturally independent from the student application, but a branch in a public GitHub repository is still public. For real anti-copy isolation, deploy this service from a private repository/private artifact and keep the production team datasets and token map there.
+
+
+## Case 0 worked example
+
+The API branch includes `team_0`, a fully worked reference case for classroom demonstration.
+
+It provides:
+- a balanced manufacturing business case;
+- a demand-forecast model contract;
+- a supplier-delay model contract;
+- company documents for RAG;
+- three public scenarios;
+- a published worked plan for `T0-P01` in `demo_case_0_solution/README.md`.
+
+The matching student-side demo workspace is maintained on `main` under `student/team_0/`.
+
+Case 0 is for demonstration only. Teams 1–5 remain the graded cases.
