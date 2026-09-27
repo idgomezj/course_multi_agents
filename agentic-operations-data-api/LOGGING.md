@@ -35,9 +35,14 @@ Use LOG_LEVEL=DEBUG for the most detailed simulator and training logs.
 
 LOG_FORMAT=json is recommended for searching and machine analysis. Use LOG_FORMAT=text for compact terminal output.
 
+JSON logs include `file`, `line`, and `function`. Text logs show the same source location as `[filename.py:line:function]`, for example `[manager.py:214:run]`. This makes it possible to jump directly from a runtime event to the code that emitted it.
+
 ## Trace IDs
 
 Every structured record includes:
+- file — source Python filename that emitted the log
+- line — source line number
+- function — source function name
 - trace_id
 - span_id
 - event
