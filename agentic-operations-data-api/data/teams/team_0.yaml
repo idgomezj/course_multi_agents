@@ -46,7 +46,7 @@ public_scenarios:
     realized:
       demand_multiplier: {FG01: 1.0, FG02: 1.0, FG03: 1.0}
       supplier_delay_days: {SUP01: 0, SUP03: 0}
-    benchmark_cost: 73999.05
+    benchmark_cost: 79249.05
     public_expectations:
       required_tools:
         [forecast_pytorch, predict_supplier_delay, get_inventory, get_open_purchase_orders, calculate_bom_requirements, get_supplier_options, calculate_plan_cost, search_knowledge, validate_plan]
