@@ -3,6 +3,9 @@ const managerModelEl=document.querySelector('#managerModel');
 const referenceBtn=document.querySelector('#referenceBtn');
 const agentBtn=document.querySelector('#agentBtn');
 const statusText=document.querySelector('#statusText');
+const helpDialog=document.querySelector('#helpDialog');
+const helpOpen=document.querySelector('#helpOpen');
+const helpClose=document.querySelector('#helpClose');
 
 async function getJson(url,options){
   const r=await fetch(url,options);
@@ -130,3 +133,16 @@ agentBtn.addEventListener('click',async()=>{
 });
 
 init().catch(e=>statusText.textContent='Startup error: '+e.message);
+
+
+helpOpen.addEventListener('click',()=>{
+  helpDialog.showModal();
+});
+
+helpClose.addEventListener('click',()=>{
+  helpDialog.close();
+});
+
+helpDialog.addEventListener('click',(event)=>{
+  if(event.target===helpDialog) helpDialog.close();
+});
