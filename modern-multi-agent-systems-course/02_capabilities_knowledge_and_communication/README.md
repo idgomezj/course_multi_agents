@@ -220,3 +220,14 @@ Students should be able to explain:
 7. what problem MCP solves,
 8. why sensitive tools need approval,
 9. why retrieved text must not automatically become trusted instructions.
+
+
+## Classical Communication Reference
+
+Review:
+
+```text
+COMMUNICATION_STANDARDS.md
+```
+
+It introduces KQML, FIPA/ACL concepts, interaction protocols, AgentSpeak/JASON, and the distinction between classical agent communication, MCP, and A2A.
