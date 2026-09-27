@@ -48,13 +48,15 @@ def build_runtime(team_id: str, scenario: dict[str, Any]) -> RuntimeDeps:
     workspace = student_path(team_id)
     log_event(logger, "manager.runtime.build.started", team_id=team_id, scenario_id=scenario.get("id"), workspace=str(workspace))
     bootstrap = get_data_client().bootstrap(team_id)
+    models = StudentModelRegistry(workspace / "models", bootstrap["model_spec"])
+    model_status = models.warmup()
     runtime = RuntimeDeps(
         team_id=team_id,
         case=bootstrap["case"],
         scenario=scenario,
         rag=RagIndex(bootstrap["knowledge"], workspace / "rag" / "config.yaml"),
         skills=SkillLibrary(workspace / "skills"),
-        models=StudentModelRegistry(workspace / "models", bootstrap["model_spec"]),
+        models=models,
     )
     log_event(
         logger,
@@ -64,6 +66,7 @@ def build_runtime(team_id: str, scenario: dict[str, Any]) -> RuntimeDeps:
         knowledge_documents=len(bootstrap.get("knowledge", [])),
         skill_directory=str(workspace / "skills"),
         model_keys=sorted(bootstrap.get("model_spec", {}).get("models", {})),
+        model_warmup=model_status,
     )
     return runtime
 
