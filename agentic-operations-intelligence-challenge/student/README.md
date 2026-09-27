@@ -7,8 +7,8 @@ Students modify only their assigned team folder:
 ```text
 student/team_X/
 ├── models/
-│   ├── model_a.pt
-│   └── model_b.pt
+│   ├── model_a.pt2
+│   └── model_b.pt2
 ├── rag/
 │   └── config.yaml
 └── skills/
