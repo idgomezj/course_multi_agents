@@ -1,0 +1,171 @@
+{
+  "team_id": "team_0",
+  "scenario_id": "T0-P03",
+  "production_plan": [
+    {
+      "week": 1,
+      "product_id": "FG01",
+      "quantity": 950,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 1,
+      "product_id": "FG02",
+      "quantity": 762.5,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 1,
+      "product_id": "FG03",
+      "quantity": 570,
+      "line_id": "L2",
+      "overtime_hours": 0
+    },
+    {
+      "week": 2,
+      "product_id": "FG01",
+      "quantity": 950,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 2,
+      "product_id": "FG02",
+      "quantity": 850,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 2,
+      "product_id": "FG03",
+      "quantity": 570,
+      "line_id": "L2",
+      "overtime_hours": 0
+    },
+    {
+      "week": 3,
+      "product_id": "FG01",
+      "quantity": 950,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 3,
+      "product_id": "FG02",
+      "quantity": 920,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 3,
+      "product_id": "FG03",
+      "quantity": 570,
+      "line_id": "L2",
+      "overtime_hours": 0
+    },
+    {
+      "week": 4,
+      "product_id": "FG01",
+      "quantity": 950,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 4,
+      "product_id": "FG02",
+      "quantity": 877.5,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 4,
+      "product_id": "FG03",
+      "quantity": 570,
+      "line_id": "L2",
+      "overtime_hours": 0
+    }
+  ],
+  "purchase_orders": [
+    {
+      "material_id": "RM01",
+      "supplier_id": "SUP01",
+      "quantity": 2500,
+      "order_day": 7,
+      "expedite": false
+    },
+    {
+      "material_id": "RM01",
+      "supplier_id": "SUP01",
+      "quantity": 2500,
+      "order_day": 14,
+      "expedite": false
+    },
+    {
+      "material_id": "RM02",
+      "supplier_id": "SUP01",
+      "quantity": 1200,
+      "order_day": 15,
+      "expedite": false
+    },
+    {
+      "material_id": "RM05",
+      "supplier_id": "SUP03",
+      "quantity": 2500,
+      "order_day": 19,
+      "expedite": false
+    },
+    {
+      "material_id": "RM06",
+      "supplier_id": "SUP03",
+      "quantity": 2000,
+      "order_day": 12,
+      "expedite": false
+    },
+    {
+      "material_id": "RM06",
+      "supplier_id": "SUP03",
+      "quantity": 2000,
+      "order_day": 19,
+      "expedite": false
+    },
+    {
+      "material_id": "RM05",
+      "supplier_id": "SUP04",
+      "quantity": 800,
+      "order_day": 19,
+      "expedite": false
+    },
+    {
+      "material_id": "RM02",
+      "supplier_id": "SUP04",
+      "quantity": 500,
+      "order_day": 21,
+      "expedite": false
+    },
+    {
+      "material_id": "RM06",
+      "supplier_id": "SUP04",
+      "quantity": 800,
+      "order_day": 21,
+      "expedite": false
+    }
+  ],
+  "actions": [
+    {
+      "action_type": "increase_fg02_production",
+      "reason": "Increase FG02 production across weeks 2-4 to cover the realized promotion-driven demand increase.",
+      "requires_approval": false
+    },
+    {
+      "action_type": "supplement_critical_materials",
+      "reason": "Add small fast SUP04 orders for RM02, RM05 and RM06 so the higher FG02 plan remains material-feasible without unnecessary bulk inventory.",
+      "requires_approval": false
+    }
+  ],
+  "assumptions": [
+    "FG02 demand increases according to the T0-P03 realized multipliers; other products remain at baseline demand."
+  ],
+  "explanation": "Worked demand-increase reference: increase FG02 production only where needed and add minimum practical fast-supplier quantities to protect service."
+}
