@@ -17,13 +17,18 @@ Therefore:
 3. do not select a plan only because its `known_total` looks low;
 4. do not stop merely because `validate_plan` says `feasible: true`.
 
-## Mandatory candidate comparison
+## Mandatory but bounded candidate comparison
 
-Compare at least two **distinct** feasible candidate plans when possible.
+Compare **two distinct candidates** when candidate A is feasible.
 
-Start with a feasible candidate, then deliberately create a leaner alternative. Revalidate after each material change.
+- Candidate A: call `calculate_plan_cost` once and `validate_plan` once.
+- Candidate B: make the highest-value lean improvement, then call `calculate_plan_cost` once and `validate_plan` once.
+- If both are feasible, immediately choose the one with the lower `estimated_realized_cost` and finish.
+- Do not create candidate C merely to chase a slightly lower cost.
+- Candidate C is allowed only when A and B are both infeasible and one targeted repair is required.
+- Reuse all previously retrieved inventory, open-PO, supplier, RAG, forecast, and BOM information instead of repeating identical tool calls.
 
-Prefer the candidate with the lowest `estimated_realized_cost` that still meets the service target and has no critical violation.
+This is an optimization exercise, not an open-ended search. Prefer the lowest-cost feasible candidate found within this bounded comparison.
 
 ## Highest-value cost reductions to investigate
 
