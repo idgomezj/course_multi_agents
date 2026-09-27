@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import os
 import logging
 from time import perf_counter
 from typing import Any
 
 from dotenv import load_dotenv
 from pydantic_ai import Agent
+from pydantic_ai.usage import UsageLimits
 
 from app.store import load_case, load_knowledge, load_model_spec
 from app.observability import current_trace_id, log_event, reset_trace_context, set_trace_context
@@ -24,6 +26,18 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 TEAM_ID = "team_0"
+
+def _manager_request_limit() -> int:
+    raw = os.getenv("MANAGER_REQUEST_LIMIT", "75").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        value = 75
+    # Keep a finite guardrail: enough room for a complex tool-using run without
+    # allowing an accidental unbounded agent loop.
+    return max(10, min(value, 150))
+
+
 
 BASE_INSTRUCTIONS = """
 You are the Operations Manager Agent for the fully solved Case 0 manufacturing planning demo.
@@ -109,7 +123,17 @@ async def run_manager(scenario: dict[str, Any], model_id: str | None = None):
         prompt = manager_prompt(deps)
         agent = build_agent(model_id)
         log_event(logger, "manager.run.started", team_id=TEAM_ID, scenario_id=scenario.get("id"), requested_model_id=model_id, prompt=prompt, visible_information=scenario.get("visible", {}))
-        result = await agent.run(prompt, deps=deps)
+        request_limit = _manager_request_limit()
+        log_event(
+            logger,
+            "manager.usage_limits",
+            request_limit=request_limit,
+        )
+        result = await agent.run(
+            prompt,
+            deps=deps,
+            usage_limits=UsageLimits(request_limit=request_limit),
+        )
         plan = result.output
         plan.team_id = TEAM_ID
         plan.scenario_id = scenario["id"]
