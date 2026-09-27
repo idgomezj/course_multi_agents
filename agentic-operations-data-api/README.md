@@ -236,3 +236,44 @@ The score cards are intentionally separated into:
 The runtime API now returns an `evaluation_breakdown` object showing exactly how each score was produced. The UI displays this breakdown below the headline score cards.
 
 The full formula, penalties, examples, and the distinction between runtime evaluation and final academic grading are documented in [EVALUATION.md](./EVALUATION.md).
+
+
+## Logs and observability
+
+The service and Case 0 demo now emit correlated structured logs for the complete execution path:
+
+- HTTP requests and latency;
+- authorization decisions without exposing credentials;
+- team/case/model/RAG asset loading;
+- selected LLM provider and resolved model;
+- Manager prompt and lifecycle;
+- every tool call;
+- Skill discovery/loading;
+- RAG searches, sources, chunks, and similarity scores;
+- PyTorch model loading and inference;
+- training-data generation and Case 0 model training;
+- simulator weekly state, production, receipts, inventory, service, and cost;
+- evaluation scores and detailed breakdowns.
+
+Each request gets an `X-Trace-Id` response header. Search that trace id in the log to reconstruct a complete run.
+
+Default file:
+
+```text
+logs/data-api.log
+```
+
+Recommended development settings:
+
+```text
+LOG_LEVEL=INFO
+LOG_FORMAT=json
+LOG_FILE=logs/data-api.log
+LOG_PAYLOADS=true
+```
+
+Use `LOG_LEVEL=DEBUG` for the most detailed simulator/training events.
+
+Sensitive fields such as API keys, tokens, authorization values, passwords, secrets, cookies, and credentials are automatically redacted.
+
+See [LOGGING.md](./LOGGING.md) for the complete configuration and event behavior.
