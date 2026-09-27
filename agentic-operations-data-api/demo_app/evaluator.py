@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 
 from .cost_engine import cost_gap, cost_score_from_gap
 from .schemas import EvaluationResult, MonthlyOperationsPlan, ToolTraceEntry
 from .simulator import simulate_month
+from app.observability import log_event
+
+logger = logging.getLogger(__name__)
 
 
 _SKILL_META_TOOLS = {"list_skills", "load_skill"}
@@ -173,6 +177,7 @@ def evaluate_plan(
     trace: list[dict[str, Any]],
     rag_hits: set[str],
 ) -> EvaluationResult:
+    log_event(logger, "evaluation.scoring.started", team_id=plan.team_id, scenario_id=plan.scenario_id, tool_calls=len(trace), rag_hits=sorted(rag_hits))
     sim = simulate_month(case, scenario, plan)
 
     feasibility_score = 100.0 if sim.feasible else 0.0
@@ -236,6 +241,23 @@ def evaluate_plan(
             "They do not change the operational score."
         ),
     }
+
+    log_event(
+        logger,
+        "evaluation.scoring.completed",
+        team_id=plan.team_id,
+        scenario_id=plan.scenario_id,
+        feasible=sim.feasible,
+        service_level=sim.service_level,
+        total_cost=sim.total_cost,
+        benchmark_cost=benchmark_cost,
+        cost_gap=gap,
+        operational_score=round(operational, 2),
+        rag_score=round(rag, 2),
+        skill_tool_score=round(skill_tool, 2),
+        violations=[v.model_dump() for v in sim.violations],
+        evaluation_breakdown=evaluation_breakdown,
+    )
 
     return EvaluationResult(
         team_id=plan.team_id,
