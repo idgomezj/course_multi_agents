@@ -55,11 +55,17 @@ def load_model_spec(team_id: str) -> dict[str, Any]:
 def load_knowledge(team_id: str) -> tuple[dict[str, str], ...]:
     if team_id not in available_teams():
         raise KeyError(team_id)
-    root = DATA_DIR / "teams" / team_id / "knowledge"
-    return tuple(
-        {"name": p.name, "content": p.read_text(encoding="utf-8")}
-        for p in sorted(root.glob("*.md"))
-    )
+    team_root = DATA_DIR / "teams" / team_id
+    roots = [team_root / "knowledge", team_root / "documents"]
+    documents = []
+    for root in roots:
+        if not root.exists():
+            continue
+        documents.extend(
+            {"name": p.name, "content": p.read_text(encoding="utf-8")}
+            for p in sorted(root.glob("*.md"))
+        )
+    return tuple(documents)
 
 
 def public_scenarios(team_id: str) -> list[dict[str, Any]]:
