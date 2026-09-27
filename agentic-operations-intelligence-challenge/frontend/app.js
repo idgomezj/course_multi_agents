@@ -1,5 +1,6 @@
 const team = document.querySelector('#team');
 const scenario = document.querySelector('#scenario');
+const managerModel = document.querySelector('#managerModel');
 const run = document.querySelector('#run');
 const statusEl = document.querySelector('#status');
 
@@ -8,6 +9,15 @@ async function json(url, options) {
   const data = await r.json();
   if (!r.ok) throw new Error(data.detail || JSON.stringify(data));
   return data;
+}
+
+async function loadManagerModels() {
+  const payload = await json('/api/manager-models');
+  managerModel.innerHTML = payload.models.map(function(x) {
+    const state = x.configured ? 'ready' : 'API key missing';
+    return '<option value="' + x.id + '">' + x.label + ' — ' + x.model + ' (' + state + ')</option>';
+  }).join('');
+  managerModel.value = payload.default_model_id;
 }
 
 async function loadTeams() {
@@ -62,12 +72,16 @@ function render(data) {
 team.addEventListener('change', loadScenarios);
 run.addEventListener('click', async function() {
   run.disabled = true;
-  statusEl.textContent = 'Running Manager + tools + simulator...';
+  statusEl.textContent = 'Running ' + managerModel.options[managerModel.selectedIndex].text + ' + tools + simulator...';
   try {
     const data = await json('/api/evaluate', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({team_id:team.value, scenario_id:scenario.value})
+      body:JSON.stringify({
+        team_id:team.value,
+        scenario_id:scenario.value,
+        model_id:managerModel.value
+      })
     });
     render(data);
     statusEl.textContent = 'Evaluation complete.';
@@ -78,4 +92,4 @@ run.addEventListener('click', async function() {
   }
 });
 
-loadTeams().catch(function(e) { statusEl.textContent = e.message; });
+Promise.all([loadManagerModels(), loadTeams()]).catch(function(e) { statusEl.textContent = e.message; });
