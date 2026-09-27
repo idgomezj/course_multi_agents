@@ -1,0 +1,14 @@
+{
+  "BEARING-6205": {
+    "on_hand": 32,
+    "safety_stock": 20,
+    "target_stock": 120,
+    "open_purchase_orders": 15
+  },
+  "MOTOR-2HP": {
+    "on_hand": 8,
+    "safety_stock": 5,
+    "target_stock": 20,
+    "open_purchase_orders": 0
+  }
+}
