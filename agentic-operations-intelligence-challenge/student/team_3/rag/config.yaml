@@ -1,0 +1,6 @@
+# Baseline intentionally imperfect: students should experiment.
+chunk_size: 260
+overlap: 15
+top_k: 2
+min_score: 0.06
+ngram_max: 1

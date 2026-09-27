@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agentic Operations Intelligence Challenge</title>
+  <style>
+    :root { --bg:#f4f5ef; --card:#fff; --ink:#20251b; --muted:#687064; --lime:#dffc62; --olive:#304117; --line:#d7ddcf; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter,Arial,sans-serif; background:var(--bg); color:var(--ink); }
+    header { background:var(--olive); color:white; padding:28px 34px; }
+    header h1 { margin:0 0 6px; font-size:28px; }
+    header p { margin:0; color:#dce4cf; }
+    main { max-width:1200px; margin:24px auto; padding:0 20px 50px; }
+    .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; }
+    .controls { grid-column:span 12; display:flex; gap:12px; flex-wrap:wrap; align-items:end; }
+    label { display:flex; flex-direction:column; gap:6px; font-size:12px; font-weight:700; color:var(--muted); min-width:260px; }
+    select,button { border:1px solid var(--line); border-radius:10px; padding:11px 12px; font-size:14px; background:white; }
+    button { background:var(--lime); border-color:var(--lime); color:#18200d; font-weight:800; cursor:pointer; }
+    button:disabled { opacity:.5; cursor:wait; }
+    .metric { grid-column:span 2; min-height:110px; }
+    .metric strong { display:block; font-size:30px; margin-top:8px; }
+    .metric span { color:var(--muted); font-size:12px; }
+    .wide { grid-column:span 6; }
+    .full { grid-column:span 12; }
+    pre { white-space:pre-wrap; word-break:break-word; font-size:12px; background:#f8faf5; border-radius:12px; padding:14px; max-height:420px; overflow:auto; }
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th,td { padding:9px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    .ok { color:#375c15; font-weight:800; }
+    .bad { color:#a33; font-weight:800; }
+    #status { font-size:13px; color:var(--muted); }
+    @media (max-width:800px) { .metric,.wide { grid-column:span 12; } label { min-width:100%; } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Agentic Operations Intelligence Challenge</h1>
+  <p>Train PyTorch specialists · Improve RAG · Design Skills · Minimize operational cost</p>
+</header>
+<main>
+  <div class="grid">
+    <section class="card controls">
+      <label>Team / case<select id="team"></select></label>
+      <label>Public scenario<select id="scenario"></select></label>
+      <button id="run">Run public evaluation</button>
+      <span id="status">Ready.</span>
+    </section>
+    <section class="card metric"><span>Operational</span><strong id="m-operational">—</strong></section>
+    <section class="card metric"><span>Feasibility</span><strong id="m-feasible">—</strong></section>
+    <section class="card metric"><span>Service</span><strong id="m-service">—</strong></section>
+    <section class="card metric"><span>Cost</span><strong id="m-cost">—</strong></section>
+    <section class="card metric"><span>RAG</span><strong id="m-rag">—</strong></section>
+    <section class="card metric"><span>Skills / Tools</span><strong id="m-skills">—</strong></section>
+    <section class="card wide"><h3>Scenario result</h3><div id="summary">Run a public scenario to see the evaluation.</div></section>
+    <section class="card wide"><h3>Constraint violations</h3><div id="violations">—</div></section>
+    <section class="card full">
+      <h3>Agent trace</h3>
+      <table><thead><tr><th>#</th><th>Tool</th><th>Inputs</th><th>Output</th></tr></thead><tbody id="trace"></tbody></table>
+    </section>
+    <section class="card full"><h3>Structured monthly plan</h3><pre id="plan">—</pre></section>
+  </div>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

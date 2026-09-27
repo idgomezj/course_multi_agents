@@ -1,0 +1,62 @@
+name: Team 1 — Volatile Demand Consumer Products
+description: Demand is highly volatile because promotions, price changes and seasonal events alter weekly sales.
+objective: Maintain high service under uncertain demand while avoiding unjustified buffers and emergency procurement.
+cost_priorities: [lost sales, stockout, emergency procurement, forecast uncertainty]
+products:
+  FG01:
+    demand_history: [780, 1210, 860, 1490, 910, 1660, 840, 1380]
+    seasonal_indices: [1.10, 0.92, 1.28, 1.05]
+  FG02:
+    demand_history: [690, 760, 1180, 720, 1340, 800, 910, 1420]
+    seasonal_indices: [0.90, 1.25, 1.05, 1.30]
+  FG03:
+    demand_history: [480, 830, 510, 970, 560, 720, 1080, 610]
+    seasonal_indices: [1.15, 1.05, 1.22, 0.95]
+costs:
+  stockout_per_unit: 32
+  lost_sale_per_unit: 44
+  holding_per_unit_week: 1.1
+  expedite_per_unit: 4.2
+policies:
+  service_level_target: 0.985
+public_scenarios:
+  - id: T1-P01
+    title: Promotion spike
+    description: FG01 enters a major promotion and forecast uncertainty rises.
+    visible:
+      promotion_products: [FG01]
+      confirmed_orders: {FG01: 1500}
+      forecast_disagreement: {FG01: 0.34}
+    realized:
+      demand_multiplier: {FG01: [1.35, 1.42, 1.18, 1.10], FG02: 1.0, FG03: 1.0}
+    benchmark_cost: 69000
+    public_expectations:
+      required_tools: [forecast_pytorch, estimate_forecast_uncertainty, search_knowledge, calculate_plan_cost]
+      discouraged_tools: [calculate_jit_requirement]
+      rag_expected_sources: [operations_policy.md]
+  - id: T1-P02
+    title: Promotion cancellation
+    description: FG02 promotion is cancelled after a strong prior month.
+    visible:
+      confirmed_orders: {FG02: 690}
+      forecast_disagreement: {FG02: 0.29}
+    realized:
+      demand_multiplier: {FG01: 1.0, FG02: [0.82, 0.78, 0.88, 0.92], FG03: 1.0}
+    benchmark_cost: 57000
+    public_expectations:
+      required_tools: [forecast_pytorch, estimate_forecast_uncertainty, search_knowledge, calculate_plan_cost]
+      discouraged_tools: [calculate_jit_requirement]
+      rag_expected_sources: [operations_policy.md]
+  - id: T1-P03
+    title: Demand spike plus supplier warning
+    visible:
+      promotion_products: [FG03]
+      supplier_recent_late_rate: {SUP02: 0.42}
+      season_risk: 0.5
+    realized:
+      demand_multiplier: {FG03: [1.25, 1.38, 1.45, 1.20]}
+      supplier_delay_days: {SUP02: 5}
+    benchmark_cost: 74000
+    public_expectations:
+      required_tools: [forecast_pytorch, predict_supplier_delay, search_knowledge, validate_plan]
+      rag_expected_sources: [operations_policy.md, supplier_contracts.md]

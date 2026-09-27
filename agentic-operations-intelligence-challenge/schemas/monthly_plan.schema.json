@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MonthlyOperationsPlan",
+  "type": "object",
+  "required": ["team_id", "scenario_id", "production_plan", "purchase_orders", "actions"],
+  "properties": {
+    "team_id": {"type": "string"},
+    "scenario_id": {"type": "string"},
+    "production_plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["week", "product_id", "quantity"],
+        "properties": {
+          "week": {"type": "integer", "minimum": 1, "maximum": 4},
+          "product_id": {"type": "string"},
+          "quantity": {"type": "number", "minimum": 0},
+          "line_id": {"type": ["string", "null"]},
+          "overtime_hours": {"type": "number", "minimum": 0, "default": 0}
+        },
+        "additionalProperties": false
+      }
+    },
+    "purchase_orders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["material_id", "supplier_id", "quantity", "order_day"],
+        "properties": {
+          "material_id": {"type": "string"},
+          "supplier_id": {"type": "string"},
+          "quantity": {"type": "number", "exclusiveMinimum": 0},
+          "order_day": {"type": "integer", "minimum": 1, "maximum": 31},
+          "expedite": {"type": "boolean", "default": false}
+        },
+        "additionalProperties": false
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action_type", "reason"],
+        "properties": {
+          "action_type": {"type": "string"},
+          "reason": {"type": "string"},
+          "requires_approval": {"type": "boolean", "default": false}
+        }
+      }
+    },
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "explanation": {"type": "string"}
+  },
+  "additionalProperties": false
+}

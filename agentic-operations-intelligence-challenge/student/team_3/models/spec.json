@@ -1,0 +1,36 @@
+{
+  "models": {
+    "model_a": {
+      "task": "supplier_delay",
+      "kind": "classification",
+      "artifact": "model_a.pt",
+      "features": [
+        "reliability",
+        "recent_late_rate",
+        "lead_time_days",
+        "order_qty_ratio",
+        "urgency",
+        "season_risk"
+      ],
+      "targets": [
+        "target_delay"
+      ]
+    },
+    "model_b": {
+      "task": "arrival_time",
+      "kind": "regression",
+      "artifact": "model_b.pt",
+      "features": [
+        "reliability",
+        "recent_late_rate",
+        "lead_time_days",
+        "order_qty_ratio",
+        "urgency",
+        "season_risk"
+      ],
+      "targets": [
+        "target_days"
+      ]
+    }
+  }
+}
