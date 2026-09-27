@@ -8,10 +8,21 @@ Standalone FastAPI service for all immutable/team-assigned data used by the Agen
 - inventory, products, BOM, suppliers, costs, policies and capacity;
 - RAG source documents;
 - PyTorch model contracts;
-- generated public training datasets;
+- **team-specific public training-data distributions**;
 - public development scenarios.
 
-The student application no longer needs local copies of those assets.
+The student application contains no runtime copy of those assets.
+
+## Why the training data also lives here
+
+The five teams are intentionally different at the ML level, not only at the Skill/RAG level.
+
+Examples:
+- Team 1 receives volatile/promotional demand distributions;
+- Team 2 receives low-variance stable-demand distributions and excess-inventory labels;
+- Team 3 receives short-lead-time JIT supplier patterns;
+- Team 4 receives broad disruption and quality-risk supplier patterns;
+- Team 5 receives high-utilization/downtime/capacity patterns.
 
 ## Team isolation
 
@@ -37,8 +48,6 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-export TEAM_TOKENS_JSON='{"team_1":"dev-team-1"}'
-export INSTRUCTOR_TOKEN='dev-instructor'
 python run.py
 ```
 
@@ -46,4 +55,4 @@ Runs on `http://localhost:8100`.
 
 ## Security note
 
-This branch exists to keep the service implementation independent from the student application. If this GitHub repository remains public, branch contents are still readable through GitHub. For real anti-copy isolation, deploy this branch from a **private repository or private deployment artifact** and keep team datasets/secrets there. API authentication protects the running service; it cannot make a public Git branch private.
+This branch is architecturally independent from the student application, but a branch in a public GitHub repository is still public. For real anti-copy isolation, deploy this service from a private repository/private artifact and keep the production team datasets and token map there.
