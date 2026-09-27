@@ -51,15 +51,17 @@ def build_runtime(scenario: dict[str, Any]) -> RuntimeDeps:
     log_event(logger, "manager.runtime.build.started", team_id=TEAM_ID, scenario_id=scenario.get("id"))
     case = load_case(TEAM_ID)
     knowledge = list(load_knowledge(TEAM_ID))
+    models = StudentModelRegistry(DEMO_MODELS_DIR, load_model_spec(TEAM_ID))
+    model_status = models.warmup()
     runtime = RuntimeDeps(
         team_id=TEAM_ID,
         case=case,
         scenario=scenario,
         rag=RagIndex(knowledge, DEMO_RAG_CONFIG),
         skills=SkillLibrary(DEMO_SKILLS_DIR),
-        models=StudentModelRegistry(DEMO_MODELS_DIR, load_model_spec(TEAM_ID)),
+        models=models,
     )
-    log_event(logger, "manager.runtime.build.completed", team_id=TEAM_ID, scenario_id=scenario.get("id"), knowledge_documents=len(knowledge), skill_directory=str(DEMO_SKILLS_DIR), model_directory=str(DEMO_MODELS_DIR))
+    log_event(logger, "manager.runtime.build.completed", team_id=TEAM_ID, scenario_id=scenario.get("id"), knowledge_documents=len(knowledge), skill_directory=str(DEMO_SKILLS_DIR), model_directory=str(DEMO_MODELS_DIR), model_warmup=model_status)
     return runtime
 
 
