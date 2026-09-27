@@ -194,6 +194,7 @@
       <section class="help-card help-full">
         <h3>12. Logs and deeper debugging</h3>
         <p>The UI is the high-level view. The server logs show the internal execution in detail. Each request receives an <code>X-Trace-Id</code> that can be used to correlate Manager, Skills, RAG, PyTorch, tool, simulator, and evaluator events.</p>
+        <p>Each structured log includes the source <code>file</code>, <code>line</code>, and <code>function</code>. Text logs show <code>[filename.py:line:function]</code>, so you can jump directly from a runtime event to the code that emitted it.</p>
         <p>See <code>LOGGING.md</code> for runtime observability and <code>EVALUATION.md</code> for the exact scoring rules.</p>
       </section>
     </div>
