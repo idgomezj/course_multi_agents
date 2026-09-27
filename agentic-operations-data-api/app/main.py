@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+import logging
+from time import perf_counter
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse
 
 from .auth import authorize_team, authorized_teams
@@ -16,6 +18,7 @@ from .store import (
     reference_solution,
 )
 from .training_data import generate_training_rows
+from .observability import log_event, new_trace_id, reset_trace_context, set_trace_context, setup_logging
 
 from demo_app.config import (
     DEMO_FRONTEND_DIR,
@@ -29,11 +32,54 @@ from demo_app.manager import run_manager
 from demo_app.schemas import MonthlyOperationsPlan
 from demo_app.simulator import simulate_month
 
+setup_logging("agentic-operations-data-api")
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     title="Agentic Operations Challenge Data API + Case 0 Demo",
     version="1.2.0",
     description="Team-scoped data service plus a self-contained fully solved Case 0 end-to-end demonstration.",
 )
+
+
+@app.middleware("http")
+async def request_logging_middleware(request: Request, call_next):
+    trace_id = request.headers.get("X-Trace-Id") or new_trace_id()
+    tokens = set_trace_context(trace_id)
+    started = perf_counter()
+    log_event(
+        logger,
+        "http.request.started",
+        method=request.method,
+        path=request.url.path,
+        query=str(request.url.query),
+        client=str(request.client),
+    )
+    try:
+        response = await call_next(request)
+        response.headers["X-Trace-Id"] = trace_id
+        log_event(
+            logger,
+            "http.request.completed",
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration_ms=round((perf_counter() - started) * 1000, 2),
+        )
+        return response
+    except Exception as exc:
+        log_event(
+            logger,
+            "http.request.failed",
+            level=logging.ERROR,
+            method=request.method,
+            path=request.url.path,
+            duration_ms=round((perf_counter() - started) * 1000, 2),
+            error=str(exc),
+        )
+        raise
+    finally:
+        reset_trace_context(tokens)
 
 
 @app.get("/health")
@@ -94,7 +140,9 @@ def training_data(
     _: str = Depends(authorize_team),
 ):
     try:
+        log_event(logger, "training_data.requested", team_id=team_id, model_key=model_key, rows=rows, seed=seed)
         data = generate_training_rows(team_id, model_key, rows=rows, seed=seed)
+        log_event(logger, "training_data.generated", team_id=team_id, model_key=model_key, rows=len(data), columns=sorted(data[0]) if data else [])
         return {"team_id": team_id, "model_key": model_key, "rows": data}
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -189,6 +237,7 @@ def demo_scenarios():
 
 @app.get("/demo/api/reference/{scenario_id}")
 def demo_reference(scenario_id: str):
+    log_event(logger, "demo.reference.requested", team_id="team_0", scenario_id=scenario_id)
     solved = reference_solution("team_0")
     if scenario_id != solved["scenario_id"]:
         raise HTTPException(
@@ -200,6 +249,17 @@ def demo_reference(scenario_id: str):
     scenario = public_scenario("team_0", scenario_id)
     plan = MonthlyOperationsPlan.model_validate(solved["reference_plan"])
     sim = simulate_month(load_case("team_0"), scenario, plan)
+    log_event(
+        logger,
+        "demo.reference.completed",
+        team_id="team_0",
+        scenario_id=scenario_id,
+        feasible=sim.feasible,
+        service_level=sim.service_level,
+        total_cost=sim.total_cost,
+        benchmark_cost=scenario.get("benchmark_cost"),
+        violations=[v.model_dump() for v in sim.violations],
+    )
     return {
         "mode": "published_reference",
         "scenario_id": scenario_id,
@@ -220,14 +280,34 @@ async def demo_run_agent(
         raise HTTPException(status_code=404, detail="Unknown Case 0 scenario") from exc
 
     try:
+        log_event(logger, "demo.ai_run.requested", team_id="team_0", scenario_id=scenario_id, model_id=model_id)
         selected_model, _settings = resolve_manager_model(model_id)
         plan, deps = await run_manager(scenario, model_id)
         result = evaluate_plan(deps.case, scenario, plan, deps.trace, deps.rag_hits)
         payload = result.model_dump()
         payload["manager_model_id"] = model_id or default_manager_model_id()
         payload["manager_model"] = selected_model
+        log_event(
+            logger,
+            "demo.ai_run.completed",
+            team_id="team_0",
+            scenario_id=scenario_id,
+            manager_model=selected_model,
+            operational_score=payload.get("operational_score"),
+            feasibility_score=payload.get("feasibility_score"),
+            service_score=payload.get("service_score"),
+            cost_score=payload.get("cost_score"),
+            rag_score=payload.get("rag_score"),
+            skill_tool_score=payload.get("skill_tool_score"),
+            total_cost=payload.get("total_cost"),
+            benchmark_cost=payload.get("benchmark_cost"),
+            cost_gap=payload.get("cost_gap"),
+            tool_calls=len(payload.get("trace", [])),
+            violations=payload.get("violations"),
+        )
         return payload
     except Exception as exc:
+        log_event(logger, "demo.ai_run.failed", level=logging.ERROR, team_id="team_0", scenario_id=scenario_id, model_id=model_id, error=str(exc))
         raise HTTPException(
             status_code=500,
             detail=f"Case 0 AI run failed: {exc}",
