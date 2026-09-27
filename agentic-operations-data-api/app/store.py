@@ -86,9 +86,22 @@ def case_without_scenarios(team_id: str) -> dict[str, Any]:
 
 
 def reference_solution(team_id: str) -> dict[str, Any]:
+    """Return the published Case 0 solution from the demo package."""
     if team_id != "team_0":
         raise KeyError("A published reference solution exists only for team_0")
-    path = DATA_DIR / "teams" / team_id / "reference_solution.json"
+
+    path = DATA_DIR.parent / "demo_case_0_solution" / "reference_plan.json"
     if not path.exists():
-        raise KeyError("Case 0 reference solution is not available")
-    return json.loads(path.read_text(encoding="utf-8"))
+        raise KeyError(f"Case 0 reference plan is missing: {path}")
+
+    plan = json.loads(path.read_text(encoding="utf-8"))
+    scenario = public_scenario(team_id, plan["scenario_id"])
+    return {
+        "scenario_id": plan["scenario_id"],
+        "purpose": "Published worked solution for the fully solved Case 0 teaching demo.",
+        "reference_plan": plan,
+        "reference_evaluation": {
+            "benchmark_cost": scenario.get("benchmark_cost"),
+            "service_level_target": load_case(team_id).get("policies", {}).get("service_level_target"),
+        },
+    }
