@@ -1,0 +1,54 @@
+model: "models/qwen3-0.6b-base-4bit"
+
+train: true
+
+# IMPORTANT:
+# MLX-LM automatically performs QLoRA because this
+# is a quantized model and fine_tune_type is LoRA.
+fine_tune_type: lora
+
+optimizer: adamw
+
+optimizer_config:
+  adamw:
+    weight_decay: 0.01
+
+data: "data"
+
+seed: 42
+
+num_layers: -1
+
+batch_size: 1
+
+iters: 80
+
+val_batches: -1
+
+learning_rate: 1e-5
+
+steps_per_report: 5
+
+steps_per_eval: 10
+
+grad_accumulation_steps: 4
+
+adapter_path: "outputs/qlora_adapter"
+
+save_every: 20
+
+test: false
+
+max_seq_length: 256
+
+grad_checkpoint: true
+
+mask_prompt: true
+
+lora_parameters:
+  keys:
+    - "self_attn.q_proj"
+    - "self_attn.v_proj"
+  rank: 8
+  scale: 20.0
+  dropout: 0.0
