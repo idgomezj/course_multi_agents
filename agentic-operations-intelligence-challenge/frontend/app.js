@@ -45,6 +45,35 @@ function escapeHtml(s) {
   });
 }
 
+function renderEvaluationBreakdown(data) {
+  const b = data.evaluation_breakdown || {};
+  const op = b.operational || {};
+  const rag = b.rag || {};
+  const st = b.skills_tools || {};
+  const components = st.components || {};
+  const ops = st.operational_tools || {};
+  const discipline = st.discipline || {};
+  const efficiency = st.efficiency || {};
+
+  document.querySelector('#evaluation-breakdown').innerHTML =
+    '<b>Operational score:</b> ' + pct(op.total_score) +
+    ' — 35% feasibility + 25% service + 40% cost' +
+    (op.feasible_gate === false ? ' <span class="bad">(critical-feasibility gate forced score to 0)</span>' : '') +
+    '<br><br><b>RAG:</b> ' + pct(rag.total_score) +
+    ' — expected sources: ' + escapeHtml(JSON.stringify(rag.expected_sources || [])) +
+    '; retrieved expected: ' + escapeHtml(JSON.stringify(rag.retrieved_expected_sources || [])) +
+    '<br><br><b>Skills / Tools:</b> ' + pct(st.total_score) +
+    '<br>• Skill usage: ' + pct(components.skill_usage) + ' / 25 points' +
+    '<br>• Expected operational tools: ' + pct(components.expected_operational_tools) + ' / 45 points' +
+    '<br>• Cost + validation discipline: ' + pct(components.cost_and_validation) + ' / 20 points' +
+    '<br>• Efficiency: ' + pct(components.efficiency) + ' / 10 points' +
+    '<br>• Missing expected operational tools: ' + escapeHtml(JSON.stringify(ops.missing || [])) +
+    '<br>• calculate_plan_cost: ' + (discipline.calculate_plan_cost_called ? 'YES' : 'NO') +
+    '; validate_plan: ' + (discipline.validate_plan_called ? 'YES' : 'NO') +
+    '<br>• Discouraged calls: ' + escapeHtml(JSON.stringify(efficiency.discouraged_calls || [])) +
+    '; exact duplicate calls: ' + Number(efficiency.exact_duplicate_calls || 0);
+}
+
 function render(data) {
   document.querySelector('#m-operational').textContent = pct(data.operational_score);
   document.querySelector('#m-feasible').textContent = pct(data.feasibility_score);
@@ -67,6 +96,7 @@ function render(data) {
       escapeHtml(JSON.stringify(t.output,null,2)) + '</pre></td></tr>';
   }).join('');
   document.querySelector('#plan').textContent = JSON.stringify(data.plan, null, 2);
+  renderEvaluationBreakdown(data);
 }
 
 team.addEventListener('change', loadScenarios);
