@@ -162,9 +162,13 @@ def scenario(team_id: str, scenario_id: str, _: str = Depends(authorize_team)):
 
 
 @app.get("/v1/teams/{team_id}/reference-solution")
-def solved_reference(team_id: str, _: str = Depends(authorize_team)):
+def solved_reference(
+    team_id: str,
+    scenario_id: str = Query(default="T0-P01"),
+    _: str = Depends(authorize_team),
+):
     try:
-        return reference_solution(team_id)
+        return reference_solution(team_id, scenario_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
@@ -238,15 +242,11 @@ def demo_scenarios():
 @app.get("/demo/api/reference/{scenario_id}")
 def demo_reference(scenario_id: str):
     log_event(logger, "demo.reference.requested", team_id="team_0", scenario_id=scenario_id)
-    solved = reference_solution("team_0")
-    if scenario_id != solved["scenario_id"]:
-        raise HTTPException(
-            status_code=400,
-            detail=f"The published worked reference exists only for {solved['scenario_id']}. "
-                   "Use 'Run AI Manager end-to-end' for the other Case 0 scenarios.",
-        )
-
-    scenario = public_scenario("team_0", scenario_id)
+    try:
+        solved = reference_solution("team_0", scenario_id)
+        scenario = public_scenario("team_0", scenario_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     plan = MonthlyOperationsPlan.model_validate(solved["reference_plan"])
     sim = simulate_month(load_case("team_0"), scenario, plan)
     log_event(
