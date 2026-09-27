@@ -10,6 +10,9 @@ from demo_app.model_registry import StudentModelRegistry
 
 
 class _FakeModule(nn.Module):
+    def eval(self):
+        raise NotImplementedError("Calling eval() is not supported yet.")
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x.sum(dim=1, keepdim=True)
 
@@ -77,3 +80,22 @@ def test_torch_export_deserialization_is_process_serialized(tmp_path, monkeypatc
 
     assert not errors
     assert maximum_active == 1
+
+
+
+def test_pt2_exported_module_is_not_sent_through_eval(tmp_path, monkeypatch):
+    (tmp_path / "model_a.pt2").write_bytes(b"a")
+    spec = {
+        "models": {
+            "model_a": {
+                "artifact": "model_a.pt2",
+                "task": "test_a",
+                "features": ["x"],
+            }
+        }
+    }
+
+    monkeypatch.setattr(torch.export, "load", lambda _path: _FakeExportedProgram())
+
+    registry = StudentModelRegistry(tmp_path, spec)
+    assert registry.predict("model_a", {"x": 3.0}) == [3.0]
