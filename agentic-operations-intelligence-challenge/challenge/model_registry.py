@@ -113,11 +113,16 @@ class StudentModelRegistry:
                 if path.suffix == ".pt2":
                     exported_program = torch.export.load(str(path))
                     model = exported_program.module()
+                    # torch.export returns an exported GraphModule whose
+                    # train()/eval() methods intentionally raise
+                    # NotImplementedError. The source model is put in eval
+                    # mode before export, so the loaded graph is already the
+                    # inference graph we should execute.
                 else:
                     # Legacy compatibility only. New training code no longer
                     # creates TorchScript artifacts.
                     model = torch.jit.load(str(path), map_location="cpu")
-                model.eval()
+                    model.eval()
             except Exception as exc:
                 log_event(
                     logger,
