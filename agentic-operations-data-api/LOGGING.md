@@ -23,7 +23,7 @@ Logged areas include:
 Use environment variables:
 
 LOG_LEVEL=INFO
-LOG_FORMAT=json
+LOG_FORMAT=text
 LOG_FILE=logs/data-api.log
 LOG_MAX_BYTES=10485760
 LOG_BACKUP_COUNT=5
@@ -33,7 +33,7 @@ LOG_MAX_COLLECTION_ITEMS=100
 
 Use LOG_LEVEL=DEBUG for the most detailed simulator and training logs.
 
-LOG_FORMAT=json is recommended for searching and machine analysis. Use LOG_FORMAT=text for compact terminal output.
+LOG_FORMAT=text is the default and recommended format for local development because it is easy to read directly in the terminal. Set LOG_FORMAT=json only when structured machine-readable output is specifically needed.
 
 JSON logs include `file`, `line`, and `function`. Text logs show the same source location as `[filename.py:line:function]`, for example `[manager.py:214:run]`. This makes it possible to jump directly from a runtime event to the code that emitted it.
 
@@ -54,9 +54,17 @@ Example:
 
 grep '<TRACE_ID>' logs/data-api.log
 
-For JSON logs:
+For the default text logs:
 
+```bash
+tail -f logs/data-api.log
+```
+
+If you explicitly switch to `LOG_FORMAT=json`, you can use:
+
+```bash
 tail -f logs/data-api.log | jq .
+```
 
 ## Secret protection
 
