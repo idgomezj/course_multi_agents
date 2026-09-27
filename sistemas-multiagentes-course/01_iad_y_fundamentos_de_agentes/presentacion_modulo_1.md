@@ -18,30 +18,31 @@ Insertar un diagrama minimalista con un **entorno central** y tres agentes alred
 
 ---
 
-## Diapositiva 2 — De IA centralizada a IA distribuida
+## Diapositiva 2 — Desarrollo histórico de la IAD
 
 ### Puntos clave
-- IA clásica: una entidad concentra estado y decisión.
-- IAD: conocimiento, control y acción se distribuyen.
-- Los problemas reales suelen estar físicamente distribuidos.
-- La distribución introduce coordinación y comunicación.
+- Décadas de 1980–1990: resolución distribuida de problemas e IA cooperativa.
+- Década de 1990: lenguajes de comunicación como KQML y estandarización FIPA.
+- Décadas de 2000–2010: plataformas y lenguajes orientados a agentes como JADE/JASON.
+- Actualidad: agentes con ML/LLM, tools y servicios distribuidos.
+- La idea central permanece: distribuir conocimiento, decisión y acción.
 
 ### Sugerencia visual
-Diagrama comparativo en dos columnas: izquierda, “Centralizada” con un único cerebro conectado a todos los recursos; derecha, “Distribuida” con varios nodos autónomos que cooperan.
+Línea de tiempo minimalista con cuatro hitos: Distributed Problem Solving → KQML/FIPA → JADE/JASON → LLM/Tool Agents.
 
 ---
 
-## Diapositiva 3 — ¿Cuándo tiene sentido distribuir la inteligencia?
+## Diapositiva 3 — Áreas de investigación y problemas de IAD
 
 ### Puntos clave
-- Información localizada en diferentes puntos.
-- Decisiones concurrentes.
-- Recursos heterogéneos.
-- Necesidad de autonomía y tolerancia a fallos.
-- Objetivos locales que deben alinearse con un objetivo global.
+- Resolución distribuida de problemas.
+- Coordinación, cooperación y negociación.
+- Representación y distribución del conocimiento.
+- Robótica y sistemas autónomos distribuidos.
+- Organización y control de sociedades de agentes.
 
 ### Sugerencia visual
-Mapa de una planta industrial con estaciones, almacén, mantenimiento y despacho; cada zona debe mostrar un pequeño agente local.
+Mapa radial con “IAD” al centro y cinco ramas: Distributed Problem Solving, Coordination, Knowledge, Robotics y Agent Organizations.
 
 ---
 
