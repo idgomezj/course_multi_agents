@@ -58,16 +58,17 @@ Ejemplo visual de un mensaje KQML simplificado con la performativa resaltada y e
 
 ---
 
-## Diapositiva 5 — FIPA y la estandarización de agentes
+## Diapositiva 5 — FIPA: misión, objetivos y áreas de estandarización
 
 ### Puntos clave
-- FIPA promovió interoperabilidad entre sistemas de agentes.
-- Define referencias para comunicación y gestión de agentes.
-- FIPA ACL formaliza actos comunicativos.
-- Los estándares permiten agentes desarrollados por equipos distintos.
+- **Misión:** favorecer interoperabilidad entre agentes y plataformas heterogéneas.
+- **Objetivo:** especificar mecanismos comunes para interacción entre agentes.
+- **Comunicación:** ACL y semántica de actos comunicativos.
+- **Interacción:** protocolos como request y contract-net.
+- **Plataforma:** gestión de agentes y transporte de mensajes.
 
 ### Sugerencia visual
-Diagrama de dos plataformas de agentes distintas conectadas mediante una capa central “FIPA ACL / Standard Interaction”.
+Diagrama por capas: Agent Management / ACL / Interaction Protocols / Message Transport, conectando dos plataformas de agentes distintas.
 
 ---
 
