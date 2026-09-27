@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import math
+from time import perf_counter
 
 import torch
 from torch import nn
@@ -9,7 +11,10 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from challenge.config import student_path
 from challenge.data_api import get_data_client
+from challenge.observability import log_event, set_trace_context, reset_trace_context, setup_logging
 from challenge.training_data import generate_training_frame
+
+logger = setup_logging("agentic-operations-training")
 
 
 class StudentNet(nn.Module):
@@ -92,9 +97,22 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=0.003)
     args = parser.parse_args()
 
+    tokens = set_trace_context()
+    started = perf_counter()
     torch.manual_seed(42)
 
     workspace = student_path(args.team)
+    log_event(
+        logger,
+        "training.run.started",
+        team_id=args.team,
+        model_key=args.model,
+        rows=args.rows,
+        epochs=args.epochs,
+        learning_rate=args.lr,
+        seed=42,
+        workspace=str(workspace),
+    )
     spec = get_data_client().get_model_spec(args.team)
     mspec = spec["models"][args.model]
     df = generate_training_frame(args.team, args.model, rows=args.rows, seed=42)
@@ -108,6 +126,18 @@ def main() -> None:
     y_val = torch.tensor(val_df[targets].values, dtype=torch.float32)
 
     classification = mspec["kind"] == "classification"
+    log_event(
+        logger,
+        "training.dataset.ready",
+        team_id=args.team,
+        model_key=args.model,
+        task=mspec.get("task"),
+        kind=mspec.get("kind"),
+        features=features,
+        targets=targets,
+        train_rows=len(train_df),
+        validation_rows=len(val_df),
+    )
     model = StudentNet(
         len(features),
         len(targets),
@@ -127,15 +157,46 @@ def main() -> None:
             loss.backward()
             optimizer.step()
 
+        metrics_text = validation_metrics(model, x_val, y_val, classification)
+        log_event(
+            logger,
+            "training.epoch.completed",
+            level=logging.DEBUG,
+            team_id=args.team,
+            model_key=args.model,
+            epoch=epoch,
+            training_loss=float(loss.detach()),
+            validation_metrics=metrics_text,
+        )
         if epoch % 20 == 0 or epoch == args.epochs - 1:
-            print(f"epoch={epoch:03d} {validation_metrics(model, x_val, y_val, classification)}")
+            print(f"epoch={epoch:03d} {metrics_text}")
+            log_event(
+                logger,
+                "training.progress",
+                team_id=args.team,
+                model_key=args.model,
+                epoch=epoch,
+                validation_metrics=metrics_text,
+            )
 
     output_dir = workspace / "models"
     output_dir.mkdir(parents=True, exist_ok=True)
     output = output_dir / mspec["artifact"]
     export_model(model, len(features), output)
-    print(validation_metrics(model, x_val, y_val, classification))
+    final_metrics = validation_metrics(model, x_val, y_val, classification)
+    print(final_metrics)
     print(f"Saved PyTorch Export model: {output}")
+    log_event(
+        logger,
+        "training.run.completed",
+        team_id=args.team,
+        model_key=args.model,
+        artifact=str(output),
+        artifact_format=output.suffix,
+        validation_metrics=final_metrics,
+        duration_ms=round((perf_counter() - started) * 1000, 2),
+    )
+    reset_trace_context(tokens)
 
 
 if __name__ == "__main__":
