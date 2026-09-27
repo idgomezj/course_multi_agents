@@ -3,7 +3,7 @@
     "model_a": {
       "task": "supplier_delay",
       "kind": "classification",
-      "artifact": "model_a.pt",
+      "artifact": "model_a.pt2",
       "features": [
         "reliability",
         "recent_late_rate",
@@ -19,7 +19,7 @@
     "model_b": {
       "task": "supplier_quality",
       "kind": "classification",
-      "artifact": "model_b.pt",
+      "artifact": "model_b.pt2",
       "features": [
         "quality_score",
         "recent_reject_rate",
