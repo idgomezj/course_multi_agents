@@ -1,4 +1,5 @@
 const scenarioEl=document.querySelector('#scenario');
+const managerModelEl=document.querySelector('#managerModel');
 const referenceBtn=document.querySelector('#referenceBtn');
 const agentBtn=document.querySelector('#agentBtn');
 const statusText=document.querySelector('#statusText');
@@ -19,13 +20,18 @@ async function init(){
     getJson('/demo/api/scenarios')
   ]);
   scenarioEl.innerHTML=scenarios.map(x=>'<option value="'+x.id+'">'+x.id+' — '+x.title+'</option>').join('');
+  managerModelEl.innerHTML=status.manager_models.map(x=>{
+    const state=x.configured?'ready':'API key missing';
+    return '<option value="'+x.id+'">'+x.label+' — '+x.model+' ('+state+')</option>';
+  }).join('');
+  managerModelEl.value=status.manager_model_id;
   document.querySelector('#runtimeStatus').innerHTML=[
     '<span class="pill">Data: '+(status.case_loaded?'READY':'MISSING')+'</span>',
     '<span class="pill">RAG: '+(status.rag_ready?'READY':'MISSING')+'</span>',
     '<span class="pill">Skills: '+status.skill_count+'</span>',
     '<span class="pill">'+status.models.model_a.artifact+': '+(status.models.model_a.ready?'READY':'NOT TRAINED')+'</span>',
     '<span class="pill">'+status.models.model_b.artifact+': '+(status.models.model_b.ready?'READY':'NOT TRAINED')+'</span>',
-    '<span class="pill">LLM key: '+(status.llm_key_present?'READY':'MISSING')+'</span>'
+    ...status.manager_models.map(x=>'<span class="pill">'+x.label+': '+(x.configured?'READY':'KEY MISSING')+'</span>')
   ].join('');
   statusText.textContent='Ready. Use Reference first, then AI Manager.';
 }
@@ -82,12 +88,13 @@ referenceBtn.addEventListener('click',async()=>{
 });
 
 agentBtn.addEventListener('click',async()=>{
-  statusText.textContent='Running LLM Manager + RAG + Skills + PyTorch + tools...';
+  statusText.textContent='Running '+managerModelEl.options[managerModelEl.selectedIndex].text+' + RAG + Skills + PyTorch + tools...';
   referenceBtn.disabled=true;agentBtn.disabled=true;
   try{
-    const data=await getJson('/demo/api/run/'+scenarioEl.value,{method:'POST'});
+    const selected=managerModelEl.value;
+    const data=await getJson('/demo/api/run/'+scenarioEl.value+'?model_id='+encodeURIComponent(selected),{method:'POST'});
     renderAgent(data);
-    statusText.textContent='Full AI evaluation complete.';
+    statusText.textContent='Full AI evaluation complete with '+data.manager_model+'.';
   }catch(e){statusText.textContent='Error: '+e.message}
   finally{referenceBtn.disabled=false;agentBtn.disabled=false}
 });
