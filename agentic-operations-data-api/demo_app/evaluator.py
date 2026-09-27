@@ -92,7 +92,7 @@ def skill_tool_breakdown(
     discouraged_calls = [name for name in names if name in discouraged]
     duplicate_calls = _exact_duplicate_calls(trace)
     efficiency_penalty = min(10.0, 5.0 * len(discouraged_calls) + 2.0 * duplicate_calls)
-    efficiency_score = 10.0 - efficiency_penalty
+    efficiency_score = (10.0 - efficiency_penalty) if names else 0.0
 
     total = max(
         0.0,
