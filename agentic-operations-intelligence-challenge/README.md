@@ -114,23 +114,3 @@ The final hidden evaluator, hidden scenarios, seeds, final holdouts and benchmar
 
 Also note: a branch in a public GitHub repository is itself public. For real team-data isolation, deploy the Data API from a private repository/deployment artifact even if this branch remains the development source.
 
-
-## Case 0 classroom demo
-
-The standalone Data API branch includes `team_0`, a worked reference case. On `main`, the matching demo workspace is:
-
-```text
-student/team_0/
-├── rag/config.yaml
-└── playbooks/
-    ├── monthly_planning.md
-    └── solution_method.md
-```
-
-Before running Case 0 locally, copy the reference playbooks to the runtime Skill directory:
-
-```bash
-cp -R student/team_0/playbooks student/team_0/skills
-```
-
-Case 0 public scenario `T0-P01` has a published reference plan in the Data API branch under `demo_case_0_solution/README.md`. It is for teaching only and is not a solution for Teams 1–5.
