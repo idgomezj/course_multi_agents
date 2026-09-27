@@ -23,8 +23,8 @@ async function init(){
     '<span class="pill">Data: '+(status.case_loaded?'READY':'MISSING')+'</span>',
     '<span class="pill">RAG: '+(status.rag_ready?'READY':'MISSING')+'</span>',
     '<span class="pill">Skills: '+status.skill_count+'</span>',
-    '<span class="pill">model_a.pt: '+(status.models.model_a?'READY':'NOT TRAINED')+'</span>',
-    '<span class="pill">model_b.pt: '+(status.models.model_b?'READY':'NOT TRAINED')+'</span>',
+    '<span class="pill">'+status.models.model_a.artifact+': '+(status.models.model_a.ready?'READY':'NOT TRAINED')+'</span>',
+    '<span class="pill">'+status.models.model_b.artifact+': '+(status.models.model_b.ready?'READY':'NOT TRAINED')+'</span>',
     '<span class="pill">LLM key: '+(status.llm_key_present?'READY':'MISSING')+'</span>'
   ].join('');
   statusText.textContent='Ready. Use Reference first, then AI Manager.';
