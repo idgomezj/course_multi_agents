@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+import logging
+from time import perf_counter
 from typing import Any
 
 from dotenv import load_dotenv
 from pydantic_ai import Agent
 
 from app.store import load_case, load_knowledge, load_model_spec
+from app.observability import current_trace_id, log_event, reset_trace_context, set_trace_context
 from .config import DEMO_MODELS_DIR, DEMO_RAG_CONFIG, DEMO_SKILLS_DIR
 from .llm_config import resolve_manager_model
 from .model_registry import StudentModelRegistry
@@ -17,6 +20,8 @@ from .skills import SkillLibrary
 from .tools import ALL_TOOLS
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 TEAM_ID = "team_0"
 
@@ -43,19 +48,24 @@ Rules:
 
 
 def build_runtime(scenario: dict[str, Any]) -> RuntimeDeps:
+    log_event(logger, "manager.runtime.build.started", team_id=TEAM_ID, scenario_id=scenario.get("id"))
     case = load_case(TEAM_ID)
-    return RuntimeDeps(
+    knowledge = list(load_knowledge(TEAM_ID))
+    runtime = RuntimeDeps(
         team_id=TEAM_ID,
         case=case,
         scenario=scenario,
-        rag=RagIndex(list(load_knowledge(TEAM_ID)), DEMO_RAG_CONFIG),
+        rag=RagIndex(knowledge, DEMO_RAG_CONFIG),
         skills=SkillLibrary(DEMO_SKILLS_DIR),
         models=StudentModelRegistry(DEMO_MODELS_DIR, load_model_spec(TEAM_ID)),
     )
+    log_event(logger, "manager.runtime.build.completed", team_id=TEAM_ID, scenario_id=scenario.get("id"), knowledge_documents=len(knowledge), skill_directory=str(DEMO_SKILLS_DIR), model_directory=str(DEMO_MODELS_DIR))
+    return runtime
 
 
 def build_agent(model_id: str | None = None) -> Agent:
     model, model_settings = resolve_manager_model(model_id)
+    log_event(logger, "manager.agent.build", requested_model_id=model_id, resolved_model=model, has_custom_model_settings=model_settings is not None, tool_count=len(ALL_TOOLS))
     kwargs = {
         "deps_type": RuntimeDeps,
         "output_type": MonthlyOperationsPlan,
@@ -89,10 +99,35 @@ def manager_prompt(deps: RuntimeDeps) -> str:
 
 
 async def run_manager(scenario: dict[str, Any], model_id: str | None = None):
-    deps = build_runtime(scenario)
-    agent = build_agent(model_id)
-    result = await agent.run(manager_prompt(deps), deps=deps)
-    plan = result.output
-    plan.team_id = TEAM_ID
-    plan.scenario_id = scenario["id"]
-    return plan, deps
+    owns_trace = current_trace_id() == "-"
+    tokens = set_trace_context() if owns_trace else None
+    started = perf_counter()
+    try:
+        deps = build_runtime(scenario)
+        prompt = manager_prompt(deps)
+        agent = build_agent(model_id)
+        log_event(logger, "manager.run.started", team_id=TEAM_ID, scenario_id=scenario.get("id"), requested_model_id=model_id, prompt=prompt, visible_information=scenario.get("visible", {}))
+        result = await agent.run(prompt, deps=deps)
+        plan = result.output
+        plan.team_id = TEAM_ID
+        plan.scenario_id = scenario["id"]
+        log_event(
+            logger,
+            "manager.run.completed",
+            team_id=TEAM_ID,
+            scenario_id=scenario.get("id"),
+            duration_ms=round((perf_counter()-started)*1000, 2),
+            tool_calls=len(deps.trace),
+            rag_sources=sorted(deps.rag_hits),
+            production_orders=len(plan.production_plan),
+            purchase_orders=len(plan.purchase_orders),
+            actions=[a.model_dump() for a in plan.actions],
+            plan=plan.model_dump(),
+        )
+        return plan, deps
+    except Exception as exc:
+        log_event(logger, "manager.run.failed", level=logging.ERROR, team_id=TEAM_ID, scenario_id=scenario.get("id"), duration_ms=round((perf_counter()-started)*1000, 2), error=str(exc))
+        raise
+    finally:
+        if tokens is not None:
+            reset_trace_context(tokens)
