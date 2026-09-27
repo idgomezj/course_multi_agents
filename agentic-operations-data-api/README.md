@@ -70,6 +70,15 @@ It provides:
 - three public scenarios;
 - a published worked plan for `T0-P01` in `demo_case_0_solution/README.md`.
 
-The matching student-side demo workspace is maintained on `main` under `student/team_0/`.
+All Case 0 artifacts now live only on this service branch under `data/teams/team_0*` and `demo_case_0_solution/`.
+
+The solved package includes:
+- Case 0 business/scenario data;
+- Case 0 model contract;
+- RAG source documents;
+- solved RAG configuration;
+- solved Skills;
+- PyTorch training script;
+- structured reference plan and benchmark explanation.
 
 Case 0 is for demonstration only. Teams 1–5 remain the graded cases.
