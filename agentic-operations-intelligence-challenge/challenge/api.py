@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from .config import FRONTEND_DIR
 from .data_api import DataApiError, get_data_client
 from .evaluator import evaluate_plan
-from .llm_config import default_manager_model_id, manager_model_status
+from .llm_config import default_manager_model_id, manager_model_status, resolve_manager_model
 from .manager import run_manager
 from .scenarios import get_public_scenario, list_public_scenarios, student_visible_scenario
 from .training_data import generate_training_frame
@@ -82,9 +82,13 @@ def training_data(team_id: str, model_key: str, rows: int = 1000, seed: int = 42
 async def evaluate(request: EvaluateRequest):
     try:
         scenario = get_public_scenario(request.team_id, request.scenario_id)
+        selected_model, _settings = resolve_manager_model(request.model_id)
         plan, deps = await run_manager(request.team_id, scenario, request.model_id)
         result = evaluate_plan(deps.case, scenario, plan, deps.trace, deps.rag_hits)
-        return result.model_dump()
+        payload = result.model_dump()
+        payload["manager_model_id"] = request.model_id or default_manager_model_id()
+        payload["manager_model"] = selected_model
+        return payload
     except FileNotFoundError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except DataApiError as exc:
