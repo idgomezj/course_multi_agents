@@ -206,3 +206,15 @@ OPENAI_API_KEY=...
 ```
 
 The exact provider can be changed without redesigning the course architecture.
+
+
+## Academic MAS Coverage
+
+Each module also includes a concise classical MAS reference so this directory can be used as the standalone main course:
+
+- Module 1: `FOUNDATIONS.md` — Distributed AI, agent vs. object, beliefs/goals/capabilities/commitments, agent types.
+- Module 2: `COMMUNICATION_STANDARDS.md` — KQML, FIPA ACL concepts, AgentSpeak/JASON, MCP vs. A2A.
+- Module 3: `COORDINATION_PATTERNS.md` + `04_contract_net_coordination.py` — social organization, cooperation, coordination, control, architectures, negotiation, Contract Net.
+- Module 4: `DESIGN_METHODOLOGIES.md` + `FINAL_PROJECT_TEMPLATE.md` — MAS-CommonKADS, GAIA, MaSE, and the final prototype design.
+
+See `CURRICULUM_ALIGNMENT.md` for the complete mapping.
