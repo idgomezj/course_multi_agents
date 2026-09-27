@@ -84,7 +84,7 @@ run.addEventListener('click', async function() {
       })
     });
     render(data);
-    statusEl.textContent = 'Evaluation complete.';
+    statusEl.textContent = 'Evaluation complete with ' + data.manager_model + '.';
   } catch (e) {
     statusEl.textContent = 'Error: ' + e.message;
   } finally {
