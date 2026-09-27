@@ -1,0 +1,150 @@
+{
+  "team_id": "team_0",
+  "scenario_id": "T0-P02",
+  "production_plan": [
+    {
+      "week": 1,
+      "product_id": "FG01",
+      "quantity": 950,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 1,
+      "product_id": "FG02",
+      "quantity": 762.5,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 1,
+      "product_id": "FG03",
+      "quantity": 570,
+      "line_id": "L2",
+      "overtime_hours": 0
+    },
+    {
+      "week": 2,
+      "product_id": "FG01",
+      "quantity": 950,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 2,
+      "product_id": "FG02",
+      "quantity": 762.5,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 2,
+      "product_id": "FG03",
+      "quantity": 570,
+      "line_id": "L2",
+      "overtime_hours": 0
+    },
+    {
+      "week": 3,
+      "product_id": "FG01",
+      "quantity": 950,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 3,
+      "product_id": "FG02",
+      "quantity": 762.5,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 3,
+      "product_id": "FG03",
+      "quantity": 570,
+      "line_id": "L2",
+      "overtime_hours": 0
+    },
+    {
+      "week": 4,
+      "product_id": "FG01",
+      "quantity": 950,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 4,
+      "product_id": "FG02",
+      "quantity": 762.5,
+      "line_id": "L1",
+      "overtime_hours": 0
+    },
+    {
+      "week": 4,
+      "product_id": "FG03",
+      "quantity": 570,
+      "line_id": "L2",
+      "overtime_hours": 0
+    }
+  ],
+  "purchase_orders": [
+    {
+      "material_id": "RM01",
+      "supplier_id": "SUP04",
+      "quantity": 2500,
+      "order_day": 7,
+      "expedite": false
+    },
+    {
+      "material_id": "RM01",
+      "supplier_id": "SUP02",
+      "quantity": 2500,
+      "order_day": 10,
+      "expedite": false
+    },
+    {
+      "material_id": "RM02",
+      "supplier_id": "SUP01",
+      "quantity": 1200,
+      "order_day": 15,
+      "expedite": false
+    },
+    {
+      "material_id": "RM05",
+      "supplier_id": "SUP03",
+      "quantity": 2500,
+      "order_day": 19,
+      "expedite": false
+    },
+    {
+      "material_id": "RM06",
+      "supplier_id": "SUP03",
+      "quantity": 2000,
+      "order_day": 12,
+      "expedite": false
+    },
+    {
+      "material_id": "RM06",
+      "supplier_id": "SUP03",
+      "quantity": 2000,
+      "order_day": 19,
+      "expedite": false
+    }
+  ],
+  "actions": [
+    {
+      "action_type": "supplier_risk_split",
+      "reason": "Use high-reliability SUP04 for the earlier RM01 tranche and lower-cost SUP02 for the later tranche where its realized delay still arrives before need.",
+      "requires_approval": false
+    },
+    {
+      "action_type": "use_existing_purchase_orders",
+      "reason": "Use existing RM03 and RM05 purchase orders before placing unnecessary replacement orders.",
+      "requires_approval": false
+    }
+  ],
+  "assumptions": [
+    "SUP02 has elevated delay risk in T0-P02; the later RM01 tranche is intentionally ordered early enough to absorb the realized delay."
+  ],
+  "explanation": "Worked supplier trade-off reference: protect near-term service with SUP04 while using cheaper SUP02 only where timing slack makes the delay economically acceptable."
+}
