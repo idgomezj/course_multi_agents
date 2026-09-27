@@ -4,6 +4,7 @@ import logging
 from challenge.observability import (
     StructuredFormatter,
     current_trace_id,
+    log_event,
     new_trace_id,
     reset_trace_context,
     sanitize,
@@ -57,3 +58,30 @@ def test_structured_formatter_includes_source_location():
 
     text_line = StructuredFormatter("test-service", json_mode=False).format(record)
     assert "[example_worker.py:42:run_job]" in text_line
+
+
+
+def test_log_event_uses_real_caller_location():
+    records = []
+
+    class CaptureHandler(logging.Handler):
+        def emit(self, record):
+            records.append(record)
+
+    logger = logging.getLogger("test.observability.callsite")
+    handler = CaptureHandler()
+    previous_level = logger.level
+    previous_propagate = logger.propagate
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    logger.addHandler(handler)
+    try:
+        log_event(logger, "callsite.test", answer=42)
+    finally:
+        logger.removeHandler(handler)
+        logger.setLevel(previous_level)
+        logger.propagate = previous_propagate
+
+    assert len(records) == 1
+    assert records[0].filename == "test_observability.py"
+    assert records[0].funcName == "test_log_event_uses_real_caller_location"
