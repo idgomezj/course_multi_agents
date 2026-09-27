@@ -33,7 +33,7 @@ LOG_MAX_COLLECTION_ITEMS=100
 
 Use LOG_LEVEL=DEBUG for the most detailed simulator and training logs.
 
-LOG_FORMAT=text is the default and recommended format for local development because it is easy to read directly in the terminal. Set LOG_FORMAT=json only when structured machine-readable output is specifically needed.
+Runtime logs are intentionally emitted as human-readable text in this branch.
 
 JSON logs include `file`, `line`, and `function`. Text logs show the same source location as `[filename.py:line:function]`, for example `[manager.py:214:run]`. This makes it possible to jump directly from a runtime event to the code that emitted it.
 
@@ -60,11 +60,7 @@ For the default text logs:
 tail -f logs/data-api.log
 ```
 
-If you explicitly switch to `LOG_FORMAT=json`, you can use:
-
-```bash
-tail -f logs/data-api.log | jq .
-```
+The runtime formatter is fixed to text so existing local `LOG_FORMAT=json` values do not switch terminal output back to JSON.
 
 ## Secret protection
 
