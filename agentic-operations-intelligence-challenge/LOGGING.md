@@ -78,19 +78,13 @@ LOG_MAX_COLLECTION_ITEMS=100
 
 ### LOG_FORMAT
 
-The default is:
+Runtime logging is intentionally fixed to human-readable text:
 
 ```text
 LOG_FORMAT=text
 ```
 
-for human-readable terminal logs. Set:
-
-```text
-LOG_FORMAT=json
-```
-
-only when structured machine-readable output is specifically needed.
+Existing local `LOG_FORMAT=json` values do not switch the runtime formatter back to JSON in this branch.
 
 Text logs include the source location as `[filename.py:line:function]`, for example `[tools.py:214:forecast_pytorch]`. JSON logs expose the same information as separate `file`, `line`, and `function` fields.
 
@@ -134,11 +128,7 @@ For the default text logs:
 tail -f logs/challenge.log
 ```
 
-If you explicitly switch to `LOG_FORMAT=json`:
-
-```bash
-tail -f logs/challenge.log | jq .
-```
+The runtime formatter is fixed to text in this branch.
 
 Find a trace:
 
