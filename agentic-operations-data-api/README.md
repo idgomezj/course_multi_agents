@@ -223,3 +223,16 @@ curl -X POST "http://localhost:8100/demo/api/run/T0-P01?model_id=google"
 ```
 
 For DeepSeek V4, thinking mode is disabled for the Manager because this demo relies on reliable function-tool use and structured Pydantic output.
+
+
+## Evaluation and scoring
+
+The score cards are intentionally separated into:
+
+- **Operational** — feasibility, service, and realized cost;
+- **RAG** — retrieval of expected organizational evidence;
+- **Skills / Tools** — procedural Skill usage, expected operational-tool coverage, cost/validation discipline, and tool-call efficiency.
+
+The runtime API now returns an `evaluation_breakdown` object showing exactly how each score was produced. The UI displays this breakdown below the headline score cards.
+
+The full formula, penalties, examples, and the distinction between runtime evaluation and final academic grading are documented in [EVALUATION.md](./EVALUATION.md).
