@@ -152,3 +152,32 @@ The HTTP response header `X-Trace-Id` gives the trace ID for the request.
 ## Evaluation logs
 
 The runtime evaluation remains documented separately in [EVALUATION.md](./EVALUATION.md). Logging explains **how execution reached the result**; evaluation explains **how the result was scored**.
+
+
+## PyTorch Export concurrency
+
+PyTorch Export deserialization uses process-global state internally. If two `torch.export.load(...)` calls overlap in different threads, PyTorch can raise an error such as:
+
+```text
+_CURRENT_DESERIALIZER is already set
+```
+
+The application prevents this in two ways:
+
+1. all `.pt2` deserialization is protected by one process-wide lock;
+2. available models are warmed up serially before the LLM is allowed to make concurrent tool calls.
+
+Loaded inference modules are cached by artifact path, modification time, and size. Retraining a model changes that signature, so the new artifact is loaded on the next run.
+
+Relevant log events:
+
+```text
+models.load.started
+models.load.completed
+models.load.cache_hit
+models.load.failed
+models.warmup.completed
+models.predict.completed
+```
+
+If you upgraded from an older checkout that already produced the deserializer error, fully stop and restart the Python/Uvicorn process after pulling the fix. The lock exists in process memory and cannot repair an already running old process.
