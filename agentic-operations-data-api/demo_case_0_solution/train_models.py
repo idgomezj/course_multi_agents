@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import logging
 import math
+from time import perf_counter
 from pathlib import Path
 import sys
 
@@ -13,10 +15,12 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
+from app.observability import log_event, reset_trace_context, set_trace_context, setup_logging
 from app.store import load_model_spec
 from app.training_data import generate_training_rows
 
 TEAM_ID = "team_0"
+logger = setup_logging("agentic-operations-case0-training")
 
 
 class ReferenceNet(nn.Module):
@@ -81,7 +85,19 @@ def metrics(
 
 
 def train(model_key: str, output_dir: Path) -> None:
+    started = perf_counter()
     spec = load_model_spec(TEAM_ID)["models"][model_key]
+    log_event(
+        logger,
+        "training.model.started",
+        team_id=TEAM_ID,
+        model_key=model_key,
+        task=spec.get("task"),
+        kind=spec.get("kind"),
+        artifact=spec.get("artifact"),
+        features=spec.get("features"),
+        targets=spec.get("targets"),
+    )
     df = pd.DataFrame(generate_training_rows(TEAM_ID, model_key, rows=3000, seed=42))
 
     split = int(len(df) * 0.82)
@@ -94,6 +110,16 @@ def train(model_key: str, output_dir: Path) -> None:
     y_val = torch.tensor(val_df[spec["targets"]].values, dtype=torch.float32)
 
     classification = spec["kind"] == "classification"
+    log_event(
+        logger,
+        "training.dataset.ready",
+        team_id=TEAM_ID,
+        model_key=model_key,
+        rows=len(df),
+        train_rows=len(train_df),
+        validation_rows=len(val_df),
+        classification=classification,
+    )
     model = ReferenceNet(
         len(spec["features"]),
         len(spec["targets"]),
@@ -110,7 +136,7 @@ def train(model_key: str, output_dir: Path) -> None:
     best_state = None
     patience = 0
 
-    for _ in range(240):
+    for epoch in range(240):
         model.train()
         for xb, yb in loader:
             loss = loss_fn(model(xb), yb)
@@ -129,7 +155,31 @@ def train(model_key: str, output_dir: Path) -> None:
         else:
             patience += 1
 
+        log_event(
+            logger,
+            "training.epoch.completed",
+            level=logging.DEBUG,
+            team_id=TEAM_ID,
+            model_key=model_key,
+            epoch=epoch,
+            validation_loss=val_loss,
+            best_loss=best_loss,
+            patience=patience,
+        )
+
+        if epoch % 20 == 0:
+            log_event(
+                logger,
+                "training.progress",
+                team_id=TEAM_ID,
+                model_key=model_key,
+                epoch=epoch,
+                validation_loss=val_loss,
+                best_loss=best_loss,
+            )
+
         if patience >= 30:
+            log_event(logger, "training.early_stopping", team_id=TEAM_ID, model_key=model_key, epoch=epoch, best_loss=best_loss)
             break
 
     if best_state is not None:
@@ -142,11 +192,29 @@ def train(model_key: str, output_dir: Path) -> None:
     exported_program = torch.export.export(model, (example,))
     torch.export.save(exported_program, str(artifact))
 
-    print(f"{model_key}: {metrics(model, x_val, y_val, classification)}; saved={artifact}")
+    final_metrics = metrics(model, x_val, y_val, classification)
+    print(f"{model_key}: {final_metrics}; saved={artifact}")
+    log_event(
+        logger,
+        "training.model.completed",
+        team_id=TEAM_ID,
+        model_key=model_key,
+        artifact=str(artifact),
+        artifact_format=artifact.suffix,
+        validation_metrics=final_metrics,
+        best_loss=best_loss,
+        duration_ms=round((perf_counter() - started) * 1000, 2),
+    )
 
 
 if __name__ == "__main__":
-    torch.manual_seed(42)
-    target = Path("demo_case_0_solution/models")
-    train("model_a", target)
-    train("model_b", target)
+    tokens = set_trace_context()
+    try:
+        torch.manual_seed(42)
+        target = Path("demo_case_0_solution/models")
+        log_event(logger, "training.run.started", team_id=TEAM_ID, seed=42, output_dir=str(target))
+        train("model_a", target)
+        train("model_b", target)
+        log_event(logger, "training.run.completed", team_id=TEAM_ID, output_dir=str(target))
+    finally:
+        reset_trace_context(tokens)
