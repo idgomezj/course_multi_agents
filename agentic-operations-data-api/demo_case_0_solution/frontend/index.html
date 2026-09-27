@@ -7,7 +7,7 @@
   <style>
     :root{--bg:#f3f5ef;--panel:#fff;--ink:#20251b;--muted:#687064;--deep:#283914;--lime:#dffc62;--line:#d9dfd1;--good:#426c20;--bad:#aa3b36}
     *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    header{background:var(--deep);color:white;padding:30px 34px}header h1{margin:0 0 5px;font-size:30px}header p{margin:0;color:#dce5cf}
+    header{background:var(--deep);color:white;padding:30px 34px}.header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}header h1{margin:0 0 5px;font-size:30px}header p{margin:0;color:#dce5cf}.help-button{background:transparent;color:white;border:1px solid rgba(255,255,255,.35);white-space:nowrap}.help-button:hover{background:rgba(255,255,255,.08)}
     main{max-width:1250px;margin:24px auto;padding:0 20px 60px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}.full{grid-column:span 12}.half{grid-column:span 6}
     .metric{grid-column:span 2}.metric span{font-size:12px;color:var(--muted)}.metric strong{display:block;font-size:27px;margin-top:7px}
@@ -18,13 +18,24 @@
     table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
     .pill{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef3e6;font-size:12px;margin:3px}.good{color:var(--good);font-weight:800}.bad{color:var(--bad);font-weight:800}
     #statusText{color:var(--muted);font-size:13px}.subtle{color:var(--muted);font-size:13px}
-    @media(max-width:850px){.metric,.half{grid-column:span 12}}
+    dialog.help-dialog{width:min(940px,calc(100vw - 32px));max-height:88vh;border:0;border-radius:20px;padding:0;box-shadow:0 24px 80px rgba(0,0,0,.28);color:var(--ink)}
+    dialog.help-dialog::backdrop{background:rgba(15,20,10,.64);backdrop-filter:blur(3px)}
+    .help-shell{padding:24px;overflow:auto;max-height:88vh}.help-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+    .help-head h2{margin:0 0 6px}.help-head p{margin:0;color:var(--muted)}.help-close{background:white;border-color:var(--line);min-width:44px}
+    .help-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}.help-card{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fbfcf8}
+    .help-card h3{margin:0 0 8px;font-size:15px}.help-card p{margin:0 0 8px;color:#4f584b;font-size:13px;line-height:1.55}.help-card ul,.help-card ol{margin:8px 0 0 20px;padding:0;color:#4f584b;font-size:13px;line-height:1.55}.help-card code{background:#eef2e8;padding:2px 5px;border-radius:5px}.help-full{grid-column:1/-1}
+    @media(max-width:850px){.metric,.half{grid-column:span 12}.header-row{flex-direction:column}.help-grid{grid-template-columns:1fr}.help-full{grid-column:auto}}
   </style>
 </head>
 <body>
 <header>
-  <h1>Case 0 — Full Agentic Operations Demo</h1>
-  <p>Data API + PyTorch + RAG + Skills + Pydantic AI + Tools + Simulator + Cost Evaluation</p>
+  <div class="header-row">
+    <div>
+      <h1>Case 0 — Full Agentic Operations Demo</h1>
+      <p>Data API + PyTorch + RAG + Skills + Pydantic AI + Tools + Simulator + Cost Evaluation</p>
+    </div>
+    <button id="helpOpen" class="help-button" type="button" aria-haspopup="dialog">Help / How to use</button>
+  </div>
 </header>
 <main>
   <div class="grid">
@@ -58,6 +69,137 @@
     <section class="card full"><h3>Structured monthly plan</h3><pre id="plan">—</pre></section>
   </div>
 </main>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpTitle">
+  <div class="help-shell">
+    <div class="help-head">
+      <div>
+        <h2 id="helpTitle">How to use the Case 0 demo</h2>
+        <p>Use this guide to understand the dropdowns, the two evaluation modes, the score cards, and how to review a run.</p>
+      </div>
+      <button id="helpClose" class="help-close" type="button" aria-label="Close help">✕</button>
+    </div>
+
+    <div class="help-grid">
+      <section class="help-card">
+        <h3>1. Scenario dropdown</h3>
+        <p>Select one of the public Case 0 development scenarios:</p>
+        <ul>
+          <li><b>T0-P01</b>: balanced month.</li>
+          <li><b>T0-P02</b>: supplier-risk trade-off.</li>
+          <li><b>T0-P03</b>: promotion / demand increase.</li>
+        </ul>
+        <p>Each scenario changes the business conditions the AI Manager must respond to.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>2. Manager LLM dropdown</h3>
+        <p>Select the LLM used only as the Manager/orchestrator. The same Case 0 data, PyTorch models, RAG, Skills, tools, simulator, and evaluator stay unchanged.</p>
+        <ul>
+          <li><b>ready</b>: the provider API key is configured.</li>
+          <li><b>API key missing</b>: that provider cannot run until its key is added.</li>
+        </ul>
+      </section>
+
+      <section class="help-card">
+        <h3>3. Evaluate published reference</h3>
+        <p>This does <b>not</b> call an LLM. It loads the known worked reference plan for the selected scenario and sends it directly through the deterministic simulator/cost engine.</p>
+        <p>Use it first to understand what a feasible, high-quality reference result looks like and to verify the evaluator itself.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>4. Run AI Manager end-to-end</h3>
+        <p>This runs the real agentic workflow:</p>
+        <p><code>LLM Manager → Skills → RAG → PyTorch → Tools → Structured Plan → Simulator → Evaluator</code></p>
+        <p>The AI must solve the selected scenario independently. It does not load the published reference plan.</p>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>5. Runtime status badges</h3>
+        <ul>
+          <li><b>Data</b>: Case 0 business data loaded.</li>
+          <li><b>RAG</b>: RAG configuration is available.</li>
+          <li><b>Skills</b>: number of available procedural Skills.</li>
+          <li><b>model_a.pt2 / model_b.pt2</b>: trained PyTorch artifacts are present and ready.</li>
+          <li><b>LLM provider badges</b>: whether each provider key is configured.</li>
+        </ul>
+        <p>If a model says <b>NOT TRAINED</b>, run <code>python demo_case_0_solution/train_models.py</code> before testing the AI Manager.</p>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>6. How to read the score cards</h3>
+        <ul>
+          <li><b>Feasibility</b>: whether the plan satisfies hard operational constraints.</li>
+          <li><b>Service</b>: realized service level relative to the service target.</li>
+          <li><b>Total Cost</b>: realized simulated operating cost.</li>
+          <li><b>Cost Score</b>: how close the plan is to the public benchmark cost.</li>
+          <li><b>RAG</b>: whether expected organizational evidence was retrieved.</li>
+          <li><b>Skills / Tools</b>: whether the Manager used the procedural Skills, expected operational tools, cost/validation discipline, and an efficient workflow.</li>
+        </ul>
+      </section>
+
+      <section class="help-card">
+        <h3>7. Cost breakdown and violations</h3>
+        <p><b>Cost breakdown</b> shows where the total cost came from. Compare purchase, production, holding, working-capital, overtime, expedite, changeover, stockout, lost-sales, and line-stop costs when present.</p>
+        <p><b>Violations</b> shows simulator findings. Any critical violation makes the plan infeasible.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>8. Evaluation breakdown</h3>
+        <p>This explains exactly why the RAG and Skills/Tools scores were assigned, including:</p>
+        <ul>
+          <li>Skill usage points;</li>
+          <li>expected operational tools used/missing;</li>
+          <li><code>calculate_plan_cost</code> and <code>validate_plan</code> usage;</li>
+          <li>efficiency penalties and exact duplicate calls.</li>
+        </ul>
+      </section>
+
+      <section class="help-card">
+        <h3>9. Agent tool trace</h3>
+        <p>Review the tool calls in order. The trace answers questions such as:</p>
+        <ul>
+          <li>Did the Manager inspect inventory and open POs?</li>
+          <li>Did it load Skills?</li>
+          <li>Did it retrieve RAG evidence?</li>
+          <li>Did it call PyTorch models?</li>
+          <li>Did it compare supplier/cost alternatives?</li>
+          <li>Did it validate the plan before finalizing?</li>
+        </ul>
+      </section>
+
+      <section class="help-card">
+        <h3>10. Structured monthly plan</h3>
+        <p>This is the final Pydantic-validated output generated by the AI Manager (or the reference plan in reference mode).</p>
+        <p>Review production orders, purchase orders, actions, assumptions, and explanation. A plan can be feasible and still be unnecessarily expensive.</p>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>11. Recommended testing workflow</h3>
+        <ol>
+          <li>Select a scenario.</li>
+          <li>Click <b>Evaluate published reference</b> and note the expected feasible/service/cost result.</li>
+          <li>Select a configured Manager LLM.</li>
+          <li>Click <b>Run AI Manager end-to-end</b>.</li>
+          <li>Check feasibility and service first.</li>
+          <li>Compare AI total cost with the benchmark/reference.</li>
+          <li>Review RAG and Skills/Tools.</li>
+          <li>Inspect the trace to see exactly what the agent did.</li>
+          <li>Inspect the final plan.</li>
+          <li>Repeat the same scenario with another LLM to compare orchestration behavior.</li>
+          <li>Repeat T0-P01, T0-P02, and T0-P03 to verify scenario generalization.</li>
+        </ol>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>12. Logs and deeper debugging</h3>
+        <p>The UI is the high-level view. The server logs show the internal execution in detail. Each request receives an <code>X-Trace-Id</code> that can be used to correlate Manager, Skills, RAG, PyTorch, tool, simulator, and evaluator events.</p>
+        <p>See <code>LOGGING.md</code> for runtime observability and <code>EVALUATION.md</code> for the exact scoring rules.</p>
+      </section>
+    </div>
+  </div>
+</dialog>
+
 <script src="/demo/app.js"></script>
 </body>
 </html>
