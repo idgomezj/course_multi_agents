@@ -42,8 +42,8 @@ This creates:
 
 ```text
 demo_case_0_solution/models/
-├── model_a.pt
-└── model_b.pt
+├── model_a.pt2
+└── model_b.pt2
 ```
 
 Start the single FastAPI service:
