@@ -189,6 +189,7 @@
       <section class="help-card help-full">
         <h3>11. Logs and deeper debugging</h3>
         <p>The frontend summarizes the run; the server logs explain what happened internally. Each request receives an <code>X-Trace-Id</code>. Use that trace ID to correlate Manager, tool, RAG, model, Data API, simulator, and evaluator events in the logs.</p>
+        <p>Each structured log includes the source <code>file</code>, <code>line</code>, and <code>function</code>. Text logs show <code>[filename.py:line:function]</code>, so you can jump directly from a runtime event to the code that emitted it.</p>
         <p>See <code>LOGGING.md</code> for observability details and <code>EVALUATION.md</code> for the exact scoring rules.</p>
       </section>
     </div>
