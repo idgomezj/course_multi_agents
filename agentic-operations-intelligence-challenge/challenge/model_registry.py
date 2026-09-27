@@ -2,8 +2,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import logging
+
 import torch
 from torch import nn
+
+from .observability import log_event
+
+logger = logging.getLogger(__name__)
 
 
 class StudentModelRegistry:
@@ -14,6 +20,12 @@ class StudentModelRegistry:
         self.model_dir.mkdir(parents=True, exist_ok=True)
         self.spec = spec
         self._cache: dict[str, nn.Module] = {}
+        log_event(
+            logger,
+            "models.registry.ready",
+            model_dir=str(self.model_dir),
+            model_keys=sorted(self.spec.get("models", {})),
+        )
 
     def model_spec(self, key: str) -> dict:
         if key not in self.spec["models"]:
@@ -35,7 +47,10 @@ class StudentModelRegistry:
         return preferred
 
     def has_model(self, key: str) -> bool:
-        return self._artifact_path(key).exists()
+        path = self._artifact_path(key)
+        ready = path.exists()
+        log_event(logger, "models.artifact.status", level=logging.DEBUG, model_key=key, path=str(path), ready=ready)
+        return ready
 
     def _load(self, key: str) -> nn.Module:
         path = self._artifact_path(key)
@@ -45,13 +60,15 @@ class StudentModelRegistry:
                 f"Train/export {key} before using this prediction tool."
             )
 
+        log_event(logger, "models.load.started", model_key=key, path=str(path), format=path.suffix)
         if path.suffix == ".pt2":
             exported_program = torch.export.load(str(path))
-            return exported_program.module()
-
-        # Legacy compatibility only. New training code no longer creates
-        # TorchScript artifacts.
-        return torch.jit.load(str(path), map_location="cpu").eval()
+            model = exported_program.module()
+        else:
+            # Legacy compatibility only. New training code no longer creates TorchScript artifacts.
+            model = torch.jit.load(str(path), map_location="cpu").eval()
+        log_event(logger, "models.load.completed", model_key=key, path=str(path), format=path.suffix)
+        return model
 
     def predict(self, key: str, feature_values: dict[str, float]) -> list[float]:
         spec = self.model_spec(key)
@@ -62,4 +79,14 @@ class StudentModelRegistry:
         x = torch.tensor([ordered], dtype=torch.float32)
         with torch.no_grad():
             y = self._cache[key](x)
-        return [float(v) for v in y.reshape(-1).tolist()]
+        output = [float(v) for v in y.reshape(-1).tolist()]
+        log_event(
+            logger,
+            "models.predict.completed",
+            model_key=key,
+            task=spec.get("task"),
+            features=feature_values,
+            ordered_features=spec.get("features"),
+            output=output,
+        )
+        return output
