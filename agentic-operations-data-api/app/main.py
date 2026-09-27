@@ -24,6 +24,7 @@ from demo_app.config import (
     DEMO_SKILLS_DIR,
 )
 from demo_app.evaluator import evaluate_plan
+from demo_app.llm_config import default_manager_model_id, manager_model_status, resolve_manager_model
 from demo_app.manager import run_manager
 from demo_app.schemas import MonthlyOperationsPlan
 from demo_app.simulator import simulate_month
@@ -160,8 +161,16 @@ def demo_status():
         "rag_ready": DEMO_RAG_CONFIG.exists(),
         "skill_count": len(skill_files),
         "models": model_status,
-        "llm_key_present": bool(os.getenv("GOOGLE_API_KEY")),
-        "manager_model": os.getenv("MANAGER_MODEL", "google:gemini-2.5-flash"),
+        "manager_model_id": default_manager_model_id(),
+        "manager_models": manager_model_status(),
+    }
+
+
+@app.get("/demo/api/manager-models")
+def demo_manager_models():
+    return {
+        "default_model_id": default_manager_model_id(),
+        "models": manager_model_status(),
     }
 
 
@@ -201,16 +210,23 @@ def demo_reference(scenario_id: str):
 
 
 @app.post("/demo/api/run/{scenario_id}")
-async def demo_run_agent(scenario_id: str):
+async def demo_run_agent(
+    scenario_id: str,
+    model_id: str | None = Query(default=None),
+):
     try:
         scenario = public_scenario("team_0", scenario_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="Unknown Case 0 scenario") from exc
 
     try:
-        plan, deps = await run_manager(scenario)
+        selected_model, _settings = resolve_manager_model(model_id)
+        plan, deps = await run_manager(scenario, model_id)
         result = evaluate_plan(deps.case, scenario, plan, deps.trace, deps.rag_hits)
-        return result.model_dump()
+        payload = result.model_dump()
+        payload["manager_model_id"] = model_id or default_manager_model_id()
+        payload["manager_model"] = selected_model
+        return payload
     except Exception as exc:
         raise HTTPException(
             status_code=500,
