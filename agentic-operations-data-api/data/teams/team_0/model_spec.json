@@ -1,0 +1,18 @@
+{
+  "models": {
+    "model_a": {
+      "task": "demand_forecast",
+      "kind": "regression",
+      "artifact": "model_a.pt",
+      "features": ["last4_mean","last4_std","trend","promotion","price_index","confirmed_orders","seasonal_index"],
+      "targets": ["target_w1","target_w2","target_w3","target_w4"]
+    },
+    "model_b": {
+      "task": "supplier_delay",
+      "kind": "classification",
+      "artifact": "model_b.pt",
+      "features": ["reliability","recent_late_rate","lead_time_days","order_qty_ratio","urgency","season_risk"],
+      "targets": ["target_delay"]
+    }
+  }
+}
