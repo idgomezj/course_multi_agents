@@ -1,0 +1,7 @@
+PROCUREMENT POLICY — TEACHING EXAMPLE
+
+1. Maintain stock at or above the SKU safety-stock level.
+2. When projected demand would push available inventory below safety stock, replenish toward target stock.
+3. Existing open purchase orders must be considered before creating a new order.
+4. Recommendations must identify the source inventory values used.
+5. Unknown SKUs must not be ordered automatically; they require human review.
