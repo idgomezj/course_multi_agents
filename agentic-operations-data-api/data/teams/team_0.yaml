@@ -1,0 +1,83 @@
+name: Team 0 — Fully Solved Reference Plant
+description: A balanced manufacturing operation used only as the worked example shown to students before they start their own team case.
+objective: Build a feasible four-week production and procurement plan, maintain full service, use evidence from RAG and specialist PyTorch models, and minimize total operational cost.
+cost_priorities: [service, total cost, inventory, supplier reliability]
+
+products:
+  FG01:
+    initial_fg: 200
+    base_demand: [1000, 1000, 1000, 1000]
+    demand_history: [970, 1010, 995, 1005, 990, 1015, 1000, 1005]
+    seasonal_indices: [1.00, 1.00, 1.00, 1.00]
+  FG02:
+    initial_fg: 150
+    base_demand: [800, 800, 800, 800]
+    demand_history: [790, 805, 800, 795, 810, 798, 802, 800]
+    seasonal_indices: [1.00, 1.00, 1.00, 1.00]
+  FG03:
+    initial_fg: 120
+    base_demand: [600, 600, 600, 600]
+    demand_history: [590, 605, 600, 595, 610, 598, 602, 600]
+    seasonal_indices: [1.00, 1.00, 1.00, 1.00]
+
+policies:
+  service_level_target: 0.99
+  approval_threshold: 25000
+  max_overtime_hours_per_line_week: 12
+
+costs:
+  stockout_per_unit: 12
+  lost_sale_per_unit: 18
+  holding_per_unit_week: 0.70
+  working_capital_rate: 0.01
+  overtime_per_hour: 110
+  line_stop_per_hour: 9000
+  expedite_per_unit: 1.80
+  changeover_cost: 750
+
+public_scenarios:
+  - id: T0-P01
+    title: Fully solved balanced month
+    description: Stable demand, normal supplier performance and enough capacity. This scenario has a published worked solution.
+    visible:
+      confirmed_orders: {FG01: 1000, FG02: 800, FG03: 600}
+      supplier_recent_late_rate: {SUP01: 0.06, SUP03: 0.03}
+      season_risk: 0.10
+    realized:
+      demand_multiplier: {FG01: 1.0, FG02: 1.0, FG03: 1.0}
+      supplier_delay_days: {SUP01: 0, SUP03: 0}
+    benchmark_cost: 73999.05
+    public_expectations:
+      required_tools:
+        [forecast_pytorch, predict_supplier_delay, get_inventory, get_open_purchase_orders, calculate_bom_requirements, get_supplier_options, calculate_plan_cost, search_knowledge, validate_plan]
+      discouraged_tools: [calculate_jit_requirement]
+      rag_expected_sources: [operations_policy.md, supplier_contracts.md]
+
+  - id: T0-P02
+    title: Reference supplier trade-off
+    description: The cheaper supplier shows elevated delay risk, forcing the worked method to compare reliability and total cost.
+    visible:
+      confirmed_orders: {FG01: 1000, FG02: 800, FG03: 600}
+      supplier_recent_late_rate: {SUP02: 0.35, SUP04: 0.03}
+      season_risk: 0.35
+    realized:
+      demand_multiplier: {FG01: 1.0, FG02: 1.0, FG03: 1.0}
+      supplier_delay_days: {SUP02: 4, SUP04: 0}
+    benchmark_cost: 76500
+    public_expectations:
+      required_tools: [predict_supplier_delay, find_alternative_supplier, calculate_plan_cost, search_knowledge, validate_plan]
+      rag_expected_sources: [operations_policy.md, supplier_contracts.md]
+
+  - id: T0-P03
+    title: Reference demand increase
+    description: A moderate demand increase demonstrates how forecast evidence changes production and procurement.
+    visible:
+      promotion_products: [FG02]
+      confirmed_orders: {FG01: 1000, FG02: 940, FG03: 600}
+      forecast_disagreement: {FG02: 0.16}
+    realized:
+      demand_multiplier: {FG01: 1.0, FG02: [1.08, 1.12, 1.15, 1.10], FG03: 1.0}
+    benchmark_cost: 80500
+    public_expectations:
+      required_tools: [forecast_pytorch, get_inventory, calculate_bom_requirements, calculate_plan_cost, validate_plan]
+      rag_expected_sources: [operations_policy.md]
