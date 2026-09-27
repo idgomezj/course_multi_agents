@@ -69,6 +69,12 @@ The system may log whether credentials are configured or authentication succeede
 See EVALUATION.md for how a run is scored. Logging explains how the system reached the plan and score; evaluation documentation explains the scoring formula.
 
 
+## PyTorch Export inference mode
+
+Exported `.pt2` inference modules must not be passed through `.eval()` or `.train()` after `torch.export.load(...).module()`. PyTorch intentionally rejects those calls on exported GraphModules. The training/export scripts put the source model in evaluation mode before export, so runtime loading executes the exported inference graph directly. Legacy TorchScript `.pt` artifacts still use `.eval()` after loading.
+
+If a runtime reports `Calling eval() is not supported yet.`, make sure the loader is not calling `.eval()` on the `.pt2` module.
+
 ## PyTorch Export concurrency
 
 PyTorch Export deserialization uses process-global state internally. If two `torch.export.load(...)` calls overlap in different threads, PyTorch can raise an error such as:
