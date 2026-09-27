@@ -60,7 +60,7 @@ http://localhost:8100/demo
 
 The page lets you:
 
-- evaluate the published T0-P01 reference plan through the simulator/cost engine without an LLM;
+- evaluate the published T0-P01, T0-P02, or T0-P03 reference plan through the simulator/cost engine without an LLM;
 - run the **AI Manager end-to-end** through RAG, Skills, PyTorch models, tools, structured planning, simulation and scoring;
 - inspect constraint violations;
 - inspect the complete tool trace;
@@ -114,7 +114,10 @@ data/teams/team_0/
 demo_case_0_solution/
 ├── README.md
 ├── train_models.py
-├── reference_plan.json
+├── reference_plans/
+│   ├── T0-P01.json
+│   ├── T0-P02.json
+│   └── T0-P03.json
 ├── models/                 # generated locally
 ├── rag/config.yaml
 ├── skills/
@@ -145,7 +148,9 @@ demo_app/
 - `GET /v1/teams/{team_id}/training-data/{model_key}`
 - `GET /v1/teams/{team_id}/scenarios/public`
 - `GET /v1/teams/{team_id}/scenarios/public/{scenario_id}`
-- `GET /v1/teams/team_0/reference-solution`
+- `GET /v1/teams/team_0/reference-solution?scenario_id=T0-P01`
+- `GET /v1/teams/team_0/reference-solution?scenario_id=T0-P02`
+- `GET /v1/teams/team_0/reference-solution?scenario_id=T0-P03`
 
 ## Authentication
 
@@ -277,3 +282,20 @@ Use `LOG_LEVEL=DEBUG` for the most detailed simulator/training events.
 Sensitive fields such as API keys, tokens, authorization values, passwords, secrets, cookies, and credentials are automatically redacted.
 
 See [LOGGING.md](./LOGGING.md) for the complete configuration and event behavior.
+
+
+## Case 0 published references
+
+All three public Case 0 scenarios have deterministic worked references:
+
+| Scenario | Purpose | Feasible | Service | Reference cost |
+|---|---|---:|---:|---:|
+| T0-P01 | Balanced month | YES | 100% | 79,249.05 |
+| T0-P02 | Supplier-risk trade-off | YES | 100% | 77,827.30 |
+| T0-P03 | Promotion/demand increase | YES | 100% | 82,983.90 |
+
+The browser's **Evaluate published reference** action works for every scenario.
+
+The references are separate files under `demo_case_0_solution/reference_plans/`; there is no longer a single T0-P01-only reference file.
+
+The AI Manager path remains independent and does not load these reference plans.
