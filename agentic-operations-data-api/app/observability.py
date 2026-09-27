@@ -221,6 +221,7 @@ def log_event(logger: logging.Logger, event: str, *, level: int = logging.INFO, 
             "trace_id": current_trace_id(),
             "span_id": current_span_id(),
         },
+        stacklevel=2,
     )
 
 
@@ -234,4 +235,5 @@ def log_exception(logger: logging.Logger, event: str, **fields: Any) -> None:
             "trace_id": current_trace_id(),
             "span_id": current_span_id(),
         },
+        stacklevel=2,
     )
