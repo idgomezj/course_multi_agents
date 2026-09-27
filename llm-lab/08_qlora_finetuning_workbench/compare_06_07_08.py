@@ -14,15 +14,46 @@ from config import (
 SOURCE_PARAMETER_COUNT = 600_000_000
 
 
-def first_existing(
-    paths
-):
+def find_chapter_06():
 
-    for path in paths:
+    candidates = [
+        (
+            BASE_DIR.parent
+            / "06_full_finetuning_workbench"
+        ),
+        (
+            BASE_DIR.parent
+            / "full_finetuning_workbench"
+        ),
+    ]
 
-        if path.exists():
+    # Prefer the location that actually contains
+    # ignored local artifacts. A Git rename does
+    # not move ignored model/checkpoint files.
+    for candidate in candidates:
 
-            return path
+        if (
+            (
+                candidate
+                / "outputs"
+                / "full_weights"
+                / "adapters.safetensors"
+            ).exists()
+            or
+            (
+                candidate
+                / "models"
+                / "qwen3-0.6b-base-bf16"
+            ).exists()
+        ):
+
+            return candidate
+
+    for candidate in candidates:
+
+        if candidate.exists():
+
+            return candidate
 
     return None
 
@@ -126,16 +157,7 @@ def mib(
 
 def main():
 
-    chapter_06 = first_existing([
-        (
-            BASE_DIR.parent
-            / "06_full_finetuning_workbench"
-        ),
-        (
-            BASE_DIR.parent
-            / "full_finetuning_workbench"
-        ),
-    ])
+    chapter_06 = find_chapter_06()
 
     chapter_07 = (
         BASE_DIR.parent
