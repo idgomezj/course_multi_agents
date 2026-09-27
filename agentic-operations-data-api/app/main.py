@@ -144,14 +144,22 @@ def demo_status():
         pass
 
     skill_files = list(DEMO_SKILLS_DIR.glob("*.md"))
+    model_spec = load_model_spec("team_0")["models"]
+    model_status = {}
+    for key, spec in model_spec.items():
+        preferred = DEMO_MODELS_DIR / spec["artifact"]
+        legacy = preferred.with_suffix(".pt") if preferred.suffix == ".pt2" else preferred
+        model_status[key] = {
+            "ready": preferred.exists() or legacy.exists(),
+            "artifact": spec["artifact"],
+            "legacy_artifact_present": legacy.exists() and not preferred.exists(),
+        }
+
     return {
         "case_loaded": case_ok,
         "rag_ready": DEMO_RAG_CONFIG.exists(),
         "skill_count": len(skill_files),
-        "models": {
-            "model_a": (DEMO_MODELS_DIR / "model_a.pt").exists(),
-            "model_b": (DEMO_MODELS_DIR / "model_b.pt").exists(),
-        },
+        "models": model_status,
         "llm_key_present": bool(os.getenv("GOOGLE_API_KEY")),
         "manager_model": os.getenv("MANAGER_MODEL", "google:gemini-2.5-flash"),
     }
