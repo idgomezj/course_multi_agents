@@ -63,10 +63,10 @@ function renderEvaluationBreakdown(data) {
     ' — expected sources: ' + escapeHtml(JSON.stringify(rag.expected_sources || [])) +
     '; retrieved expected: ' + escapeHtml(JSON.stringify(rag.retrieved_expected_sources || [])) +
     '<br><br><b>Skills / Tools:</b> ' + pct(st.total_score) +
-    '<br>• Skill usage: ' + pct(components.skill_usage) + ' / 25 points' +
-    '<br>• Expected operational tools: ' + pct(components.expected_operational_tools) + ' / 45 points' +
-    '<br>• Cost + validation discipline: ' + pct(components.cost_and_validation) + ' / 20 points' +
-    '<br>• Efficiency: ' + pct(components.efficiency) + ' / 10 points' +
+    '<br>• Skill usage: ' + Number(components.skill_usage || 0).toFixed(1) + ' / 25' +
+    '<br>• Expected operational tools: ' + Number(components.expected_operational_tools || 0).toFixed(1) + ' / 45' +
+    '<br>• Cost + validation discipline: ' + Number(components.cost_and_validation || 0).toFixed(1) + ' / 20' +
+    '<br>• Efficiency: ' + Number(components.efficiency || 0).toFixed(1) + ' / 10' +
     '<br>• Missing expected operational tools: ' + escapeHtml(JSON.stringify(ops.missing || [])) +
     '<br>• calculate_plan_cost: ' + (discipline.calculate_plan_cost_called ? 'YES' : 'NO') +
     '; validate_plan: ' + (discipline.validate_plan_called ? 'YES' : 'NO') +
