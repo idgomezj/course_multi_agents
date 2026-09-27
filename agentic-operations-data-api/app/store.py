@@ -95,20 +95,36 @@ def case_without_scenarios(team_id: str) -> dict[str, Any]:
     return case
 
 
-def reference_solution(team_id: str) -> dict[str, Any]:
-    """Return the published Case 0 solution from the demo package."""
+def reference_solution(team_id: str, scenario_id: str = "T0-P01") -> dict[str, Any]:
+    """Return a published Case 0 reference solution for one public scenario."""
     if team_id != "team_0":
-        raise KeyError("A published reference solution exists only for team_0")
+        raise KeyError("Published reference solutions exist only for team_0")
 
-    path = DATA_DIR.parent / "demo_case_0_solution" / "reference_plan.json"
+    scenario = public_scenario(team_id, scenario_id)
+    path = DATA_DIR.parent / "demo_case_0_solution" / "reference_plans" / f"{scenario_id}.json"
+
+    # Backward compatibility for older checkouts that only had reference_plan.json.
+    if not path.exists() and scenario_id == "T0-P01":
+        path = DATA_DIR.parent / "demo_case_0_solution" / "reference_plan.json"
+
     if not path.exists():
-        raise KeyError(f"Case 0 reference plan is missing: {path}")
+        raise KeyError(f"Case 0 reference plan is missing for {scenario_id}: {path}")
 
     plan = json.loads(path.read_text(encoding="utf-8"))
-    log_event(logger, "store.reference_solution.loaded", team_id=team_id, path=str(path), scenario_id=plan.get("scenario_id"))
-    scenario = public_scenario(team_id, plan["scenario_id"])
+    if plan.get("scenario_id") != scenario_id:
+        raise ValueError(
+            f"Reference plan scenario mismatch: requested {scenario_id}, file contains {plan.get('scenario_id')}"
+        )
+
+    log_event(
+        logger,
+        "store.reference_solution.loaded",
+        team_id=team_id,
+        path=str(path),
+        scenario_id=scenario_id,
+    )
     return {
-        "scenario_id": plan["scenario_id"],
+        "scenario_id": scenario_id,
         "purpose": "Published worked solution for the fully solved Case 0 teaching demo.",
         "reference_plan": plan,
         "reference_evaluation": {
