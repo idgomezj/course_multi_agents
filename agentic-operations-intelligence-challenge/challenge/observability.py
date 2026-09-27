@@ -3,10 +3,10 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sys
 import traceback
 import uuid
 from contextvars import ContextVar, Token
-from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
@@ -114,48 +114,55 @@ def sanitize(value: Any, *, depth: int = 0) -> Any:
 
 
 class StructuredFormatter(logging.Formatter):
-    def __init__(self, service_name: str, json_mode: bool):
+    """Human-readable formatter styled like Uvicorn's terminal output."""
+
+    _LEVEL_COLORS = {
+        logging.DEBUG: "\x1b[36m",      # cyan
+        logging.INFO: "\x1b[32m",       # green
+        logging.WARNING: "\x1b[33m",    # yellow
+        logging.ERROR: "\x1b[31m",      # red
+        logging.CRITICAL: "\x1b[1;31m", # bold red
+    }
+    _RESET = "\x1b[0m"
+
+    def __init__(self, service_name: str, json_mode: bool = False, use_colors: bool = False):
         super().__init__()
         self.service_name = service_name
-        self.json_mode = json_mode
+        # Kept only for backward-compatible construction in tests/callers.
+        # Runtime logging is intentionally text-only.
+        self.json_mode = False
+        self.use_colors = use_colors
+
+    def _level_prefix(self, record: logging.LogRecord) -> str:
+        prefix = f"{record.levelname}:"
+        padded = f"{prefix:<9}"
+        if not self.use_colors:
+            return padded
+        color = self._LEVEL_COLORS.get(record.levelno, "")
+        return f"{color}{padded}{self._RESET}" if color else padded
 
     def format(self, record: logging.LogRecord) -> str:
-        timestamp = datetime.now(timezone.utc).isoformat()
         event = getattr(record, "event", record.getMessage())
         data = sanitize(getattr(record, "event_data", {}))
         trace_id = getattr(record, "trace_id", current_trace_id())
         span_id = getattr(record, "span_id", current_span_id())
 
-        if self.json_mode:
-            payload = {
-                "timestamp": timestamp,
-                "level": record.levelname,
-                "service": self.service_name,
-                "logger": record.name,
-                "file": record.filename,
-                "line": record.lineno,
-                "function": record.funcName,
-                "trace_id": trace_id,
-                "span_id": span_id,
-                "event": event,
-                "data": data,
-            }
-            if record.exc_info:
-                payload["exception"] = "".join(traceback.format_exception(*record.exc_info))
-            return json.dumps(payload, default=str, ensure_ascii=False)
-
         suffix = ""
         if data:
             suffix = " " + json.dumps(data, default=str, ensure_ascii=False)
-        message = (
-            f"{timestamp} {record.levelname:<8} "
-            f"[{self.service_name}] [{record.filename}:{record.lineno}:{record.funcName}] "
-            f"[trace={trace_id}] [span={span_id}] {event}{suffix}"
-        )
+
+        context_parts = [
+            f"[{record.filename}:{record.lineno}:{record.funcName}]",
+        ]
+        if trace_id != "-":
+            context_parts.append(f"[trace={trace_id}]")
+        if span_id != "-":
+            context_parts.append(f"[span={span_id}]")
+
+        message = f"{self._level_prefix(record)} {' '.join(context_parts)} {event}{suffix}"
         if record.exc_info:
             message += "\n" + "".join(traceback.format_exception(*record.exc_info))
         return message
-
 
 def setup_logging(service_name: str) -> logging.Logger:
     """Configure safe console + rotating-file logs exactly once per process."""
@@ -166,11 +173,18 @@ def setup_logging(service_name: str) -> logging.Logger:
 
     marker = f"_agentic_logging_{service_name}"
     if not getattr(root, marker, False):
-        formatter = StructuredFormatter(service_name, json_mode=False)
+        use_colors = (
+            _truthy("LOG_COLORS", "true")
+            and os.getenv("NO_COLOR") is None
+            and hasattr(sys.stderr, "isatty")
+            and sys.stderr.isatty()
+        )
+        console_formatter = StructuredFormatter(service_name, use_colors=use_colors)
+        file_formatter = StructuredFormatter(service_name, use_colors=False)
 
         console = logging.StreamHandler()
         console.setLevel(level)
-        console.setFormatter(formatter)
+        console.setFormatter(console_formatter)
         root.addHandler(console)
 
         log_file = os.getenv("LOG_FILE", "").strip()
@@ -184,7 +198,7 @@ def setup_logging(service_name: str) -> logging.Logger:
                 encoding="utf-8",
             )
             file_handler.setLevel(level)
-            file_handler.setFormatter(formatter)
+            file_handler.setFormatter(file_formatter)
             root.addHandler(file_handler)
 
         setattr(root, marker, True)
@@ -195,7 +209,8 @@ def setup_logging(service_name: str) -> logging.Logger:
         "logging.configured",
         level=logging.INFO,
         log_level=level_name,
-        log_format="text",
+        log_format="uvicorn-style-text",
+        log_colors=_truthy("LOG_COLORS", "true"),
         log_file=os.getenv("LOG_FILE", ""),
         log_payloads=_truthy("LOG_PAYLOADS", "true"),
     )
