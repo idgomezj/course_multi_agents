@@ -1,0 +1,6 @@
+# Local-only files for this course track
+**/.env
+**/__pycache__/
+**/*.pyc
+**/outputs/*
+!**/outputs/.gitkeep
