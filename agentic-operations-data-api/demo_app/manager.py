@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 from typing import Any
 
 from dotenv import load_dotenv
@@ -9,6 +8,7 @@ from pydantic_ai import Agent
 
 from app.store import load_case, load_knowledge, load_model_spec
 from .config import DEMO_MODELS_DIR, DEMO_RAG_CONFIG, DEMO_SKILLS_DIR
+from .llm_config import resolve_manager_model
 from .model_registry import StudentModelRegistry
 from .rag import RagIndex
 from .runtime import RuntimeDeps
@@ -54,15 +54,17 @@ def build_runtime(scenario: dict[str, Any]) -> RuntimeDeps:
     )
 
 
-def build_agent(model_name: str | None = None) -> Agent:
-    model = model_name or os.getenv("MANAGER_MODEL", "google:gemini-2.5-flash")
-    return Agent(
-        model,
-        deps_type=RuntimeDeps,
-        output_type=MonthlyOperationsPlan,
-        tools=ALL_TOOLS,
-        instructions=BASE_INSTRUCTIONS,
-    )
+def build_agent(model_id: str | None = None) -> Agent:
+    model, model_settings = resolve_manager_model(model_id)
+    kwargs = {
+        "deps_type": RuntimeDeps,
+        "output_type": MonthlyOperationsPlan,
+        "tools": ALL_TOOLS,
+        "instructions": BASE_INSTRUCTIONS,
+    }
+    if model_settings is not None:
+        kwargs["model_settings"] = model_settings
+    return Agent(model, **kwargs)
 
 
 def manager_prompt(deps: RuntimeDeps) -> str:
@@ -86,9 +88,9 @@ def manager_prompt(deps: RuntimeDeps) -> str:
     )
 
 
-async def run_manager(scenario: dict[str, Any], model_name: str | None = None):
+async def run_manager(scenario: dict[str, Any], model_id: str | None = None):
     deps = build_runtime(scenario)
-    agent = build_agent(model_name)
+    agent = build_agent(model_id)
     result = await agent.run(manager_prompt(deps), deps=deps)
     plan = result.output
     plan.team_id = TEAM_ID
