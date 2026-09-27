@@ -170,11 +170,7 @@ Run the A2A server:
 python 03_a2a_distributed_agents.py
 ```
 
-or:
-
-```bash
-uvicorn 03_a2a_distributed_agents:app --port 8001
-```
+The script starts the local ASGI server on port 8001 when executed directly.
 
 The example converts a normal Pydantic AI agent into an A2A-compatible ASGI application using FastA2A.
 
