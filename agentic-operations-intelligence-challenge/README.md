@@ -114,3 +114,45 @@ The final hidden evaluator, hidden scenarios, seeds, final holdouts and benchmar
 
 Also note: a branch in a public GitHub repository is itself public. For real team-data isolation, deploy the Data API from a private repository/deployment artifact even if this branch remains the development source.
 
+
+
+## Manager LLM providers
+
+The Manager is provider-independent through Pydantic AI. The UI can select one of four providers for each run:
+
+- `google` — Google Gemini
+- `openai` — OpenAI / ChatGPT models through the OpenAI API
+- `anthropic` — Anthropic Claude
+- `deepseek` — DeepSeek
+
+Configure only the providers you want to use in `.env`:
+
+```text
+MANAGER_PROVIDER=google
+
+GOOGLE_MANAGER_MODEL=google:gemini-2.5-flash
+GOOGLE_API_KEY=...
+
+OPENAI_MANAGER_MODEL=openai:gpt-5.6-sol
+OPENAI_API_KEY=...
+
+ANTHROPIC_MANAGER_MODEL=anthropic:claude-sonnet-4-6
+ANTHROPIC_API_KEY=...
+
+DEEPSEEK_MANAGER_MODEL=deepseek:deepseek-v4-flash
+DEEPSEEK_API_KEY=...
+```
+
+`MANAGER_PROVIDER` controls the default selection. The browser can still choose any configured provider for an individual evaluation.
+
+`MANAGER_MODEL` remains supported as a legacy explicit model-string override when no provider is selected by the request.
+
+For DeepSeek V4 the runtime disables thinking mode for the Manager because the challenge depends on reliable tool use and structured Pydantic output.
+
+API:
+
+```text
+GET /api/manager-models
+```
+
+returns the available provider/model choices and whether the required API-key environment variable is configured. It never returns the key value itself.
