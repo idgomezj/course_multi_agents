@@ -1,0 +1,23 @@
+PROJECT: Local Teaching Agent System
+
+Constraints:
+- The only required external runtime service is one configured LLM API.
+- Python is the application language.
+- Pydantic AI is the primary LLM/agent framework.
+- Persistent memory should use local SQLite or JSON files.
+- Retrieval knowledge should come from local files.
+- MCP examples should run locally.
+- No Redis, PostgreSQL, pgvector, hosted vector DB, hosted observability, or remote MCP server is required.
+- All model outputs that drive code should use typed Pydantic models where practical.
+- Tools must be explicit and allowlisted.
+- The system should be understandable in a classroom in a few days.
+
+Desired concepts:
+- specialist agents
+- parallel execution
+- programmatic handoff
+- supervisor synthesis
+- validation/critic role
+- shared typed state
+- local persistence
+- optional local API
