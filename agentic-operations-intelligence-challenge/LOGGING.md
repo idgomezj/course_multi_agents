@@ -26,6 +26,9 @@ The logs cover:
 
 Every log record contains:
 
+- `file` — source Python filename that emitted the record;
+- `line` — source line number;
+- `function` — source function name;
 - `trace_id` — one end-to-end request/run;
 - `span_id` — the current operation context;
 - `event` — stable event name;
@@ -89,6 +92,8 @@ LOG_FORMAT=text
 
 for compact terminal-readable lines.
 
+Text logs include the source location as `[filename.py:line:function]`, for example `[tools.py:214:forecast_pytorch]`. JSON logs expose the same information as separate `file`, `line`, and `function` fields.
+
 ### LOG_PAYLOADS
 
 `true` logs sanitized inputs/outputs for tools, RAG, model inference, etc.
@@ -120,6 +125,10 @@ Rotation defaults to 10 MB per file with five backups.
   "timestamp": "2026-09-27T20:00:00+00:00",
   "level": "INFO",
   "service": "agentic-operations-challenge",
+  "logger": "agentic-operations-challenge",
+  "file": "tools.py",
+  "line": 214,
+  "function": "forecast_pytorch",
   "trace_id": "7fd...",
   "span_id": "41b...",
   "event": "tool.completed",
