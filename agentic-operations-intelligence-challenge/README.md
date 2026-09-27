@@ -156,3 +156,16 @@ GET /api/manager-models
 ```
 
 returns the available provider/model choices and whether the required API-key environment variable is configured. It never returns the key value itself.
+
+
+## Evaluation and scoring
+
+The score cards are intentionally separated into:
+
+- **Operational** — feasibility, service, and realized cost;
+- **RAG** — retrieval of expected organizational evidence;
+- **Skills / Tools** — procedural Skill usage, expected operational-tool coverage, cost/validation discipline, and tool-call efficiency.
+
+The runtime API now returns an `evaluation_breakdown` object showing exactly how each score was produced. The UI displays this breakdown below the headline score cards.
+
+The full formula, penalties, examples, and the distinction between runtime evaluation and final academic grading are documented in [EVALUATION.md](./EVALUATION.md).
