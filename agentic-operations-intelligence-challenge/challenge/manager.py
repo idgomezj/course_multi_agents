@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import os
 import logging
 from time import perf_counter
 from typing import Any
 
 from dotenv import load_dotenv
 from pydantic_ai import Agent
+from pydantic_ai.usage import UsageLimits
 
 from .config import student_path
 from .data_api import get_data_client
@@ -22,6 +24,19 @@ from .tools import ALL_TOOLS
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+
+def _manager_request_limit() -> int:
+    raw = os.getenv("MANAGER_REQUEST_LIMIT", "75").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        value = 75
+    # Keep a finite guardrail: enough room for a complex tool-using run without
+    # allowing an accidental unbounded agent loop.
+    return max(10, min(value, 150))
+
+
 
 
 BASE_INSTRUCTIONS = """
@@ -133,7 +148,17 @@ async def run_manager(
             prompt=prompt,
             visible_information=scenario.get("visible", {}),
         )
-        result = await agent.run(prompt, deps=deps)
+        request_limit = _manager_request_limit()
+        log_event(
+            logger,
+            "manager.usage_limits",
+            request_limit=request_limit,
+        )
+        result = await agent.run(
+            prompt,
+            deps=deps,
+            usage_limits=UsageLimits(request_limit=request_limit),
+        )
         plan = result.output
         plan.team_id = team_id
         plan.scenario_id = scenario["id"]
