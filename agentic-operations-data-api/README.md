@@ -158,3 +158,68 @@ Because this GitHub repository/branch is currently public, these demo tokens are
 Case 0 lives on this service branch. It does not need `main` to run the demo.
 
 Teams 1–5 remain the graded cases. Hidden final scenarios, final PyTorch holdouts, hidden RAG queries, benchmark/oracle data and final-evaluator credentials must remain private.
+
+
+## Choose Gemini, OpenAI/ChatGPT, Claude, or DeepSeek
+
+The Case 0 demo is no longer tied to a single LLM provider. The browser at `/demo` has a **Manager LLM** selector.
+
+Supported provider ids:
+
+```text
+google
+openai
+anthropic
+deepseek
+```
+
+Configure the providers you want in `.env`:
+
+```text
+MANAGER_PROVIDER=google
+
+GOOGLE_MANAGER_MODEL=google:gemini-2.5-flash
+GOOGLE_API_KEY=...
+
+OPENAI_MANAGER_MODEL=openai:gpt-5.6-sol
+OPENAI_API_KEY=...
+
+ANTHROPIC_MANAGER_MODEL=anthropic:claude-sonnet-4-6
+ANTHROPIC_API_KEY=...
+
+DEEPSEEK_MANAGER_MODEL=deepseek:deepseek-v4-flash
+DEEPSEEK_API_KEY=...
+```
+
+Then restart:
+
+```bash
+python run.py
+```
+
+Open:
+
+```text
+http://localhost:8100/demo
+```
+
+Choose the provider from **Manager LLM** and run the same Case 0 scenario. This makes it possible to compare the exact same tools, RAG, Skills, PyTorch models and evaluator while changing only the LLM Manager.
+
+The API also exposes:
+
+```text
+GET /demo/api/manager-models
+```
+
+which returns provider/model names plus a boolean showing whether the required key is configured. API-key values are never returned.
+
+You can also call a provider directly:
+
+```bash
+curl -X POST "http://localhost:8100/demo/api/run/T0-P01?model_id=openai"
+curl -X POST "http://localhost:8100/demo/api/run/T0-P01?model_id=anthropic"
+curl -X POST "http://localhost:8100/demo/api/run/T0-P01?model_id=deepseek"
+curl -X POST "http://localhost:8100/demo/api/run/T0-P01?model_id=google"
+```
+
+For DeepSeek V4, thinking mode is disabled for the Manager because this demo relies on reliable function-tool use and structured Pydantic output.
