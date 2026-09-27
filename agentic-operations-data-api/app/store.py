@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from copy import deepcopy
 from functools import lru_cache
 from pathlib import Path
@@ -9,6 +10,9 @@ from typing import Any
 import yaml
 
 from .config import DATA_DIR
+from .observability import log_event
+
+logger = logging.getLogger(__name__)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -28,7 +32,9 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 
 @lru_cache
 def available_teams() -> tuple[str, ...]:
-    return tuple(sorted(p.stem for p in (DATA_DIR / "teams").glob("team_*.yaml")))
+    teams = tuple(sorted(p.stem for p in (DATA_DIR / "teams").glob("team_*.yaml")))
+    log_event(logger, "store.teams.discovered", level=logging.DEBUG, teams=teams)
+    return teams
 
 
 @lru_cache
@@ -40,6 +46,7 @@ def load_case(team_id: str) -> dict[str, Any]:
         _load_yaml(DATA_DIR / "teams" / f"{team_id}.yaml"),
     )
     merged["team_id"] = team_id
+    log_event(logger, "store.case.loaded", team_id=team_id, product_count=len(merged.get("products", {})), material_count=len(merged.get("materials", {})), supplier_count=len(merged.get("suppliers", {})), line_count=len(merged.get("lines", {})))
     return merged
 
 
@@ -48,7 +55,9 @@ def load_model_spec(team_id: str) -> dict[str, Any]:
     if team_id not in available_teams():
         raise KeyError(team_id)
     path = DATA_DIR / "teams" / team_id / "model_spec.json"
-    return json.loads(path.read_text(encoding="utf-8"))
+    spec = json.loads(path.read_text(encoding="utf-8"))
+    log_event(logger, "store.model_spec.loaded", team_id=team_id, path=str(path), model_keys=sorted(spec.get("models", {})))
+    return spec
 
 
 @lru_cache
@@ -65,6 +74,7 @@ def load_knowledge(team_id: str) -> tuple[dict[str, str], ...]:
             {"name": p.name, "content": p.read_text(encoding="utf-8")}
             for p in sorted(root.glob("*.md"))
         )
+    log_event(logger, "store.knowledge.loaded", team_id=team_id, document_count=len(documents), sources=[x["name"] for x in documents])
     return tuple(documents)
 
 
@@ -95,6 +105,7 @@ def reference_solution(team_id: str) -> dict[str, Any]:
         raise KeyError(f"Case 0 reference plan is missing: {path}")
 
     plan = json.loads(path.read_text(encoding="utf-8"))
+    log_event(logger, "store.reference_solution.loaded", team_id=team_id, path=str(path), scenario_id=plan.get("scenario_id"))
     scenario = public_scenario(team_id, plan["scenario_id"])
     return {
         "scenario_id": plan["scenario_id"],
