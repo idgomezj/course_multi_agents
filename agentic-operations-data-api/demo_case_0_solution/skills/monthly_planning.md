@@ -72,9 +72,18 @@ A faster or more reliable supplier may be more expensive.
 
 Choose the lowest-cost supplier that can satisfy the required receipt date and acceptable risk. Pay a reliability/expedite premium only when it prevents a larger expected operational cost such as stockout, line stop, lost sales, or service failure.
 
-## 6. Mandatory cost-improvement loop
+## 6. Bounded cost-improvement loop
 
-Do not finalize the first feasible candidate.
+Do not finalize the first feasible candidate, but keep the optimization bounded so the Manager can finish the run.
+
+**Candidate budget:**
+- Evaluate at most two candidates when candidate A is feasible.
+- A third candidate is allowed only if both A and B are infeasible and one targeted correction is necessary.
+- For each candidate, call `calculate_plan_cost` at most once and `validate_plan` at most once.
+- Reuse earlier inventory, open-PO, RAG, model, BOM, and supplier results instead of calling the same tool again with identical inputs.
+- Once two feasible candidates have been compared, choose the cheaper one and return the final plan. Do not keep searching for marginal improvements.
+
+Start with candidate A.
 
 For candidate A:
 
@@ -96,7 +105,7 @@ Then call `calculate_plan_cost` and `validate_plan` for candidate B.
 
 Choose the **lowest `estimated_realized_cost` candidate that remains feasible and meets the service target**. If a cheaper candidate fails feasibility/service, revert the specific change that caused the failure rather than returning to a broadly over-buffered plan.
 
-Repeated tool calls with different candidate inputs are legitimate optimization. Avoid only exact duplicate calls that add no new information.
+Repeated cost/validation calls are allowed only for genuinely different candidates within the candidate budget above. Avoid exact duplicate calls and avoid reopening evidence that has already been retrieved unless the inputs changed.
 
 ## 7. Final pre-submission checks
 
