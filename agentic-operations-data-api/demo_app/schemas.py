@@ -41,6 +41,8 @@ class ToolTraceEntry(BaseModel):
     tool: str
     inputs: dict[str, Any]
     output: Any
+    trace_id: str | None = None
+    span_id: str | None = None
 
 
 class ConstraintViolation(BaseModel):
