@@ -3,9 +3,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+import logging
+
 import yaml
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
+from .observability import log_event
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -29,6 +35,15 @@ class RagIndex:
             sublinear_tf=True,
         )
         self.matrix = self.vectorizer.fit_transform([c.text for c in self.chunks]) if self.chunks else None
+        log_event(
+            logger,
+            "rag.index.ready",
+            config_path=str(self.config_path),
+            document_count=len(self.documents),
+            sources=[d.get("name") for d in self.documents],
+            chunk_count=len(self.chunks),
+            config=self.config,
+        )
 
     def _load_config(self) -> dict:
         if not self.config_path.exists():
@@ -62,6 +77,7 @@ class RagIndex:
 
     def search(self, query: str, top_k: int | None = None) -> list[dict]:
         if not self.chunks or self.matrix is None:
+            log_event(logger, "rag.search.empty_index", query=query, requested_top_k=top_k)
             return []
         k = top_k or int(self.config.get("top_k", 4))
         min_score = float(self.config.get("min_score", 0.04))
@@ -81,4 +97,17 @@ class RagIndex:
             })
             if len(results) >= k:
                 break
+        log_event(
+            logger,
+            "rag.search.completed",
+            query=query,
+            requested_top_k=top_k,
+            effective_top_k=k,
+            min_score=min_score,
+            result_count=len(results),
+            hits=[
+                {"source": x["source"], "chunk_id": x["chunk_id"], "score": x["score"]}
+                for x in results
+            ],
+        )
         return results
