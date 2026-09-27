@@ -9,8 +9,11 @@
     * { box-sizing:border-box; }
     body { margin:0; font-family:Inter,Arial,sans-serif; background:var(--bg); color:var(--ink); }
     header { background:var(--olive); color:white; padding:28px 34px; }
+    .header-row { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
     header h1 { margin:0 0 6px; font-size:28px; }
     header p { margin:0; color:#dce4cf; }
+    .help-button { background:transparent; color:white; border:1px solid rgba(255,255,255,.35); white-space:nowrap; }
+    .help-button:hover { background:rgba(255,255,255,.08); }
     main { max-width:1200px; margin:24px auto; padding:0 20px 50px; }
     .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; }
     .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; }
@@ -30,13 +33,32 @@
     .ok { color:#375c15; font-weight:800; }
     .bad { color:#a33; font-weight:800; }
     #status { font-size:13px; color:var(--muted); }
-    @media (max-width:800px) { .metric,.wide { grid-column:span 12; } label { min-width:100%; } }
+    dialog.help-dialog { width:min(920px,calc(100vw - 32px)); max-height:88vh; border:0; border-radius:20px; padding:0; box-shadow:0 24px 80px rgba(0,0,0,.28); color:var(--ink); }
+    dialog.help-dialog::backdrop { background:rgba(15,20,10,.64); backdrop-filter:blur(3px); }
+    .help-shell { padding:24px; overflow:auto; max-height:88vh; }
+    .help-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+    .help-head h2 { margin:0 0 6px; }
+    .help-head p { margin:0; color:var(--muted); }
+    .help-close { background:white; border-color:var(--line); min-width:44px; }
+    .help-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:18px; }
+    .help-card { border:1px solid var(--line); border-radius:14px; padding:15px; background:#fbfcf8; }
+    .help-card h3 { margin:0 0 8px; font-size:15px; }
+    .help-card p { margin:0 0 8px; color:#4f584b; font-size:13px; line-height:1.55; }
+    .help-card ul,.help-card ol { margin:8px 0 0 20px; padding:0; color:#4f584b; font-size:13px; line-height:1.55; }
+    .help-card code { background:#eef2e8; padding:2px 5px; border-radius:5px; }
+    .help-full { grid-column:1 / -1; }
+    @media (max-width:800px) { .metric,.wide { grid-column:span 12; } label { min-width:100%; } .header-row{flex-direction:column}.help-grid{grid-template-columns:1fr}.help-full{grid-column:auto} }
   </style>
 </head>
 <body>
 <header>
-  <h1>Agentic Operations Intelligence Challenge</h1>
-  <p>Train PyTorch specialists · Improve RAG · Design Skills · Minimize operational cost</p>
+  <div class="header-row">
+    <div>
+      <h1>Agentic Operations Intelligence Challenge</h1>
+      <p>Train PyTorch specialists · Improve RAG · Design Skills · Minimize operational cost</p>
+    </div>
+    <button id="helpOpen" class="help-button" type="button" aria-haspopup="dialog">Help / How to use</button>
+  </div>
 </header>
 <main>
   <div class="grid">
@@ -61,6 +83,96 @@
     <section class="card full"><h3>Structured monthly plan</h3><pre id="plan">—</pre></section>
   </div>
 </main>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpTitle">
+  <div class="help-shell">
+    <div class="help-head">
+      <div>
+        <h2 id="helpTitle">How to use, test, and review the challenge frontend</h2>
+        <p>This guide explains every control, what the evaluation button runs, what the results mean, and a recommended testing workflow.</p>
+      </div>
+      <button id="helpClose" class="help-close" type="button" aria-label="Close help">✕</button>
+    </div>
+
+    <div class="help-grid">
+      <section class="help-card">
+        <h3>1. Team / case dropdown</h3>
+        <p>Select the team whose public business case you want to test. The available teams come from the backend. Changing the team reloads that team's public scenarios.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>2. Public scenario dropdown</h3>
+        <p>Select the development scenario to evaluate. Each scenario changes the visible operating conditions, so the agent should solve the selected scenario instead of reusing one fixed plan.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>3. Run public evaluation button</h3>
+        <p>Runs the full public evaluation for the selected team and scenario:</p>
+        <p><code>Manager → Skills → RAG → PyTorch → Tools → Plan → Simulator → Evaluator</code></p>
+        <p>This is for development and review. It is not the hidden final evaluation.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>4. Score cards</h3>
+        <ul>
+          <li><b>Operational</b>: overall public business-result score.</li>
+          <li><b>Feasibility</b>: whether hard operating constraints were respected.</li>
+          <li><b>Service</b>: realized service against the scenario target.</li>
+          <li><b>Cost</b>: cost performance relative to the public benchmark.</li>
+          <li><b>RAG</b>: whether expected evidence was retrieved.</li>
+          <li><b>Skills / Tools</b>: whether the intended skills and operational tools were actually used.</li>
+        </ul>
+      </section>
+
+      <section class="help-card">
+        <h3>5. Scenario result and violations</h3>
+        <p><b>Scenario result</b> shows realized cost, benchmark cost, and cost gap. <b>Constraint violations</b> shows simulator findings that explain why a plan is feasible or infeasible.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>6. Agent trace</h3>
+        <p>Review tool calls in order, including inputs and outputs. Confirm the agent really used the expected architecture rather than only producing a plausible final answer.</p>
+        <ul>
+          <li>Check that relevant Skills and RAG evidence were used.</li>
+          <li>Check PyTorch/model calls and operational data lookups.</li>
+          <li>Check cost and validation steps before the final plan.</li>
+        </ul>
+      </section>
+
+      <section class="help-card">
+        <h3>7. Structured monthly plan</h3>
+        <p>This is the final structured plan produced by the Manager. Review orders, actions, assumptions, and explanations together with the score cards and trace.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>8. How to test changes</h3>
+        <p>Change only one component at a time—model, RAG, Skill, prompt, or tool behavior—then rerun the same scenario. After that, repeat on multiple scenarios to make sure the improvement generalizes.</p>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>9. Recommended review workflow</h3>
+        <ol>
+          <li>Select the team and one public scenario.</li>
+          <li>Run the public evaluation.</li>
+          <li>Check feasibility and service first.</li>
+          <li>Review realized cost, benchmark, and cost gap.</li>
+          <li>Review RAG and Skills/Tools scores.</li>
+          <li>Inspect the Agent trace from first call to last call.</li>
+          <li>Inspect the final structured plan.</li>
+          <li>Modify one component and rerun the same scenario.</li>
+          <li>Repeat across several scenarios before deciding the change is better.</li>
+        </ol>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>10. Logs and deeper debugging</h3>
+        <p>The frontend summarizes the run; server logs show the internal execution. Use the request <code>X-Trace-Id</code> to correlate events. Every structured log now also identifies the source <code>file</code>, <code>line</code>, and <code>function</code>; text logs display <code>[filename.py:line:function]</code>.</p>
+        <p>Use those fields to jump directly from a failed event to the Python code that emitted it.</p>
+      </section>
+    </div>
+  </div>
+</dialog>
+
 <script src="/app.js"></script>
 </body>
 </html>
