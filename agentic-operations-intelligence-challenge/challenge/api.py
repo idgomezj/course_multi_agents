@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -9,6 +7,7 @@ from pydantic import BaseModel
 from .config import FRONTEND_DIR
 from .data_api import DataApiError, get_data_client
 from .evaluator import evaluate_plan
+from .llm_config import default_manager_model_id, manager_model_status
 from .manager import run_manager
 from .scenarios import get_public_scenario, list_public_scenarios, student_visible_scenario
 from .training_data import generate_training_frame
@@ -19,6 +18,7 @@ app = FastAPI(title="Agentic Operations Intelligence Challenge", version="0.2.0"
 class EvaluateRequest(BaseModel):
     team_id: str
     scenario_id: str
+    model_id: str | None = None
 
 
 @app.get("/")
@@ -39,8 +39,17 @@ def health():
         data_api = {"status": "error", "detail": str(exc)}
     return {
         "status": "ok",
-        "manager_model": os.getenv("MANAGER_MODEL", "google:gemini-3.7-flash"),
+        "manager_model_id": default_manager_model_id(),
+        "manager_models": manager_model_status(),
         "data_api": data_api,
+    }
+
+
+@app.get("/api/manager-models")
+def manager_models():
+    return {
+        "default_model_id": default_manager_model_id(),
+        "models": manager_model_status(),
     }
 
 
@@ -73,7 +82,7 @@ def training_data(team_id: str, model_key: str, rows: int = 1000, seed: int = 42
 async def evaluate(request: EvaluateRequest):
     try:
         scenario = get_public_scenario(request.team_id, request.scenario_id)
-        plan, deps = await run_manager(request.team_id, scenario)
+        plan, deps = await run_manager(request.team_id, scenario, request.model_id)
         result = evaluate_plan(deps.case, scenario, plan, deps.trace, deps.rag_hits)
         return result.model_dump()
     except FileNotFoundError as exc:
