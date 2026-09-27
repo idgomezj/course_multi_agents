@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import math
+import logging
 import random
 
 from .store import load_model_spec
+from .observability import log_event
+
+logger = logging.getLogger(__name__)
 
 
 def _sigmoid(x: float) -> float:
@@ -89,6 +93,16 @@ def generate_training_rows(
     """Generate public training data with a distribution specific to each team case."""
     spec = load_model_spec(team_id)
     model = spec["models"][model_key]
+    log_event(
+        logger,
+        "training_data.generation.started",
+        level=logging.DEBUG,
+        team_id=team_id,
+        model_key=model_key,
+        rows=rows,
+        seed=seed,
+        task=model.get("task"),
+    )
     task = model["task"]
     rng = random.Random(seed + sum(ord(c) for c in team_id + model_key))
     data: list[dict[str, float]] = []
@@ -238,4 +252,14 @@ def generate_training_rows(
 
         data.append(row)
 
+    log_event(
+        logger,
+        "training_data.generation.completed",
+        level=logging.DEBUG,
+        team_id=team_id,
+        model_key=model_key,
+        task=task,
+        rows=len(data),
+        columns=sorted(data[0]) if data else [],
+    )
     return data
