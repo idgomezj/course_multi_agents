@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScenarioEvaluationResult",
+  "type": "object",
+  "required": ["scenario_id", "feasible", "service_level", "total_cost", "violations"],
+  "properties": {
+    "scenario_id": {"type": "string"},
+    "feasible": {"type": "boolean"},
+    "service_level": {"type": "number", "minimum": 0, "maximum": 1},
+    "total_cost": {"type": "number", "minimum": 0},
+    "benchmark_cost": {"type": ["number", "null"], "minimum": 0},
+    "cost_gap": {"type": ["number", "null"]},
+    "violations": {"type": "array", "items": {"type": "string"}},
+    "rag_score": {"type": "number", "minimum": 0, "maximum": 1},
+    "skill_tool_score": {"type": "number", "minimum": 0, "maximum": 1},
+    "operational_score": {"type": "number", "minimum": 0, "maximum": 1}
+  },
+  "additionalProperties": false
+}
