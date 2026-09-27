@@ -61,6 +61,7 @@ Use the following environment variables:
 ```text
 LOG_LEVEL=INFO
 LOG_FORMAT=text
+LOG_COLORS=true
 LOG_FILE=logs/challenge.log
 LOG_MAX_BYTES=10485760
 LOG_BACKUP_COUNT=5
@@ -78,13 +79,13 @@ LOG_MAX_COLLECTION_ITEMS=100
 
 ### LOG_FORMAT
 
-Runtime logging is intentionally fixed to human-readable text:
+Runtime logging uses a compact Uvicorn-style human-readable format:
 
 ```text
 LOG_FORMAT=text
 ```
 
-Existing local `LOG_FORMAT=json` values do not switch the runtime formatter back to JSON in this branch.
+Existing local `LOG_FORMAT=json` values do not switch the runtime formatter back to JSON in this branch. Interactive terminals color the level prefix when `LOG_COLORS=true`: DEBUG cyan, INFO green, WARNING yellow, ERROR red, and CRITICAL bold red. Rotating log files remain plain text without ANSI color codes.
 
 Text logs include the source location as `[filename.py:line:function]`, for example `[tools.py:214:forecast_pytorch]`. JSON logs expose the same information as separate `file`, `line`, and `function` fields.
 
@@ -114,11 +115,13 @@ Rotation defaults to 10 MB per file with five backups.
 
 ## Example
 
-Default text output:
+Default terminal output:
 
 ```text
-2026-09-27T20:00:00+00:00 INFO     [agentic-operations-challenge] [tools.py:214:forecast_pytorch] [trace=7fd...] [span=41b...] tool.completed {"tool":"forecast_pytorch","team_id":"team_3","scenario_id":"T3-P01"}
+INFO:     [tools.py:214:forecast_pytorch] [trace=7fd...] [span=41b...] tool.completed {"tool":"forecast_pytorch","team_id":"team_3","scenario_id":"T3-P01"}
 ```
+
+The `INFO:` prefix is green in an interactive terminal; warnings/errors use yellow/red respectively.
 
 ## Following one run
 
