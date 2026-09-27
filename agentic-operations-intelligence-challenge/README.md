@@ -169,3 +169,18 @@ The score cards are intentionally separated into:
 The runtime API now returns an `evaluation_breakdown` object showing exactly how each score was produced. The UI displays this breakdown below the headline score cards.
 
 The full formula, penalties, examples, and the distinction between runtime evaluation and final academic grading are documented in [EVALUATION.md](./EVALUATION.md).
+
+
+## Logs and observability
+
+The application now emits correlated structured logs for HTTP requests, LLM Manager runs, every tool call, Skills, RAG, PyTorch inference, Data API calls, training, simulation, and evaluation.
+
+Each request has a `trace_id`, and that trace is forwarded to the Data API using `X-Trace-Id`. Secrets/tokens are automatically redacted.
+
+Default file:
+
+```text
+logs/challenge.log
+```
+
+For the complete event catalog, configuration, examples, and trace-following instructions, see [LOGGING.md](./LOGGING.md).
