@@ -321,3 +321,30 @@ Students should be able to:
 8. explain the difference between in-process agents and distributed agent services,
 9. describe what makes an agent "deep",
 10. justify when a multi-agent design is or is not appropriate.
+
+
+## MAS Design Methodologies
+
+Review:
+
+```text
+DESIGN_METHODOLOGIES.md
+```
+
+It provides a compact treatment of:
+
+- MAS-CommonKADS,
+- GAIA,
+- MaSE,
+
+and maps their design artifacts to modern Pydantic AI implementations.
+
+## Final Project
+
+Use:
+
+```text
+FINAL_PROJECT_TEMPLATE.md
+```
+
+The project requires students to design, implement, and evaluate a complete MAS, including roles, communication, RAG/memory, coordination, control, approval boundaries, budgets, output evaluation, and trajectory evaluation.
