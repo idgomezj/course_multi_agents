@@ -67,3 +67,10 @@ Ejemplos:
 ## Qué hace este caso distinto
 
 Una solución que siempre minimiza inventario puede destruir nivel de servicio. El equipo debe aprender cuándo vale la pena pagar por buffer.
+
+## Evidencia para entrenamiento
+
+El equipo recibe `student/team_1/training/raw_case_history.csv`, un historial semanal **crudo** de demanda, promociones, precio, órdenes confirmadas, estacionalidad y eventos comerciales.
+
+No se entregan filas listas para entrenamiento ni targets calculados. El equipo debe construir ventanas temporales, derivar los features exigidos por `model_contract.json`, crear los targets de las cuatro semanas futuras y definir/documentar una medida razonable de incertidumbre usando resultados posteriores. Debe evitar leakage temporal.
+
