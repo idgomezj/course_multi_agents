@@ -63,15 +63,15 @@ Rules:
 def build_runtime(team_id: str, scenario: dict[str, Any]) -> RuntimeDeps:
     workspace = student_path(team_id)
     log_event(logger, "manager.runtime.build.started", team_id=team_id, scenario_id=scenario.get("id"), workspace=str(workspace))
-    bootstrap = get_data_client().bootstrap(team_id)
+    start_context = get_data_client().start_context(team_id)
     model_spec = load_model_spec(team_id)
     models = StudentModelRegistry(workspace / "models", model_spec)
     model_status = models.warmup()
     runtime = RuntimeDeps(
         team_id=team_id,
-        case=bootstrap["case"],
+        case=start_context["case"],
         scenario=scenario,
-        rag=RagIndex(bootstrap["knowledge"], workspace / "rag" / "config.yaml"),
+        rag=RagIndex(start_context["knowledge"], workspace / "rag" / "config.yaml"),
         skills=SkillLibrary(workspace / "skills"),
         models=models,
     )
@@ -80,7 +80,7 @@ def build_runtime(team_id: str, scenario: dict[str, Any]) -> RuntimeDeps:
         "manager.runtime.build.completed",
         team_id=team_id,
         scenario_id=scenario.get("id"),
-        knowledge_documents=len(bootstrap.get("knowledge", [])),
+        knowledge_documents=len(start_context.get("knowledge", [])),
         skill_directory=str(workspace / "skills"),
         model_keys=sorted(model_spec.get("models", {})),
         model_contract=str(workspace / "training" / "model_contract.json"),
