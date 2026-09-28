@@ -208,17 +208,18 @@ Other endpoints:
 
 `/v1/teams/{team_id}/start-context` is designed as the authoritative starting point. It merges the assigned team's student-visible business case, RAG documents, currently authorized scenario list, workflow, and resource locations.
 
-A normal request does not need to identify itself. If there is no AI signal, the caller is treated as a normal human/browser by default.
+`X-Client-Type` is the **single client-classification signal** used by this endpoint. Callers should identify themselves explicitly whenever possible.
 
-For AI detection, the service uses available request metadata in this order:
+Behavior:
 
-1. `X-Client-Type` when an integration explicitly supplies it;
-2. `X-AI-Client` when an integration explicitly supplies it;
-3. User-Agent heuristics.
+- missing or empty `X-Client-Type` → normal full context;
+- `X-Client-Type: human` → normal full context;
+- a recognized AI-related value in `X-Client-Type` → conceptual/Socratic tutor response;
+- another non-AI application/tool name → normal full context.
 
-Therefore a person can simply open or GET the endpoint with no special headers.
+The endpoint does **not** use `User-Agent` or `X-AI-Client` for classification.
 
-Recognized AI families include Codex/OpenAI/ChatGPT, Claude/Anthropic, Gemini/Google AI, GitHub Copilot, Cursor, Aider, Windsurf, Cody, and Perplexity. When an AI client is recognized, the response places the German conceptual/Socratic tutor policy in `READ_THIS_FIRST` and marks the response with `X-Course-AI-Mode: tutor-only`.
+Recognized AI-related values include Codex/OpenAI/ChatGPT/GPT, Claude/Anthropic, Gemini/Google AI, GitHub Copilot, Cursor, Aider, Windsurf, Cody, Perplexity, DeepSeek, Grok/xAI, Mistral, Llama/Ollama, and common generic AI/LLM labels. Matching is substring-based, so values such as `claude-code` or `openai-codex-cli` are also classified as AI. When AI is detected, the response places the German conceptual/Socratic tutor policy in `READ_THIS_FIRST` and marks the response with `X-Course-AI-Mode: tutor-only`.
 
 The built-in challenge application identifies itself as `challenge-runtime`, so its Operations Manager receives the operational runtime context rather than tutor-only behavior.
 
