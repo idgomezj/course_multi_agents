@@ -104,3 +104,7 @@ The backend projects the internal scenario/evaluation object to exactly those co
 ## Important deployment note
 
 If students can clone the branch containing `data/scenarios/**/hidden.json`, no HTTP token can make those files hidden. For a real hidden exam, deploy this service from an instructor-only/private repository or inject the hidden scenario directory into the server at deployment time. Give students the hidden token when you want them to access that hidden scenario set through the API, not repository access to the underlying files.
+
+## Current hidden-set status
+
+The access mechanism is operational and each graded team currently has three hidden scenario definitions (`H01`–`H03`) to exercise the flow. These are the initial hidden set, not the final 20-scenario suite described in the instructor blueprint. Their final benchmark costs still need calibration before they should be used for final cost-gap grading.
