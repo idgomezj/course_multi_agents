@@ -91,7 +91,7 @@ def detect_request_client(request: Request) -> ClientDetection:
                 signal=header_name,
             )
         return ClientDetection(
-            kind="human_or_unknown",
+            kind="human",
             name=value.strip().lower(),
             confidence="declared_unknown",
             signal=header_name,
@@ -109,8 +109,8 @@ def detect_request_client(request: Request) -> ClientDetection:
         )
 
     return ClientDetection(
-        kind="human_or_unknown",
-        name="unidentified",
-        confidence="unknown",
-        signal="none",
+        kind="human",
+        name="default_human",
+        confidence="default",
+        signal="no_ai_signal",
     )
