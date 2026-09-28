@@ -5,7 +5,7 @@ import logging
 from time import perf_counter
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -16,12 +16,14 @@ from .auth import (
     require_hidden_scenario_access,
     require_public_scenario_access,
 )
+from .client_detection import detect_request_client
 from .config import scenario_scope_config
 from .store import (
     case_without_scenarios,
     load_case,
     load_knowledge,
     load_model_spec,
+    load_start_context_config,
     load_training_source,
     public_scenario,
     public_scenarios,
@@ -49,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Agentic Operations Challenge Data API + Case 0 Demo",
-    version="1.4.0",
+    version="1.5.0",
     description="Team-scoped data service plus a self-contained fully solved Case 0 end-to-end demonstration.",
 )
 
@@ -96,7 +98,7 @@ async def request_logging_middleware(request: Request, call_next):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "agentic-operations-data-api", "version": "1.4.0"}
+    return {"status": "ok", "service": "agentic-operations-data-api", "version": "1.5.0"}
 
 
 class ScenarioEvaluationRequest(BaseModel):
@@ -159,6 +161,90 @@ def teams(team_ids: list[str] = Depends(authorized_teams)):
             "objective": case["objective"],
         })
     return out
+
+
+@app.get("/v1/teams/{team_id}/start-context")
+def start_context(
+    team_id: str,
+    request: Request,
+    response: Response,
+    scope: str | None = Query(default=None),
+    access_scope: str = Depends(authorize_scenario_access),
+):
+    """Canonical first endpoint for a team's activity.
+
+    It returns the complete student-visible case context and detects known AI
+    clients so the course tutor policy can be surfaced before any model/problem
+    work. Client detection is best-effort because HTTP headers can be spoofed.
+    """
+    effective_scope = _resolve_scenario_scope(access_scope, scope)
+    client = detect_request_client(request)
+    config = load_start_context_config()
+
+    if client.kind == "ai":
+        read_first = config["ai_client_policy_de"]
+        instruction_class = "conceptual_socratic_tutor"
+        response.headers["X-Course-AI-Mode"] = "tutor-only"
+    elif client.kind == "application":
+        read_first = config.get("application_message", config["purpose"])
+        instruction_class = "runtime_case_context"
+        response.headers["X-Course-AI-Mode"] = "runtime"
+    else:
+        read_first = config.get("human_message", config["purpose"])
+        instruction_class = "canonical_case_context"
+        response.headers["X-Course-AI-Mode"] = "human-or-unknown"
+
+    response.headers["X-Course-Context"] = "canonical-start-context"
+
+    scenarios = [
+        scenario_shared_view(team_id, effective_scope, item, detail=False)
+        for item in scenarios_for_scope(team_id, effective_scope)
+    ]
+
+    resources = {
+        "start_context": f"/v1/teams/{team_id}/start-context",
+        "case": f"/v1/teams/{team_id}/case",
+        "knowledge": f"/v1/teams/{team_id}/knowledge",
+        "training_source": (
+            None
+            if team_id == "team_0"
+            else f"/v1/teams/{team_id}/training-source.json"
+        ),
+        "scenario_list": f"/v1/teams/{team_id}/scenarios",
+        "scenario_detail_template": f"/v1/teams/{team_id}/scenarios/{{scenario_id}}",
+        "scenario_evaluation_template": f"/v1/teams/{team_id}/scenarios/{{scenario_id}}/evaluate",
+        "local_model_contract": f"student/{team_id}/training/model_contract.json",
+        "local_training_brief": f"student/{team_id}/training/CASE_TRAINING.md",
+    }
+
+    log_event(
+        logger,
+        "start_context.requested",
+        team_id=team_id,
+        scenario_scope=effective_scope,
+        client_kind=client.kind,
+        client_name=client.name,
+        client_confidence=client.confidence,
+    )
+
+    return {
+        "READ_THIS_FIRST": read_first,
+        "instruction_class": instruction_class,
+        "canonical": True,
+        "context_version": config.get("version"),
+        "purpose": config.get("purpose"),
+        "client_detection": client.as_dict(),
+        "team_id": team_id,
+        "scenario_scope": effective_scope,
+        "case": case_without_scenarios(team_id),
+        "knowledge": list(load_knowledge(team_id)),
+        "authorized_scenarios": scenarios,
+        "resources": resources,
+        "student_workflow": config.get("student_workflow", []),
+        "student_editable": config.get("student_editable", []),
+        "student_read_only": config.get("student_read_only", []),
+        "important_rules": config.get("important_rules", []),
+    }
 
 
 @app.get("/v1/teams/{team_id}/bootstrap")
