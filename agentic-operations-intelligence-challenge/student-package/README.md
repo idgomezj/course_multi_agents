@@ -12,6 +12,8 @@ Su equipo debe enseñar al sistema cómo operar su caso mediante:
 
 ## El entrenamiento también es parte del reto
 
+**Case 0 is the instructor validation exception:** its two datasets are clean, deterministic and ready to train so the platform logic can be validated end-to-end. Teams 1–5 do not receive that shortcut.
+
 No existe un endpoint que entregue un dataset supervisado listo.
 
 Cada equipo recibe dentro de su paquete:
