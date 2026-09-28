@@ -65,6 +65,7 @@
     <section class="card controls">
       <label>Team / case<select id="team"></select></label>
       <label>Public scenario<select id="scenario"></select></label>
+      <label>Manager LLM<select id="managerModel"></select></label>
       <button id="run">Run public evaluation</button>
       <span id="status">Ready.</span>
     </section>
@@ -77,6 +78,10 @@
     <section class="card wide"><h3>Scenario result</h3><div id="summary">Run a public scenario to see the evaluation.</div></section>
     <section class="card wide"><h3>Constraint violations</h3><div id="violations">—</div></section>
     <section class="card full">
+      <h3>Evaluation breakdown</h3>
+      <div id="evaluation-breakdown">Run a public scenario to see exactly how each score is calculated.</div>
+    </section>
+    <section class="card full">
       <h3>Agent trace</h3>
       <table><thead><tr><th>#</th><th>Tool</th><th>Inputs</th><th>Output</th></tr></thead><tbody id="trace"></tbody></table>
     </section>
@@ -88,8 +93,8 @@
   <div class="help-shell">
     <div class="help-head">
       <div>
-        <h2 id="helpTitle">How to use, test, and review the challenge frontend</h2>
-        <p>This guide explains every control, what the evaluation button runs, what the results mean, and a recommended testing workflow.</p>
+        <h2 id="helpTitle">How to use and review the challenge frontend</h2>
+        <p>This guide explains what each control shows, what the evaluation button does, and how to review a run.</p>
       </div>
       <button id="helpClose" class="help-close" type="button" aria-label="Close help">✕</button>
     </div>
@@ -97,77 +102,95 @@
     <div class="help-grid">
       <section class="help-card">
         <h3>1. Team / case dropdown</h3>
-        <p>Select the team whose public business case you want to test. The available teams come from the backend. Changing the team reloads that team's public scenarios.</p>
+        <p>Select the team whose business case you want to evaluate. The list comes from the Data API and only shows teams allowed by the configured token.</p>
+        <p>Changing the team automatically reloads that team's public scenarios.</p>
       </section>
 
       <section class="help-card">
         <h3>2. Public scenario dropdown</h3>
-        <p>Select the development scenario to evaluate. Each scenario changes the visible operating conditions, so the agent should solve the selected scenario instead of reusing one fixed plan.</p>
+        <p>Select the development scenario to test. Each scenario changes visible business conditions such as demand, supplier risk, capacity, or other operating signals.</p>
+        <p>The Manager must solve the selected scenario; it should not assume every scenario needs the same plan.</p>
       </section>
 
       <section class="help-card">
-        <h3>3. Run public evaluation button</h3>
-        <p>Runs the full public evaluation for the selected team and scenario:</p>
+        <h3>3. Manager LLM dropdown</h3>
+        <p>Select the foundation model used only for the Manager/orchestrator. The rest of the system stays the same: PyTorch models, RAG, Skills, tools, simulator, and evaluator.</p>
+        <ul>
+          <li><b>ready</b>: the required API key is configured.</li>
+          <li><b>API key missing</b>: that provider cannot run until its key is configured.</li>
+        </ul>
+      </section>
+
+      <section class="help-card">
+        <h3>4. Run public evaluation</h3>
+        <p>Runs the full agentic pipeline for the selected team, scenario, and LLM:</p>
         <p><code>Manager → Skills → RAG → PyTorch → Tools → Plan → Simulator → Evaluator</code></p>
-        <p>This is for development and review. It is not the hidden final evaluation.</p>
-      </section>
-
-      <section class="help-card">
-        <h3>4. Score cards</h3>
-        <ul>
-          <li><b>Operational</b>: overall public business-result score.</li>
-          <li><b>Feasibility</b>: whether hard operating constraints were respected.</li>
-          <li><b>Service</b>: realized service against the scenario target.</li>
-          <li><b>Cost</b>: cost performance relative to the public benchmark.</li>
-          <li><b>RAG</b>: whether expected evidence was retrieved.</li>
-          <li><b>Skills / Tools</b>: whether the intended skills and operational tools were actually used.</li>
-        </ul>
-      </section>
-
-      <section class="help-card">
-        <h3>5. Scenario result and violations</h3>
-        <p><b>Scenario result</b> shows realized cost, benchmark cost, and cost gap. <b>Constraint violations</b> shows simulator findings that explain why a plan is feasible or infeasible.</p>
-      </section>
-
-      <section class="help-card">
-        <h3>6. Agent trace</h3>
-        <p>Review tool calls in order, including inputs and outputs. Confirm the agent really used the expected architecture rather than only producing a plausible final answer.</p>
-        <ul>
-          <li>Check that relevant Skills and RAG evidence were used.</li>
-          <li>Check PyTorch/model calls and operational data lookups.</li>
-          <li>Check cost and validation steps before the final plan.</li>
-        </ul>
-      </section>
-
-      <section class="help-card">
-        <h3>7. Structured monthly plan</h3>
-        <p>This is the final structured plan produced by the Manager. Review orders, actions, assumptions, and explanations together with the score cards and trace.</p>
-      </section>
-
-      <section class="help-card">
-        <h3>8. How to test changes</h3>
-        <p>Change only one component at a time—model, RAG, Skill, prompt, or tool behavior—then rerun the same scenario. After that, repeat on multiple scenarios to make sure the improvement generalizes.</p>
+        <p>This is a development test. It is not the hidden final course evaluation.</p>
       </section>
 
       <section class="help-card help-full">
-        <h3>9. Recommended review workflow</h3>
+        <h3>5. What the score cards mean</h3>
+        <ul>
+          <li><b>Operational</b>: business result. For feasible plans it combines 35% feasibility, 25% service, and 40% cost. A critical feasibility violation gates Operational to 0.</li>
+          <li><b>Feasibility</b>: whether the submitted plan respects hard operating constraints.</li>
+          <li><b>Service</b>: realized service compared with the case service-level target.</li>
+          <li><b>Cost</b>: cost score relative to the public benchmark for the scenario.</li>
+          <li><b>RAG</b>: whether the agent retrieved the expected organizational evidence.</li>
+          <li><b>Skills / Tools</b>: whether the agent used Skills, expected operational tools, cost/validation discipline, and an efficient tool workflow.</li>
+        </ul>
+      </section>
+
+      <section class="help-card">
+        <h3>6. Scenario result and violations</h3>
+        <p><b>Scenario result</b> shows realized cost, benchmark cost, and percentage cost gap.</p>
+        <p><b>Constraint violations</b> shows hard or soft simulator findings. Critical violations make the plan infeasible.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>7. Evaluation breakdown</h3>
+        <p>Use this section to understand <i>why</i> a score was assigned. It shows the Operational formula, RAG source coverage, loaded Skills/tool coverage, cost/validation use, efficiency penalties, and missing expected tools.</p>
+      </section>
+
+      <section class="help-card">
+        <h3>8. Agent trace</h3>
+        <p>Review each tool call in order, including its inputs and outputs. Use the trace to answer questions such as:</p>
+        <ul>
+          <li>Did the agent load a relevant Skill?</li>
+          <li>Did it retrieve the right RAG evidence?</li>
+          <li>Did it use the PyTorch model?</li>
+          <li>Did it inspect inventory/open POs?</li>
+          <li>Did it calculate cost and validate the plan?</li>
+        </ul>
+      </section>
+
+      <section class="help-card">
+        <h3>9. Structured monthly plan</h3>
+        <p>This is the final Pydantic-validated plan produced by the Manager. Review production orders, purchase orders, actions, assumptions, and explanation.</p>
+        <p>A plan can be feasible but still economically poor, so compare it with the cost score and trace.</p>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>10. Recommended testing workflow</h3>
         <ol>
-          <li>Select the team and one public scenario.</li>
+          <li>Select the assigned team.</li>
+          <li>Select one public scenario.</li>
+          <li>Select a configured Manager LLM.</li>
           <li>Run the public evaluation.</li>
           <li>Check feasibility and service first.</li>
-          <li>Review realized cost, benchmark, and cost gap.</li>
-          <li>Review RAG and Skills/Tools scores.</li>
-          <li>Inspect the Agent trace from first call to last call.</li>
+          <li>Review cost and cost gap.</li>
+          <li>Review RAG and Skills/Tools diagnostics.</li>
+          <li>Inspect the Agent trace to confirm the architecture was actually used.</li>
           <li>Inspect the final structured plan.</li>
-          <li>Modify one component and rerun the same scenario.</li>
-          <li>Repeat across several scenarios before deciding the change is better.</li>
+          <li>Change one component at a time (PyTorch, RAG, Skills, or LLM) and rerun so the effect is measurable.</li>
+          <li>Repeat across multiple scenarios; do not optimize only for one scenario.</li>
         </ol>
       </section>
 
       <section class="help-card help-full">
-        <h3>10. Logs and deeper debugging</h3>
-        <p>The frontend summarizes the run; server logs show the internal execution. Use the request <code>X-Trace-Id</code> to correlate events. Every structured log now also identifies the source <code>file</code>, <code>line</code>, and <code>function</code>; text logs display <code>[filename.py:line:function]</code>.</p>
-        <p>Use those fields to jump directly from a failed event to the Python code that emitted it.</p>
+        <h3>11. Logs and deeper debugging</h3>
+        <p>The frontend summarizes the run; the server logs explain what happened internally. Each request receives an <code>X-Trace-Id</code>. Use that trace ID to correlate Manager, tool, RAG, model, Data API, simulator, and evaluator events in the logs.</p>
+        <p>Each structured log includes the source <code>file</code>, <code>line</code>, and <code>function</code>. Text logs show <code>[filename.py:line:function]</code>, so you can jump directly from a runtime event to the code that emitted it.</p>
+        <p>See <code>LOGGING.md</code> for observability details and <code>EVALUATION.md</code> for the exact scoring rules.</p>
       </section>
     </div>
   </div>

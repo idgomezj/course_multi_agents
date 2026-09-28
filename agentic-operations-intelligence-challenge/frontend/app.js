@@ -1,5 +1,6 @@
 const team = document.querySelector('#team');
 const scenario = document.querySelector('#scenario');
+const managerModel = document.querySelector('#managerModel');
 const run = document.querySelector('#run');
 const statusEl = document.querySelector('#status');
 const helpDialog = document.querySelector('#helpDialog');
@@ -11,6 +12,15 @@ async function json(url, options) {
   const data = await r.json();
   if (!r.ok) throw new Error(data.detail || JSON.stringify(data));
   return data;
+}
+
+async function loadManagerModels() {
+  const payload = await json('/api/manager-models');
+  managerModel.innerHTML = payload.models.map(function(x) {
+    const state = x.configured ? 'ready' : 'API key missing';
+    return '<option value="' + x.id + '">' + x.label + ' — ' + x.model + ' (' + state + ')</option>';
+  }).join('');
+  managerModel.value = payload.default_model_id;
 }
 
 async function loadTeams() {
@@ -38,6 +48,35 @@ function escapeHtml(s) {
   });
 }
 
+function renderEvaluationBreakdown(data) {
+  const b = data.evaluation_breakdown || {};
+  const op = b.operational || {};
+  const rag = b.rag || {};
+  const st = b.skills_tools || {};
+  const components = st.components || {};
+  const ops = st.operational_tools || {};
+  const discipline = st.discipline || {};
+  const efficiency = st.efficiency || {};
+
+  document.querySelector('#evaluation-breakdown').innerHTML =
+    '<b>Operational score:</b> ' + pct(op.total_score) +
+    ' — 35% feasibility + 25% service + 40% cost' +
+    (op.feasible_gate === false ? ' <span class="bad">(critical-feasibility gate forced score to 0)</span>' : '') +
+    '<br><br><b>RAG:</b> ' + pct(rag.total_score) +
+    ' — expected sources: ' + escapeHtml(JSON.stringify(rag.expected_sources || [])) +
+    '; retrieved expected: ' + escapeHtml(JSON.stringify(rag.retrieved_expected_sources || [])) +
+    '<br><br><b>Skills / Tools:</b> ' + pct(st.total_score) +
+    '<br>• Skill usage: ' + Number(components.skill_usage || 0).toFixed(1) + ' / 25' +
+    '<br>• Expected operational tools: ' + Number(components.expected_operational_tools || 0).toFixed(1) + ' / 45' +
+    '<br>• Cost + validation discipline: ' + Number(components.cost_and_validation || 0).toFixed(1) + ' / 20' +
+    '<br>• Efficiency: ' + Number(components.efficiency || 0).toFixed(1) + ' / 10' +
+    '<br>• Missing expected operational tools: ' + escapeHtml(JSON.stringify(ops.missing || [])) +
+    '<br>• calculate_plan_cost: ' + (discipline.calculate_plan_cost_called ? 'YES' : 'NO') +
+    '; validate_plan: ' + (discipline.validate_plan_called ? 'YES' : 'NO') +
+    '<br>• Discouraged calls: ' + escapeHtml(JSON.stringify(efficiency.discouraged_calls || [])) +
+    '; exact duplicate calls: ' + Number(efficiency.exact_duplicate_calls || 0);
+}
+
 function render(data) {
   document.querySelector('#m-operational').textContent = pct(data.operational_score);
   document.querySelector('#m-feasible').textContent = pct(data.feasibility_score);
@@ -60,26 +99,34 @@ function render(data) {
       escapeHtml(JSON.stringify(t.output,null,2)) + '</pre></td></tr>';
   }).join('');
   document.querySelector('#plan').textContent = JSON.stringify(data.plan, null, 2);
+  renderEvaluationBreakdown(data);
 }
 
 team.addEventListener('change', loadScenarios);
 run.addEventListener('click', async function() {
   run.disabled = true;
-  statusEl.textContent = 'Running Manager + tools + simulator...';
+  statusEl.textContent = 'Running ' + managerModel.options[managerModel.selectedIndex].text + ' + tools + simulator...';
   try {
     const data = await json('/api/evaluate', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({team_id:team.value, scenario_id:scenario.value})
+      body:JSON.stringify({
+        team_id:team.value,
+        scenario_id:scenario.value,
+        model_id:managerModel.value
+      })
     });
     render(data);
-    statusEl.textContent = 'Evaluation complete.';
+    statusEl.textContent = 'Evaluation complete with ' + data.manager_model + '.';
   } catch (e) {
     statusEl.textContent = 'Error: ' + e.message;
   } finally {
     run.disabled = false;
   }
 });
+
+Promise.all([loadManagerModels(), loadTeams()]).catch(function(e) { statusEl.textContent = e.message; });
+
 
 helpOpen.addEventListener('click', function() {
   helpDialog.showModal();
@@ -92,5 +139,3 @@ helpClose.addEventListener('click', function() {
 helpDialog.addEventListener('click', function(event) {
   if (event.target === helpDialog) helpDialog.close();
 });
-
-loadTeams().catch(function(e) { statusEl.textContent = e.message; });

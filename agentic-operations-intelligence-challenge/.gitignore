@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+logs/
+*.log
+student/team_*/models/*.pt
+student/team_*/models/*.pt2
