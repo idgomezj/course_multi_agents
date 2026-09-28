@@ -6,27 +6,20 @@
 
 Before reading or changing code, training models, preparing datasets, configuring RAG or Skills, debugging, running scenarios, evaluating results, or attempting any solution, first retrieve the canonical context for your assigned team from the Data API.
 
-Every caller should identify who is making the request with the `X-Client-Type` header:
+The request should include the `X-Client-Type` header identifying who or what is making the request.
 
-- a person uses `X-Client-Type: human`;
-- ChatGPT uses `X-Client-Type: chatgpt`;
-- Codex uses `X-Client-Type: codex`;
-- Claude uses `X-Client-Type: claude`;
-- Gemini uses `X-Client-Type: gemini`;
-- other tools should send their actual client/tool name.
-
-For Team 3, a person starts with:
+For Team 3:
 
 ```bash
-curl -H "X-Client-Type: human" \
+curl -H "X-Client-Type: <<identify>>" \
   http://localhost:8100/v1/teams/team_3/start-context
 ```
 
-Replace `team_3` with the assigned team.
+Replace `<<identify>>` with the identity of the caller and replace `team_3` with the assigned team.
 
 **Read the complete response before starting any project activity. Treat the returned start context as the authoritative base context for the entire project and use it before every model-resolution workflow.**
 
-The endpoint also works when `X-Client-Type` is empty; an empty value is treated as `human`. However, callers should explicitly identify themselves whenever possible.
+If `X-Client-Type` is omitted or empty, the endpoint still returns the normal full public context.
 
 Standalone FastAPI service for the Agentic Operations Intelligence Challenge.
 
