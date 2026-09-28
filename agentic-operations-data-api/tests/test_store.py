@@ -1,3 +1,6 @@
+from pathlib import Path
+
+import pandas as pd
 import pytest
 
 from app.store import (
@@ -33,10 +36,31 @@ def test_each_team_has_required_assets():
         assert set(load_model_spec(team)["models"]) == {"model_a", "model_b"}
 
 
-def test_generated_training_data_is_case0_only():
-    for model in ("model_a", "model_b"):
-        rows = generate_training_rows("team_0", model, rows=120, seed=7)
-        assert len(rows) == 120
+def test_case0_clean_training_files_match_model_contract():
+    root = Path(__file__).resolve().parents[1]
+    training_dir = root / "demo_case_0_solution" / "training"
+    spec = load_model_spec("team_0")["models"]
+
+    for model_key in ("model_a", "model_b"):
+        path = training_dir / f"{model_key}_training.csv"
+        assert path.exists(), path
+
+        frame = pd.read_csv(path)
+        required = spec[model_key]["features"] + spec[model_key]["targets"]
+
+        assert len(frame) == 3000
+        assert list(frame.columns) == required
+        assert not frame[required].isnull().any().any()
+        assert frame.duplicated().sum() == 0
+
+    delay = pd.read_csv(training_dir / "model_b_training.csv")
+    assert set(delay["target_delay"].unique()) == {0, 1}
+
+
+def test_case0_compatibility_training_loader_reads_static_files_only():
+    rows = generate_training_rows("team_0", "model_a", rows=120, seed=7)
+    assert len(rows) == 120
+    assert set(rows[0]) == set(load_model_spec("team_0")["models"]["model_a"]["features"] + load_model_spec("team_0")["models"]["model_a"]["targets"])
 
     with pytest.raises(PermissionError):
         generate_training_rows("team_1", "model_a", rows=120, seed=7)
