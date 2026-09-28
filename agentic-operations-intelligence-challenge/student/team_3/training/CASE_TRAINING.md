@@ -4,6 +4,8 @@
 
 This is the **raw historical evidence for your assigned business case**. It is intentionally not a training-ready ML table.
 
+Treat `raw_case_history.csv` and `model_contract.json` as read-only assignment inputs. Create new derived files rather than editing the supplied evidence or contract.
+
 You must build the supervised learning dataset yourself. That means deciding how historical rows become examples, deriving the required model inputs from the raw observations, constructing defensible targets from later outcomes, handling missing/noisy observations, choosing train/validation splits, and documenting your assumptions.
 
 The runtime model interface is fixed by `model_contract.json`. You may change the neural-network architecture, preprocessing inside the model, optimizer, loss, sampling, regularization, validation strategy, and training procedure, but the exported model must accept the feature columns and produce the target shape declared in the contract.
