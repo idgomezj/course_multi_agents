@@ -55,13 +55,6 @@ def scenarios(team_id: str):
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@app.get("/api/training-data/{team_id}/{model_key}")
-def training_data(team_id: str, model_key: str, rows: int = 1000, seed: int = 42):
-    try:
-        df = generate_training_frame(team_id, model_key, rows=max(100, min(rows, 5000)), seed=seed)
-        return {"columns": list(df.columns), "rows": df.to_dict(orient="records")}
-    except (ValueError, KeyError) as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/api/evaluate")
