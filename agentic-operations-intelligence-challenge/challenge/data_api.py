@@ -94,6 +94,55 @@ class DataApiClient:
             raise DataApiError(f"Data API {response.status_code} for {path}: {detail}")
         return response.json()
 
+    def _post(self, path: str, payload: dict[str, Any]) -> Any:
+        url = f"{self.base_url}{path}"
+        started = perf_counter()
+        headers = self._headers()
+        headers["X-Trace-Id"] = current_trace_id()
+        log_event(
+            logger,
+            "data_api.request.started",
+            method="POST",
+            base_url=self.base_url,
+            path=path,
+            timeout_seconds=self.timeout,
+            auth_mode="instructor" if self.instructor_token else ("team" if self.team_token else "none"),
+        )
+        try:
+            response = httpx.post(
+                url,
+                headers=headers,
+                json=payload,
+                timeout=self.timeout,
+            )
+        except httpx.HTTPError as exc:
+            log_event(
+                logger,
+                "data_api.request.failed",
+                level=logging.ERROR,
+                path=path,
+                duration_ms=round((perf_counter() - started) * 1000, 2),
+                error=str(exc),
+            )
+            raise DataApiError(f"Could not reach Data API at {self.base_url}: {exc}") from exc
+
+        log_event(
+            logger,
+            "data_api.request.completed",
+            path=path,
+            status_code=response.status_code,
+            duration_ms=round((perf_counter() - started) * 1000, 2),
+            response_bytes=len(response.content),
+        )
+        if response.status_code >= 400:
+            detail = response.text
+            try:
+                detail = response.json().get("detail", detail)
+            except Exception:
+                pass
+            raise DataApiError(f"Data API {response.status_code} for {path}: {detail}")
+        return response.json()
+
     def health(self) -> dict[str, Any]:
         return self._get("/health")
 
@@ -111,11 +160,37 @@ class DataApiClient:
 
 
 
+    def get_scenarios(self, team_id: str) -> list[dict[str, Any]]:
+        """Return the scenario set selected by the active token scope."""
+        return self._get(f"/v1/teams/{team_id}/scenarios")
+
+    def get_scenario(self, team_id: str, scenario_id: str) -> dict[str, Any]:
+        """Return only the fields this token is allowed to see."""
+        return self._get(f"/v1/teams/{team_id}/scenarios/{scenario_id}")
+
+    def evaluate_scenario(
+        self,
+        team_id: str,
+        scenario_id: str,
+        plan: dict[str, Any],
+        trace: list[dict[str, Any]],
+        rag_hits: list[str],
+    ) -> dict[str, Any]:
+        return self._post(
+            f"/v1/teams/{team_id}/scenarios/{scenario_id}/evaluate",
+            {
+                "plan": plan,
+                "trace": trace,
+                "rag_hits": rag_hits,
+            },
+        )
+
+    # Backward-compatible names now use token-selected scenario scope.
     def get_public_scenarios(self, team_id: str) -> list[dict[str, Any]]:
-        return self._get(f"/v1/teams/{team_id}/scenarios/public")
+        return self.get_scenarios(team_id)
 
     def get_public_scenario(self, team_id: str, scenario_id: str) -> dict[str, Any]:
-        return self._get(f"/v1/teams/{team_id}/scenarios/public/{scenario_id}")
+        return self.get_scenario(team_id, scenario_id)
 
 
 @lru_cache
