@@ -13,6 +13,7 @@ from .store import (
     load_case,
     load_knowledge,
     load_model_spec,
+    load_training_source,
     public_scenario,
     public_scenarios,
     reference_solution,
@@ -36,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Agentic Operations Challenge Data API + Case 0 Demo",
-    version="1.2.0",
+    version="1.3.0",
     description="Team-scoped data service plus a self-contained fully solved Case 0 end-to-end demonstration.",
 )
 
@@ -83,7 +84,7 @@ async def request_logging_middleware(request: Request, call_next):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "agentic-operations-data-api", "version": "1.2.0"}
+    return {"status": "ok", "service": "agentic-operations-data-api", "version": "1.3.0"}
 
 
 # ---------------------------------------------------------------------------
@@ -126,6 +127,28 @@ def knowledge(team_id: str, _: str = Depends(authorize_team)):
 
 
 
+
+
+@app.get("/v1/teams/{team_id}/training-source.json")
+def training_source(team_id: str, _: str = Depends(authorize_team)):
+    """Return the team's raw historical model-development data as JSON.
+
+    The payload is intentionally messy and not ML-ready. It does not contain
+    precomputed feature matrices, model-specific labels, train/validation splits,
+    or cleaning decisions.
+    """
+    try:
+        payload = load_training_source(team_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    log_event(
+        logger,
+        "training_source.requested",
+        team_id=team_id,
+        record_count=payload.get("record_count"),
+    )
+    return payload
 
 
 @app.get("/v1/teams/{team_id}/scenarios/public")
