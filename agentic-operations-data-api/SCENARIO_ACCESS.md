@@ -108,3 +108,22 @@ If students can clone the branch containing `data/scenarios/**/hidden.json`, no 
 ## Current hidden-set status
 
 The access mechanism is operational and each graded team currently has three hidden scenario definitions (`H01`–`H03`) to exercise the flow. These are the initial hidden set, not the final 20-scenario suite described in the instructor blueprint. Their final benchmark costs still need calibration before they should be used for final cost-gap grading.
+
+
+## Canonical public start context
+
+The first context endpoint is intentionally easier to consume:
+
+```text
+GET /v1/teams/{team_id}/start-context
+```
+
+For the public context, no token and no client-identification header are required. A request with no AI-identifying signal is treated as a normal human/browser request.
+
+Example:
+
+```bash
+curl http://localhost:8100/v1/teams/team_3/start-context
+```
+
+A valid hidden scenario token is still required to make this endpoint operate in hidden scope. An invalid token is rejected rather than silently downgraded to public.
