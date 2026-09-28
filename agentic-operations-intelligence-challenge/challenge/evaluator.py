@@ -63,7 +63,7 @@ def skill_tool_breakdown(
         * exact duplicate calls (same tool + same inputs): -2 each
         * repeated calls with different inputs are NOT penalized
     """
-    expectations = scenario.get("public_expectations", {})
+    expectations = scenario.get("private_expectations") or scenario.get("public_expectations", {})
     required = set(expectations.get("required_tools", []))
     discouraged = set(expectations.get("discouraged_tools", []))
 
@@ -151,7 +151,8 @@ def score_skill_tools(scenario: dict[str, Any], trace: list[dict[str, Any]]) -> 
 
 
 def rag_breakdown(scenario: dict[str, Any], rag_hits: set[str]) -> dict[str, Any]:
-    expected = set(scenario.get("public_expectations", {}).get("rag_expected_sources", []))
+    expectations = scenario.get("private_expectations") or scenario.get("public_expectations", {})
+    expected = set(expectations.get("rag_expected_sources", []))
     used = set(rag_hits)
     if not expected:
         score = 100.0
