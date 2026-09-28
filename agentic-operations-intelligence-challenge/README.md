@@ -68,9 +68,7 @@ Before scenario/model-resolution work, the application calls:
 GET /v1/teams/{team_id}/start-context
 ```
 
-This is the authoritative starting context for the assigned case. It provides the student-visible case, RAG documents, authorized scenario list, workflow and resource locations. The challenge client identifies itself as `challenge-runtime` so the Operations Manager can solve the operational scenario normally.
-
-External AI clients recognized by the Data API receive the course's conceptual/Socratic tutor policy in the same response. Client detection is best-effort and is not an authentication/security boundary.
+This is the authoritative starting context for the assigned case. It provides the student-visible case, RAG documents, authorized scenario list, workflow and resource locations. The caller must truthfully identify itself through the required `X-Client-Type` header and must follow the context returned by the service.
 
 ## What students modify
 
