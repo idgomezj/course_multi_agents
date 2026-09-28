@@ -1,0 +1,142 @@
+{
+  "team_id": "team_5",
+  "scope": "hidden",
+  "scenarios": [
+    {
+      "id": "T5-H01",
+      "title": "Downtime with urgent customer demand",
+      "description": "A line has elevated downtime risk while an urgent customer order must be protected.",
+      "visible": {
+        "recent_downtime": {
+          "L1": 20
+        },
+        "maintenance_age_days": {
+          "L1": 155
+        },
+        "confirmed_orders": {
+          "FG01": 1320
+        }
+      },
+      "realized": {
+        "demand_multiplier": {
+          "FG01": [
+            1.14,
+            1.2,
+            1.16,
+            1.08
+          ]
+        },
+        "downtime_hours": {
+          "L1": [
+            14,
+            8,
+            5,
+            2
+          ]
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "predict_downtime",
+          "get_production_capacity",
+          "calculate_overtime_option",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md"
+        ]
+      }
+    },
+    {
+      "id": "T5-H02",
+      "title": "Two lines constrained",
+      "description": "Both production lines are operating near their practical limits.",
+      "visible": {
+        "utilization": {
+          "L1": 0.98,
+          "L2": 0.97
+        },
+        "overload": {
+          "L1": 0.18,
+          "L2": 0.22
+        },
+        "labor_ratio": {
+          "L1": 0.88,
+          "L2": 0.82
+        }
+      },
+      "realized": {
+        "downtime_hours": {
+          "L1": [
+            5,
+            4,
+            3,
+            2
+          ],
+          "L2": [
+            7,
+            6,
+            4,
+            3
+          ]
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "predict_production_feasibility",
+          "get_production_capacity",
+          "calculate_overtime_option",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md"
+        ]
+      }
+    },
+    {
+      "id": "T5-H03",
+      "title": "Labor shortage and overtime trade-off",
+      "description": "A labor shortage reduces effective capacity while overtime remains available at a cost.",
+      "visible": {
+        "labor_ratio": {
+          "L2": 0.72
+        },
+        "overtime_available": {
+          "L2": 1
+        },
+        "confirmed_orders": {
+          "FG03": 870
+        }
+      },
+      "realized": {
+        "demand_multiplier": {
+          "FG03": [
+            1.12,
+            1.18,
+            1.16,
+            1.09
+          ]
+        },
+        "downtime_hours": {
+          "L2": [
+            6,
+            5,
+            4,
+            3
+          ]
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "predict_production_feasibility",
+          "calculate_overtime_option",
+          "calculate_plan_cost",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md"
+        ]
+      }
+    }
+  ]
+}
