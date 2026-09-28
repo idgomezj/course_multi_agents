@@ -17,7 +17,6 @@ from .store import (
     public_scenarios,
     reference_solution,
 )
-from .training_data import generate_training_rows
 from .observability import log_event, new_trace_id, reset_trace_context, set_trace_context, setup_logging
 
 from demo_app.config import (
@@ -111,7 +110,6 @@ def bootstrap(team_id: str, _: str = Depends(authorize_team)):
         "team_id": team_id,
         "case": case_without_scenarios(team_id),
         "knowledge": list(load_knowledge(team_id)),
-        "model_spec": load_model_spec(team_id),
         "public_scenarios": public_scenarios(team_id),
     }
 
@@ -126,26 +124,8 @@ def knowledge(team_id: str, _: str = Depends(authorize_team)):
     return list(load_knowledge(team_id))
 
 
-@app.get("/v1/teams/{team_id}/model-spec")
-def model_spec(team_id: str, _: str = Depends(authorize_team)):
-    return load_model_spec(team_id)
 
 
-@app.get("/v1/teams/{team_id}/training-data/{model_key}")
-def training_data(
-    team_id: str,
-    model_key: str,
-    rows: int = Query(default=1400, ge=100, le=10000),
-    seed: int = Query(default=42, ge=0, le=2_147_483_647),
-    _: str = Depends(authorize_team),
-):
-    try:
-        log_event(logger, "training_data.requested", team_id=team_id, model_key=model_key, rows=rows, seed=seed)
-        data = generate_training_rows(team_id, model_key, rows=rows, seed=seed)
-        log_event(logger, "training_data.generated", team_id=team_id, model_key=model_key, rows=len(data), columns=sorted(data[0]) if data else [])
-        return {"team_id": team_id, "model_key": model_key, "rows": data}
-    except KeyError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @app.get("/v1/teams/{team_id}/scenarios/public")
