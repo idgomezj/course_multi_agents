@@ -33,11 +33,13 @@ def test_each_team_has_required_assets():
         assert set(load_model_spec(team)["models"]) == {"model_a", "model_b"}
 
 
-def test_training_generation():
-    for team in available_teams():
-        for model in ("model_a", "model_b"):
-            rows = generate_training_rows(team, model, rows=120, seed=7)
-            assert len(rows) == 120
+def test_generated_training_data_is_case0_only():
+    for model in ("model_a", "model_b"):
+        rows = generate_training_rows("team_0", model, rows=120, seed=7)
+        assert len(rows) == 120
+
+    with pytest.raises(PermissionError):
+        generate_training_rows("team_1", "model_a", rows=120, seed=7)
 
 
 @pytest.mark.parametrize(
