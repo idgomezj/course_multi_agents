@@ -4,7 +4,7 @@ Final project platform for **LLM Agents + Pydantic AI + RAG + Skills + PyTorch +
 
 ## Architecture
 
-Business/team data is no longer stored in this application. The main application obtains it from the standalone FastAPI service maintained on branch:
+Runtime business/scenario data is obtained from the standalone FastAPI service maintained on branch. Model-development evidence is different: each assigned student workspace contains its own readable raw training history and fixed local model contract.
 
 `service/agentic-operations-data-api`
 
