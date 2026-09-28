@@ -2,91 +2,118 @@
 
 Final project platform for **LLM Agents + Pydantic AI + RAG + Skills + PyTorch + operations planning**.
 
-This folder now contains both the project specification **and a runnable public MVP**.
+## Architecture
 
-## What students change
+Business/team data is no longer stored in this application. The main application obtains it from the standalone FastAPI service maintained on branch:
+
+`service/agentic-operations-data-api`
+
+```text
+                    DATA API
+       runtime case + knowledge
+          + public scenarios
+                         │
+                         ▼
+                MAIN APPLICATION
+                         ▲
+                         │
+        local model contract + raw history
+        student-built supervised datasets
+                         │
+                  Pydantic AI Manager
+                         │
+              ┌──────────┼──────────┐
+              ▼          ▼          ▼
+             RAG       Skills    PyTorch
+              └──────────┼──────────┘
+                         ▼
+                       Tools
+                         │
+                         ▼
+                Structured monthly plan
+                         │
+                         ▼
+              simulator + cost evaluator
+```
+
+Each team receives a different `DATA_API_TOKEN`. The Data API authorizes that token only for the assigned team.
+
+## What students modify
 
 Only:
 
 ```text
 student/team_X/
-├── models/   # train/export PyTorch TorchScript models
-├── rag/      # improve retrieval configuration
-└── skills/   # improve procedural Skills
+├── training/
+│   ├── raw_case_history.csv       # supplied raw evidence
+│   ├── CASE_TRAINING.md           # supplied assignment guidance
+│   ├── model_contract.json        # supplied fixed runtime interface
+│   ├── model_a_training.csv       # student builds
+│   └── model_b_training.csv       # student builds
+├── models/                        # student trains model_a.pt2 + model_b.pt2
+├── rag/                           # retrieval configuration
+└── skills/                        # procedural Skills
 ```
 
-They do **not** modify the Manager, application, tools, simulator, cost engine, schemas or evaluator.
+Students do not modify the Manager, application, tools, schemas, simulator, cost engine or evaluator.
 
-## What the instructor provides
+## What now comes from the Data API
 
-- FastAPI backend;
-- frontend dashboard;
-- Pydantic AI Manager;
-- common toolbox;
-- RAG runtime;
-- Skill loader;
-- PyTorch model adapter;
-- manufacturing data/contracts/policies;
-- public development scenarios;
-- independent simulator and cost engine;
-- public evaluation feedback.
+For the authorized team:
 
-The final hidden evaluator, seeds, holdouts and benchmark solutions remain outside this public repository.
+- products and demand history;
+- materials and initial inventory;
+- BOM;
+- suppliers and commercial parameters;
+- production lines/capacity;
+- open purchase orders;
+- policies and cost parameters;
+- RAG source documents;
+- public development scenarios.
 
-## Five different problem families
+The API intentionally does **not** provide model-training rows or the student model contract. Those training assets are local to the assigned team package.
 
-| Team | Case | PyTorch models |
-|---|---|---|
-| 1 | Volatile Demand | Demand Forecast + Demand Uncertainty |
-| 2 | Stable Make-to-Stock | Demand Forecast + Excess Inventory Risk |
-| 3 | Just-in-Time | Supplier Delay + Arrival-Time Prediction |
-| 4 | Unreliable Supply | Supplier Delay + Supplier Quality Risk |
-| 5 | Capacity-Constrained Plant | Downtime Risk + Production Feasibility |
+## What is provided locally for model development
 
-All teams use the same application/toolbox but different business economics, RAG knowledge, Skills, model targets and scenario families.
+Each assigned team workspace includes a readable raw historical file, a training brief and the fixed model I/O contract. Students must construct the supervised feature/target tables themselves before training.
 
-## Evaluation idea
+## Local setup
 
-The Manager returns a structured monthly plan. The evaluator does not compare free text with an answer key.
-
-```text
-Manager plan
-   ↓
-constraint validation
-   ↓
-month simulation
-   ↓
-service measurement
-   ↓
-realized cost
-   ↓
-benchmark comparison
-   ↓
-score
-```
-
-The cost engine includes purchasing, production, holding, working capital, stockout/lost sales, overtime, changeovers, line stops and expedite costs. The weights differ by case.
-
-## Quick start
+Run the Data API first (from its independent branch/deployment), then:
 
 ```bash
 cd agentic-operations-intelligence-challenge
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Add a Gemini API key to `.env` if using the default Google model.
+Configure:
 
-Train the two starter models for one team:
-
-```bash
-python student/train_pytorch.py --team team_1 --model model_a
-python student/train_pytorch.py --team team_1 --model model_b
+```text
+GOOGLE_API_KEY=...
+DATA_API_URL=http://localhost:8100
+DATA_API_TOKEN=<token assigned to this team>
 ```
 
-Run the platform:
+Build the supervised datasets first from the assigned raw history:
+
+```text
+student/team_3/training/model_a_training.csv
+student/team_3/training/model_b_training.csv
+```
+
+Then train:
+
+```bash
+python student/train_pytorch.py --team team_3 --model model_a
+python student/train_pytorch.py --team team_3 --model model_b
+```
+
+The starter trainer will not generate those CSVs for the student.
+
+Run:
 
 ```bash
 python run.py
@@ -94,34 +121,87 @@ python run.py
 
 Open `http://localhost:8000`.
 
-Run public engine tests:
-
-```bash
-pytest -q
-```
-
-## Create a package for one student team
-
-Do not hand students the entire repository. Build the specific package:
+## Team packages
 
 ```bash
 python scripts/build_student_package.py --team team_3
 ```
 
-The generated ZIP contains the shared runtime plus only Team 3's case, knowledge and editable workspace.
+The ZIP contains the assigned team's **raw historical training evidence, training brief and model contract**, but no ready-made supervised training dataset. Runtime business/scenario data and authorized RAG documents arrive through the API.
 
-## Sharing boundary
+## Security
 
-Read **SHARING_MATRIX.md** before distribution.
+The final hidden evaluator, hidden scenarios, seeds, final holdouts and benchmark solutions must remain outside both the student package and the public Data API.
 
-The following must never be committed to this public repository:
+Also note: a branch in a public GitHub repository is itself public. For real team-data isolation, deploy the Data API from a private repository/deployment artifact even if this branch remains the development source.
 
-- final hidden scenarios;
-- hidden seeds;
-- final PyTorch holdouts;
-- hidden RAG queries and expected evidence;
-- benchmark plans/costs for final tests;
-- realized hidden future events;
-- final evaluator credentials.
 
-Those belong in private instructor infrastructure.
+
+## Manager LLM providers
+
+The Manager is provider-independent through Pydantic AI. The UI can select one of four providers for each run:
+
+- `google` — Google Gemini
+- `openai` — OpenAI / ChatGPT models through the OpenAI API
+- `anthropic` — Anthropic Claude
+- `deepseek` — DeepSeek
+
+Configure only the providers you want to use in `.env`:
+
+```text
+MANAGER_PROVIDER=google
+
+GOOGLE_MANAGER_MODEL=google:gemini-2.5-flash
+GOOGLE_API_KEY=...
+
+OPENAI_MANAGER_MODEL=openai:gpt-5.6-sol
+OPENAI_API_KEY=...
+
+ANTHROPIC_MANAGER_MODEL=anthropic:claude-sonnet-4-6
+ANTHROPIC_API_KEY=...
+
+DEEPSEEK_MANAGER_MODEL=deepseek:deepseek-v4-flash
+DEEPSEEK_API_KEY=...
+```
+
+`MANAGER_PROVIDER` controls the default selection. The browser can still choose any configured provider for an individual evaluation.
+
+`MANAGER_MODEL` remains supported as a legacy explicit model-string override when no provider is selected by the request.
+
+For DeepSeek V4 the runtime disables thinking mode for the Manager because the challenge depends on reliable tool use and structured Pydantic output.
+
+API:
+
+```text
+GET /api/manager-models
+```
+
+returns the available provider/model choices and whether the required API-key environment variable is configured. It never returns the key value itself.
+
+
+## Evaluation and scoring
+
+The score cards are intentionally separated into:
+
+- **Operational** — feasibility, service, and realized cost;
+- **RAG** — retrieval of expected organizational evidence;
+- **Skills / Tools** — procedural Skill usage, expected operational-tool coverage, cost/validation discipline, and tool-call efficiency.
+
+The runtime API now returns an `evaluation_breakdown` object showing exactly how each score was produced. The UI displays this breakdown below the headline score cards.
+
+The full formula, penalties, examples, and the distinction between runtime evaluation and final academic grading are documented in [EVALUATION.md](./EVALUATION.md).
+
+
+## Logs and observability
+
+The application now emits correlated structured logs for HTTP requests, LLM Manager runs, every tool call, Skills, RAG, PyTorch inference, Data API calls, training, simulation, and evaluation.
+
+Each request has a `trace_id`, and that trace is forwarded to the Data API using `X-Trace-Id`. Secrets/tokens are automatically redacted.
+
+Default file:
+
+```text
+logs/challenge.log
+```
+
+For the complete event catalog, configuration, examples, and trace-following instructions, see [LOGGING.md](./LOGGING.md).
