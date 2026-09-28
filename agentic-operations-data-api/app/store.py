@@ -20,6 +20,21 @@ def _load_yaml(path: Path) -> dict[str, Any]:
         return yaml.safe_load(fh) or {}
 
 
+@lru_cache
+def load_start_context_config() -> dict[str, Any]:
+    path = DATA_DIR / "start_context.json"
+    if not path.exists():
+        raise FileNotFoundError(f"Canonical start context is missing: {path}")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    log_event(
+        logger,
+        "store.start_context.loaded",
+        path=str(path),
+        version=payload.get("version"),
+    )
+    return payload
+
+
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     out = deepcopy(base)
     for key, value in override.items():
