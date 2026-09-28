@@ -14,7 +14,6 @@ from .llm_config import default_manager_model_id, manager_model_status, resolve_
 from .manager import run_manager
 from .observability import log_event, new_trace_id, reset_trace_context, set_trace_context, setup_logging
 from .scenarios import get_public_scenario, list_public_scenarios, student_visible_scenario
-from .training_data import generate_training_frame
 
 setup_logging("agentic-operations-challenge")
 logger = logging.getLogger(__name__)
@@ -94,13 +93,6 @@ def scenarios(team_id: str):
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-@app.get("/api/training-data/{team_id}/{model_key}")
-def training_data(team_id: str, model_key: str, rows: int = 1000, seed: int = 42):
-    try:
-        df = generate_training_frame(team_id, model_key, rows=max(100, min(rows, 5000)), seed=seed)
-        return {"columns": list(df.columns), "rows": df.to_dict(orient="records")}
-    except DataApiError as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @app.post("/api/evaluate")
