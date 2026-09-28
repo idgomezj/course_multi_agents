@@ -10,11 +10,15 @@ Business/team data is no longer stored in this application. The main application
 
 ```text
                     DATA API
-     case + knowledge + model contract
-       + training data + public scenarios
+       runtime case + knowledge
+          + public scenarios
                          │
                          ▼
                 MAIN APPLICATION
+                         ▲
+                         │
+        local model contract + raw history
+        student-built supervised datasets
                          │
                   Pydantic AI Manager
                          │
@@ -40,9 +44,15 @@ Only:
 
 ```text
 student/team_X/
-├── models/   # model_a.pt2 + model_b.pt2
-├── rag/      # retrieval configuration
-└── skills/   # procedural Skills
+├── training/
+│   ├── raw_case_history.csv       # supplied raw evidence
+│   ├── CASE_TRAINING.md           # supplied assignment guidance
+│   ├── model_contract.json        # supplied fixed runtime interface
+│   ├── model_a_training.csv       # student builds
+│   └── model_b_training.csv       # student builds
+├── models/                        # student trains model_a.pt2 + model_b.pt2
+├── rag/                           # retrieval configuration
+└── skills/                        # procedural Skills
 ```
 
 Students do not modify the Manager, application, tools, schemas, simulator, cost engine or evaluator.
@@ -59,11 +69,13 @@ For the authorized team:
 - open purchase orders;
 - policies and cost parameters;
 - RAG source documents;
-- PyTorch model specification;
-- public PyTorch training data;
 - public development scenarios.
 
-There are no runtime copies of those assets under this folder.
+The API intentionally does **not** provide model-training rows or the student model contract. Those training assets are local to the assigned team package.
+
+## What is provided locally for model development
+
+Each assigned team workspace includes a readable raw historical file, a training brief and the fixed model I/O contract. Students must construct the supervised feature/target tables themselves before training.
 
 ## Local setup
 
@@ -85,12 +97,21 @@ DATA_API_URL=http://localhost:8100
 DATA_API_TOKEN=<token assigned to this team>
 ```
 
-Train:
+Build the supervised datasets first from the assigned raw history:
+
+```text
+student/team_3/training/model_a_training.csv
+student/team_3/training/model_b_training.csv
+```
+
+Then train:
 
 ```bash
 python student/train_pytorch.py --team team_3 --model model_a
 python student/train_pytorch.py --team team_3 --model model_b
 ```
+
+The starter trainer will not generate those CSVs for the student.
 
 Run:
 
@@ -106,7 +127,7 @@ Open `http://localhost:8000`.
 python scripts/build_student_package.py --team team_3
 ```
 
-The ZIP contains **no case dataset or RAG source documents**. Those arrive at runtime through the API.
+The ZIP contains the assigned team's **raw historical training evidence, training brief and model contract**, but no ready-made supervised training dataset. Runtime business/scenario data and authorized RAG documents arrive through the API.
 
 ## Security
 
