@@ -25,7 +25,7 @@ def test_start_context_is_canonical_and_contains_full_student_visible_case_conte
     assert payload["team_id"] == "team_3"
     assert payload["scenario_scope"] == "public"
     assert payload["client_detection"]["kind"] == "human"
-    assert payload["client_detection"]["signal"] == "no_ai_signal"
+    assert payload["client_detection"]["signal"] == "x-client-type-empty"
     assert payload["case"]["team_id"] == "team_3"
     assert payload["case"]["products"]
     assert payload["case"]["materials"]
@@ -56,16 +56,28 @@ def test_declared_chatgpt_client_receives_tutor_only_policy_first():
     assert response.headers["X-Course-AI-Mode"] == "tutor-only"
 
 
-def test_ai_user_agent_is_detected_when_explicit_header_is_absent():
+def test_user_agent_does_not_control_ai_classification():
     response = CLIENT.get(
         "/v1/teams/team_2/start-context",
         headers={"User-Agent": "Claude/3.0 API Client"},
     )
     assert response.status_code == 200
     payload = response.json()
+    assert payload["client_detection"]["kind"] == "human"
+    assert payload["client_detection"]["is_ai"] is False
+    assert payload["client_detection"]["signal"] == "x-client-type-empty"
+
+
+def test_ai_related_x_client_type_substring_triggers_tutor_mode():
+    response = CLIENT.get(
+        "/v1/teams/team_2/start-context",
+        headers={"X-Client-Type": "claude-code-v2"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
     assert payload["client_detection"]["kind"] == "ai"
     assert payload["client_detection"]["name"] == "claude"
-    assert payload["client_detection"]["confidence"] == "heuristic"
+    assert payload["READ_THIS_FIRST"] == START["ai_client_policy_de"]
 
 
 def test_challenge_runtime_is_not_put_into_tutor_only_mode():
@@ -112,3 +124,25 @@ def test_invalid_token_is_not_silently_downgraded_to_public():
         headers={"X-Scenario-Token": "not-a-valid-token"},
     )
     assert response.status_code == 403
+
+
+def test_explicit_human_client_type_gets_full_context():
+    response = CLIENT.get(
+        "/v1/teams/team_3/start-context",
+        headers={"X-Client-Type": "human"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["client_detection"]["kind"] == "human"
+    assert payload["instruction_class"] == "canonical_case_context"
+
+
+def test_unknown_non_ai_client_type_gets_full_context():
+    response = CLIENT.get(
+        "/v1/teams/team_3/start-context",
+        headers={"X-Client-Type": "curl"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["client_detection"]["kind"] == "human"
+    assert payload["instruction_class"] == "canonical_case_context"
