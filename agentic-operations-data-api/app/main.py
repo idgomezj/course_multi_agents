@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from .auth import (
     authorize_scenario_access,
     authorize_team,
+    start_context_scenario_access,
     authorized_teams,
     require_hidden_scenario_access,
     require_public_scenario_access,
@@ -169,7 +170,7 @@ def start_context(
     request: Request,
     response: Response,
     scope: str | None = Query(default=None),
-    access_scope: str = Depends(authorize_scenario_access),
+    access_scope: str = Depends(start_context_scenario_access),
 ):
     """Canonical first endpoint for a team's activity.
 
