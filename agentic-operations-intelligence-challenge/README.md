@@ -4,20 +4,21 @@ Final project platform for **LLM Agents + Pydantic AI + RAG + Skills + PyTorch +
 
 ## Architecture
 
-Runtime business/scenario data is obtained from the standalone FastAPI service maintained on branch. Model-development evidence is different: each assigned student workspace contains its own readable raw training history and fixed local model contract.
+Runtime business/scenario data and the raw historical model-development source are obtained from the standalone FastAPI service. Each assigned student workspace keeps the fixed local model contract and the student-created supervised datasets.
 
 `service/agentic-operations-data-api`
 
 ```text
                     DATA API
-       runtime case + knowledge
-          + public scenarios
+       canonical start context first
+      + case + knowledge + raw history
+       + token-authorized scenarios
                          │
                          ▼
                 MAIN APPLICATION
                          ▲
                          │
-        local model contract + raw history
+        local fixed model contract
         student-built supervised datasets
                          │
                   Pydantic AI Manager
@@ -38,6 +39,18 @@ Runtime business/scenario data is obtained from the standalone FastAPI service m
 
 Each team receives a different `DATA_API_TOKEN`. The Data API authorizes that token only for the assigned team.
 
+## Canonical first context
+
+Before scenario/model-resolution work, the application calls:
+
+```text
+GET /v1/teams/{team_id}/start-context
+```
+
+This is the authoritative starting context for the assigned case. It provides the student-visible case, RAG documents, authorized scenario list, workflow and resource locations. The challenge client identifies itself as `challenge-runtime` so the Operations Manager can solve the operational scenario normally.
+
+External AI clients recognized by the Data API receive the course's conceptual/Socratic tutor policy in the same response. Client detection is best-effort and is not an authentication/security boundary.
+
 ## What students modify
 
 Only:
@@ -45,7 +58,6 @@ Only:
 ```text
 student/team_X/
 ├── training/
-│   ├── raw_case_history.csv       # supplied raw evidence
 │   ├── CASE_TRAINING.md           # supplied assignment guidance
 │   ├── model_contract.json        # supplied fixed runtime interface
 │   ├── model_a_training.csv       # student builds
@@ -69,13 +81,15 @@ For the authorized team:
 - open purchase orders;
 - policies and cost parameters;
 - RAG source documents;
-- public development scenarios.
+- raw historical model-development data as JSON;
+- public or hidden scenarios selected by the active scenario token;
+- server-side scenario evaluation.
 
-The API intentionally does **not** provide model-training rows or the student model contract. Those training assets are local to the assigned team package.
+The API intentionally does **not** provide ready-made supervised model-training rows or the student model contract. The fixed model contract remains local to the assigned team package.
 
 ## What is provided locally for model development
 
-Each assigned team workspace includes a readable raw historical file, a training brief and the fixed model I/O contract. Students must construct the supervised feature/target tables themselves before training.
+Each assigned team workspace includes a training brief and the fixed model I/O contract. The raw historical evidence is retrieved from `/v1/teams/{team_id}/training-source.json`. Students must construct the supervised feature/target tables themselves before training.
 
 ## Local setup
 
@@ -127,7 +141,7 @@ Open `http://localhost:8000`.
 python scripts/build_student_package.py --team team_3
 ```
 
-The ZIP contains the assigned team's **raw historical training evidence, training brief and model contract**, but no ready-made supervised training dataset. Runtime business/scenario data and authorized RAG documents arrive through the API.
+The ZIP contains the assigned team's training brief and fixed model contract, but no ready-made supervised training dataset. Raw historical evidence, runtime business data, authorized RAG documents and scenarios arrive through the API.
 
 ## Security
 
