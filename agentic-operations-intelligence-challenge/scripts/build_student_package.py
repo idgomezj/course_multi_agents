@@ -31,7 +31,7 @@ def main() -> None:
         for item in SHARED:
             copy_item(ROOT / item, stage / item)
 
-        # No business data is copied into the package. It is delivered by the Data API.
+        # Copy only the assigned team's workspace. It includes readable raw historical\n        # training evidence and the local model contract, but no ready-made supervised dataset.\n        # Runtime business/scenario data remains delivered by the Data API.
         (stage / "student").mkdir(exist_ok=True)
         copy_item(ROOT / "student" / "train_pytorch.py", stage / "student" / "train_pytorch.py")
         copy_item(ROOT / "student" / "README.md", stage / "student" / "README.md")
