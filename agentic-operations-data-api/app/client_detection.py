@@ -23,7 +23,7 @@ AI_CLIENT_MARKERS: dict[str, tuple[str, ...]] = {
     "grok": ("grok", "xai"),
     "mistral": ("mistral",),
     "llama": ("llama", "ollama"),
-    "generic_ai": ("llm", "artificial-intelligence", "ai-agent", "ai-assistant"),
+    "generic_ai": ("ai", "llm", "artificial-intelligence", "ai-agent", "ai-assistant"),
 }
 
 APPLICATION_CLIENT_MARKERS = {
