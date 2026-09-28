@@ -17,9 +17,9 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from app.observability import log_event, reset_trace_context, set_trace_context, setup_logging
 from app.store import load_model_spec
-from app.training_data import generate_training_rows
 
 TEAM_ID = "team_0"
+TRAINING_DIR = Path(__file__).resolve().parent / "training"
 logger = setup_logging("agentic-operations-case0-training")
 
 
@@ -98,7 +98,19 @@ def train(model_key: str, output_dir: Path) -> None:
         features=spec.get("features"),
         targets=spec.get("targets"),
     )
-    df = pd.DataFrame(generate_training_rows(TEAM_ID, model_key, rows=3000, seed=42))
+    dataset = TRAINING_DIR / f"{model_key}_training.csv"
+    if not dataset.exists():
+        raise FileNotFoundError(f"Clean Case 0 training dataset not found: {dataset}")
+
+    df = pd.read_csv(dataset)
+    required_columns = list(spec["features"]) + list(spec["targets"])
+    missing = [column for column in required_columns if column not in df.columns]
+    if missing:
+        raise ValueError(f"{dataset} is missing required columns: {missing}")
+    if df[required_columns].isnull().any().any():
+        raise ValueError(f"{dataset} must be clean and contain no null values in model columns")
+    if len(df) < 100:
+        raise ValueError(f"{dataset} does not contain enough rows for Case 0 validation")
 
     split = int(len(df) * 0.82)
     train_df = df.iloc[:split]
@@ -119,6 +131,7 @@ def train(model_key: str, output_dir: Path) -> None:
         train_rows=len(train_df),
         validation_rows=len(val_df),
         classification=classification,
+        dataset=str(dataset),
     )
     model = ReferenceNet(
         len(spec["features"]),
