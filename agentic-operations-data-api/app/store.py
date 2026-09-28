@@ -9,7 +9,7 @@ from typing import Any
 
 import yaml
 
-from .config import DATA_DIR
+from .config import DATA_DIR, scenario_scope_config
 from .observability import log_event
 
 logger = logging.getLogger(__name__)
@@ -109,14 +109,82 @@ def load_knowledge(team_id: str) -> tuple[dict[str, str], ...]:
 
 
 def public_scenarios(team_id: str) -> list[dict[str, Any]]:
+    """Full internal public scenario definitions.
+
+    API routes must project these through scenario_shared_view before returning
+    them to a student token.
+    """
     return deepcopy(load_case(team_id).get("public_scenarios", []))
 
 
-def public_scenario(team_id: str, scenario_id: str) -> dict[str, Any]:
-    for scenario in public_scenarios(team_id):
-        if scenario["id"] == scenario_id:
+@lru_cache
+def _load_hidden_scenarios(team_id: str) -> tuple[dict[str, Any], ...]:
+    if team_id not in available_teams() or team_id == "team_0":
+        return tuple()
+
+    path = DATA_DIR / "scenarios" / team_id / "hidden.json"
+    if not path.exists():
+        return tuple()
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    scenarios = payload.get("scenarios", [])
+    if not isinstance(scenarios, list):
+        raise ValueError(f"{path} must contain a list named 'scenarios'")
+
+    log_event(
+        logger,
+        "store.hidden_scenarios.loaded",
+        team_id=team_id,
+        path=str(path),
+        scenario_count=len(scenarios),
+    )
+    return tuple(deepcopy(scenarios))
+
+
+def hidden_scenarios(team_id: str) -> list[dict[str, Any]]:
+    """Full internal hidden scenario definitions."""
+    return deepcopy(list(_load_hidden_scenarios(team_id)))
+
+
+def scenarios_for_scope(team_id: str, scope: str) -> list[dict[str, Any]]:
+    if scope == "public":
+        return public_scenarios(team_id)
+    if scope == "hidden":
+        return hidden_scenarios(team_id)
+    raise KeyError(f"Unknown scenario scope: {scope}")
+
+
+def scenario_for_scope(team_id: str, scope: str, scenario_id: str) -> dict[str, Any]:
+    for scenario in scenarios_for_scope(team_id, scope):
+        if scenario.get("id") == scenario_id:
             return scenario
     raise KeyError(scenario_id)
+
+
+def public_scenario(team_id: str, scenario_id: str) -> dict[str, Any]:
+    return scenario_for_scope(team_id, "public", scenario_id)
+
+
+def hidden_scenario(team_id: str, scenario_id: str) -> dict[str, Any]:
+    return scenario_for_scope(team_id, "hidden", scenario_id)
+
+
+def scenario_shared_view(
+    team_id: str,
+    scope: str,
+    scenario: dict[str, Any],
+    *,
+    detail: bool,
+) -> dict[str, Any]:
+    """Project a full scenario to only fields allowed for this token scope."""
+    cfg = scenario_scope_config(team_id, scope)
+    key = "detail_fields" if detail else "list_fields"
+    fields = cfg.get(key, ["id", "title", "description", "visible"])
+    return {
+        field: deepcopy(scenario[field])
+        for field in fields
+        if field in scenario
+    }
 
 
 def case_without_scenarios(team_id: str) -> dict[str, Any]:
