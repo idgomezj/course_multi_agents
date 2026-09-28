@@ -109,21 +109,7 @@ class DataApiClient:
     def get_knowledge(self, team_id: str) -> list[dict[str, str]]:
         return self._get(f"/v1/teams/{team_id}/knowledge")
 
-    def get_model_spec(self, team_id: str) -> dict[str, Any]:
-        return self._get(f"/v1/teams/{team_id}/model-spec")
 
-    def get_training_rows(
-        self,
-        team_id: str,
-        model_key: str,
-        rows: int = 1400,
-        seed: int = 42,
-    ) -> list[dict[str, Any]]:
-        payload = self._get(
-            f"/v1/teams/{team_id}/training-data/{model_key}",
-            params={"rows": rows, "seed": seed},
-        )
-        return payload["rows"]
 
     def get_public_scenarios(self, team_id: str) -> list[dict[str, Any]]:
         return self._get(f"/v1/teams/{team_id}/scenarios/public")
