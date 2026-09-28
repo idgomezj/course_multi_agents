@@ -1,0 +1,34 @@
+{
+  "models": {
+    "model_a": {
+      "task": "downtime_risk",
+      "kind": "classification",
+      "artifact": "model_a.pt2",
+      "features": [
+        "recent_downtime",
+        "maintenance_age_days",
+        "utilization",
+        "runtime_hours",
+        "overload"
+      ],
+      "targets": [
+        "target_downtime"
+      ]
+    },
+    "model_b": {
+      "task": "production_feasibility",
+      "kind": "classification",
+      "artifact": "model_b.pt2",
+      "features": [
+        "required_hours_ratio",
+        "downtime_risk",
+        "changeovers",
+        "overtime_available",
+        "labor_ratio"
+      ],
+      "targets": [
+        "target_feasible"
+      ]
+    }
+  }
+}
