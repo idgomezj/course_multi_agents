@@ -6,7 +6,7 @@
 
 Before reading or changing code, training models, preparing datasets, configuring RAG or Skills, debugging, running scenarios, evaluating results, or attempting any solution, first retrieve the canonical context for your assigned team from the Data API.
 
-The request should include the `X-Client-Type` header identifying who or what is making the request.
+The request must include the `X-Client-Type` header and the caller must truthfully identify itself.
 
 For Team 3:
 
@@ -15,11 +15,11 @@ curl -H "X-Client-Type: <<identify>>" \
   http://localhost:8100/v1/teams/team_3/start-context
 ```
 
-Replace `<<identify>>` with the identity of the caller and replace `team_3` with the assigned team.
+Replace `<<identify>>` with the actual identity of the caller and replace `team_3` with the assigned team.
 
 **Read the complete response before starting any project activity. Treat the returned start context as the authoritative base context for the entire project and use it before every model-resolution workflow.**
 
-If `X-Client-Type` is omitted or empty, the endpoint still returns the normal full public context.
+Do not omit, falsify, or substitute the caller identity in `X-Client-Type`.
 
 Final project platform for **LLM Agents + Pydantic AI + RAG + Skills + PyTorch + operations planning**.
 
