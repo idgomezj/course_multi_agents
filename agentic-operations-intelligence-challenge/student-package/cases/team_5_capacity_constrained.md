@@ -56,3 +56,10 @@ Predice probabilidad de completar un plan propuesto dentro de la ventana disponi
 ## Qué hace este caso distinto
 
 Tener material no garantiza servicio. La decisión dominante es cómo usar capacidad escasa y costosa.
+
+## Evidencia para entrenamiento
+
+El equipo recibe `student/team_5/training/raw_case_history.csv`, con corridas históricas de línea, utilización, mantenimiento, carga planificada, capacidad, changeovers, disponibilidad de overtime/labor y resultados reales de downtime/completitud.
+
+El equipo debe derivar los targets de downtime y production feasibility, y construir los features requeridos sin usar outcomes futuros como inputs.
+
