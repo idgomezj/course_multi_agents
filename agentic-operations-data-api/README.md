@@ -170,15 +170,7 @@ The canonical first call for any team activity is:
 
 - `GET /v1/teams/{team_id}/start-context` — complete public student-visible case context, knowledge, authorized public scenario list, workflow/resources, and AI-client tutor policy when an AI client is detected. **No token is required for the public start context.**
 
-The challenge runtime loads this context before scenario/model-resolution work.
-
-Local human/browser example:
-
-```bash
-curl http://localhost:8100/v1/teams/team_3/start-context
-```
-
-This returns Team 3's public canonical context. A hidden scenario token is required only when switching the start context to the hidden scenario scope.
+The project runtime loads this canonical context before scenario/model-resolution work.
 
 Other endpoints:
 
@@ -214,7 +206,7 @@ data/start_context.json
 
 Teams 1–5 have exactly **two scenario tokens each**: one public token and one hidden token. They are controlled in `data/scenario_access.json`; see `SCENARIO_ACCESS.md` for the current values and field-sharing policy.
 
-The canonical public `/start-context` endpoint is the exception: it is intentionally readable without a token. Supplying the team's hidden token allows that endpoint to return the hidden scenario scope. The other protected team/scenario/training/evaluation endpoints keep their normal token checks.
+The canonical `/start-context` endpoint is the required first context call. Scenario authorization still determines which scenario information can be returned.
 
 The same token also authorizes that team's base case, knowledge, and training-source requests. Send the active token as `X-Scenario-Token` or through the backward-compatible `X-Team-Token` header.
 
