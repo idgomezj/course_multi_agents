@@ -10,7 +10,6 @@ from .config import FRONTEND_DIR, available_teams, load_case
 from .evaluator import evaluate_plan
 from .manager import run_manager
 from .scenarios import get_public_scenario, list_public_scenarios, student_visible_scenario
-from .training_data import generate_training_frame
 
 app = FastAPI(title="Agentic Operations Intelligence Challenge", version="0.1.0")
 
