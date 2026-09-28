@@ -1,52 +1,18 @@
 from __future__ import annotations
 
-import math
+import csv
 import logging
-import random
+from pathlib import Path
 
-from .store import load_model_spec
 from .observability import log_event
 
 logger = logging.getLogger(__name__)
 
-
-def _sigmoid(x: float) -> float:
-    return 1.0 / (1.0 + math.exp(-x))
-
-
-def _demand_row(rng: random.Random) -> tuple[dict[str, float], float]:
-    """Internal Case 0 reference-data generator.
-
-    Student teams do not receive generated training rows from this service.
-    """
-    mean = rng.uniform(700, 1600)
-    std = rng.uniform(40, 220)
-    trend = rng.uniform(-0.10, 0.12)
-    promo = 1.0 if rng.random() < 0.10 else 0.0
-    price_index = rng.uniform(0.92, 1.08)
-    confirmed = mean * rng.uniform(0.75, 1.20)
-    seasonal = rng.uniform(0.90, 1.15)
-    row = {
-        "last4_mean": mean,
-        "last4_std": std,
-        "trend": trend,
-        "promotion": promo,
-        "price_index": price_index,
-        "confirmed_orders": confirmed,
-        "seasonal_index": seasonal,
-    }
-    return row, 0.30
-
-
-def _supplier_row(rng: random.Random) -> dict[str, float]:
-    return {
-        "reliability": rng.uniform(0.60, 0.99),
-        "recent_late_rate": rng.uniform(0.0, 0.50),
-        "lead_time_days": rng.uniform(1.0, 20.0),
-        "order_qty_ratio": rng.uniform(0.25, 2.0),
-        "urgency": rng.uniform(0.0, 1.0),
-        "season_risk": rng.uniform(0.0, 0.8),
-    }
+_CASE0_TRAINING_DIR = (
+    Path(__file__).resolve().parents[1]
+    / "demo_case_0_solution"
+    / "training"
+)
 
 
 def generate_training_rows(
@@ -55,80 +21,51 @@ def generate_training_rows(
     rows: int = 1000,
     seed: int = 42,
 ) -> list[dict[str, float]]:
-    """Generate data only for the instructor's solved Case 0 reference models.
+    """Compatibility loader for the committed clean Case 0 datasets.
 
-    Teams 1-5 must build supervised datasets locally from the raw historical
-    case files distributed in their student workspace. There is intentionally
-    no student training-data API.
+    Despite the historical function name, this function no longer synthesizes
+    training examples. Case 0 uses deterministic, committed, model-ready CSV
+    files so the instructor can validate the complete training/export/inference
+    pipeline against stable inputs.
+
+    Teams 1-5 receive raw historical JSON through the team-scoped Data API and
+    must build their own supervised training datasets.
     """
     if team_id != "team_0":
         raise PermissionError(
-            "Generated training rows are not available for student teams. "
-            "Use the local raw_case_history.csv and CASE_TRAINING.md supplied with the case."
+            "Ready-made training rows exist only for the solved Case 0 validation case. "
+            "Student teams must build supervised datasets from their raw JSON source."
         )
+    if model_key not in {"model_a", "model_b"}:
+        raise KeyError(model_key)
 
-    spec = load_model_spec(team_id)
-    model = spec["models"][model_key]
-    task = model["task"]
-    rng = random.Random(seed + sum(ord(c) for c in team_id + model_key))
-    data: list[dict[str, float]] = []
+    path = _CASE0_TRAINING_DIR / f"{model_key}_training.csv"
+    if not path.exists():
+        raise FileNotFoundError(f"Case 0 training dataset not found: {path}")
 
-    log_event(
-        logger,
-        "case0.training_data.generation.started",
-        level=logging.DEBUG,
-        team_id=team_id,
-        model_key=model_key,
-        rows=rows,
-        seed=seed,
-        task=task,
-    )
+    with path.open("r", encoding="utf-8", newline="") as fh:
+        source = [
+            {key: float(value) for key, value in row.items()}
+            for row in csv.DictReader(fh)
+        ]
 
-    for _ in range(rows):
-        row: dict[str, float] = {}
+    if not source:
+        raise ValueError(f"Case 0 training dataset is empty: {path}")
 
-        if task == "demand_forecast":
-            row, noise_scale = _demand_row(rng)
-            base = max(
-                50.0,
-                row["last4_mean"]
-                * (1 + row["trend"])
-                * row["seasonal_index"]
-                * (1 + 0.35 * row["promotion"])
-                / row["price_index"],
-            )
-            for week in range(1, 5):
-                row[f"target_w{week}"] = max(
-                    0.0,
-                    base * (1 + 0.02 * week)
-                    + rng.gauss(0, row["last4_std"] * noise_scale),
-                )
-
-        elif task == "supplier_delay":
-            row.update(_supplier_row(rng))
-            p = _sigmoid(
-                -2.5
-                + 4.0 * (1 - row["reliability"])
-                + 3.2 * row["recent_late_rate"]
-                + 0.55 * row["order_qty_ratio"]
-                + 1.2 * row["season_risk"]
-                + 0.35 * row["urgency"]
-            )
-            row["target_delay"] = 1.0 if rng.random() < p else 0.0
-
-        else:
-            raise KeyError(f"Unsupported Case 0 task: {task}")
-
-        data.append(row)
+    # Keep legacy callers deterministic without synthesizing new examples.
+    # seed only controls the starting offset when fewer than all rows are requested.
+    count = max(1, min(int(rows), len(source)))
+    start = int(seed) % len(source)
+    selected = [source[(start + i) % len(source)] for i in range(count)]
 
     log_event(
         logger,
-        "case0.training_data.generation.completed",
-        level=logging.DEBUG,
+        "case0.training_data.loaded",
         team_id=team_id,
         model_key=model_key,
-        task=task,
-        rows=len(data),
-        columns=sorted(data[0]) if data else [],
+        path=str(path),
+        requested_rows=rows,
+        returned_rows=len(selected),
+        source_rows=len(source),
     )
-    return data
+    return selected
