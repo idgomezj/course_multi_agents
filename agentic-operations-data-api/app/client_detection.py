@@ -5,9 +5,12 @@ from dataclasses import dataclass
 from fastapi import Request
 
 
+# X-Client-Type is the single authoritative classification signal.
+# Matching is intentionally substring-based so values such as
+# "openai-codex-cli", "claude-code", or "chatgpt-desktop" are recognized.
 AI_CLIENT_MARKERS: dict[str, tuple[str, ...]] = {
-    "codex": ("codex", "openai-codex"),
-    "chatgpt": ("chatgpt", "openai"),
+    "codex": ("codex",),
+    "chatgpt": ("chatgpt", "openai", "gpt"),
     "claude": ("claude", "anthropic"),
     "gemini": ("gemini", "google-genai", "google-ai", "generativelanguage"),
     "copilot": ("github-copilot", "copilot"),
@@ -16,18 +19,17 @@ AI_CLIENT_MARKERS: dict[str, tuple[str, ...]] = {
     "windsurf": ("windsurf",),
     "cody": ("sourcegraph-cody", "cody"),
     "perplexity": ("perplexity",),
+    "deepseek": ("deepseek",),
+    "grok": ("grok", "xai"),
+    "mistral": ("mistral",),
+    "llama": ("llama", "ollama"),
+    "generic_ai": ("llm", "artificial-intelligence", "ai-agent", "ai-assistant"),
 }
 
 APPLICATION_CLIENT_MARKERS = {
     "challenge-runtime",
     "agentic-operations-challenge",
     "course-runtime",
-}
-
-HUMAN_CLIENT_MARKERS = {
-    "human",
-    "browser",
-    "person",
 }
 
 
@@ -52,65 +54,58 @@ class ClientDetection:
         }
 
 
-def _classify(value: str) -> tuple[str, str] | None:
+def _ai_name(value: str) -> str | None:
     normalized = value.strip().lower()
-    if not normalized:
-        return None
-
-    if normalized in APPLICATION_CLIENT_MARKERS:
-        return ("application", normalized)
-    if normalized in HUMAN_CLIENT_MARKERS:
-        return ("human_or_unknown", normalized)
-
     for name, markers in AI_CLIENT_MARKERS.items():
         if any(marker in normalized for marker in markers):
-            return ("ai", name)
+            return name
     return None
 
 
 def detect_request_client(request: Request) -> ClientDetection:
-    """Best-effort client classification.
+    """Classify the caller only from X-Client-Type.
 
-    HTTP headers are assertions, not proof of identity. Explicit course headers
-    are preferred; User-Agent matching is only a heuristic fallback.
+    Rules:
+    - missing/empty X-Client-Type -> human/full context
+    - X-Client-Type: human -> human/full context
+    - any recognized AI-related value -> AI/tutor-only context
+    - known runtime/application names -> application/full context
+    - any other non-AI value -> human/full context
+
+    The header is caller-declared metadata, not a security/authentication proof.
     """
-    explicit_headers = (
-        ("x-client-type", request.headers.get("X-Client-Type")),
-        ("x-ai-client", request.headers.get("X-AI-Client")),
-    )
-    for header_name, value in explicit_headers:
-        if not value:
-            continue
-        classified = _classify(value)
-        if classified:
-            kind, name = classified
-            return ClientDetection(
-                kind=kind,
-                name=name,
-                confidence="declared",
-                signal=header_name,
-            )
+    raw = request.headers.get("X-Client-Type")
+    value = (raw or "").strip()
+    normalized = value.lower()
+
+    if not normalized or normalized == "human":
         return ClientDetection(
             kind="human",
-            name=value.strip().lower(),
-            confidence="declared_unknown",
-            signal=header_name,
+            name="human",
+            confidence="declared" if normalized == "human" else "default",
+            signal="x-client-type" if normalized == "human" else "x-client-type-empty",
         )
 
-    user_agent = request.headers.get("User-Agent", "")
-    classified = _classify(user_agent)
-    if classified:
-        kind, name = classified
+    ai_name = _ai_name(normalized)
+    if ai_name:
         return ClientDetection(
-            kind=kind,
-            name=name,
-            confidence="heuristic",
-            signal="user-agent",
+            kind="ai",
+            name=ai_name,
+            confidence="declared",
+            signal="x-client-type",
+        )
+
+    if normalized in APPLICATION_CLIENT_MARKERS:
+        return ClientDetection(
+            kind="application",
+            name=normalized,
+            confidence="declared",
+            signal="x-client-type",
         )
 
     return ClientDetection(
         kind="human",
-        name="default_human",
-        confidence="default",
-        signal="no_ai_signal",
+        name=normalized,
+        confidence="declared_non_ai",
+        signal="x-client-type",
     )
