@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import math
+from pathlib import Path
 from time import perf_counter
 
 import torch
@@ -10,15 +11,18 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from challenge.config import student_path
-from challenge.data_api import get_data_client
-from challenge.observability import log_event, set_trace_context, reset_trace_context, setup_logging
-from challenge.training_data import generate_training_frame
+from challenge.observability import log_event, reset_trace_context, set_trace_context, setup_logging
+from challenge.training_data import load_model_spec, load_training_frame
 
 logger = setup_logging("agentic-operations-training")
 
 
 class StudentNet(nn.Module):
-    """Starter network. Improve architecture/training, but keep the API model contract."""
+    """Starter network.
+
+    Students are expected to improve the architecture/training procedure when justified,
+    while preserving the fixed input/output contract in training/model_contract.json.
+    """
 
     def __init__(
         self,
@@ -80,8 +84,7 @@ def validation_metrics(
     )
 
 
-def export_model(model: nn.Module, input_dim: int, output) -> None:
-    """Export with the current PyTorch Export format instead of deprecated TorchScript tracing."""
+def export_model(model: nn.Module, input_dim: int, output: Path) -> None:
     model.eval()
     example = torch.zeros((1, input_dim), dtype=torch.float32)
     exported_program = torch.export.export(model, (example,))
@@ -89,36 +92,59 @@ def export_model(model: nn.Module, input_dim: int, output) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description=(
+            "Train one assigned PyTorch model from a supervised CSV built by the student. "
+            "The platform does not generate training rows."
+        )
+    )
     parser.add_argument("--team", required=True, choices=[f"team_{i}" for i in range(1, 6)])
     parser.add_argument("--model", required=True, choices=["model_a", "model_b"])
-    parser.add_argument("--rows", type=int, default=1400)
+    parser.add_argument(
+        "--dataset",
+        default=None,
+        help=(
+            "Optional path to the student-built supervised CSV. Defaults to "
+            "student/team_X/training/<model>_training.csv."
+        ),
+    )
     parser.add_argument("--epochs", type=int, default=120)
     parser.add_argument("--lr", type=float, default=0.003)
+    parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
     tokens = set_trace_context()
     started = perf_counter()
-    torch.manual_seed(42)
+    torch.manual_seed(args.seed)
 
     workspace = student_path(args.team)
+    spec = load_model_spec(args.team)
+    mspec = spec["models"][args.model]
+    dataset_path = Path(args.dataset) if args.dataset else workspace / "training" / f"{args.model}_training.csv"
+
     log_event(
         logger,
         "training.run.started",
         team_id=args.team,
         model_key=args.model,
-        rows=args.rows,
+        dataset=str(dataset_path),
         epochs=args.epochs,
         learning_rate=args.lr,
-        seed=42,
+        batch_size=args.batch_size,
+        seed=args.seed,
         workspace=str(workspace),
     )
-    spec = get_data_client().get_model_spec(args.team)
-    mspec = spec["models"][args.model]
-    df = generate_training_frame(args.team, args.model, rows=args.rows, seed=42)
 
+    df = load_training_frame(args.team, args.model, dataset_path)
     features, targets = mspec["features"], mspec["targets"]
+
+    # Default split preserves row order. Students should choose a split appropriate
+    # to their case and document any change, especially for time-dependent data.
     split = int(len(df) * 0.8)
+    if split <= 0 or split >= len(df):
+        raise ValueError("Training dataset must contain enough rows for train/validation splits")
+
     train_df, val_df = df.iloc[:split], df.iloc[split:]
     x_train = torch.tensor(train_df[features].values, dtype=torch.float32)
     y_train = torch.tensor(train_df[targets].values, dtype=torch.float32)
@@ -137,7 +163,9 @@ def main() -> None:
         targets=targets,
         train_rows=len(train_df),
         validation_rows=len(val_df),
+        source=str(dataset_path),
     )
+
     model = StudentNet(
         len(features),
         len(targets),
@@ -147,15 +175,21 @@ def main() -> None:
     )
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
     loss_fn = nn.BCELoss() if classification else nn.MSELoss()
-    loader = DataLoader(TensorDataset(x_train, y_train), batch_size=64, shuffle=True)
+    loader = DataLoader(
+        TensorDataset(x_train, y_train),
+        batch_size=args.batch_size,
+        shuffle=True,
+    )
 
     for epoch in range(args.epochs):
         model.train()
+        last_loss = None
         for xb, yb in loader:
             loss = loss_fn(model(xb), yb)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            last_loss = loss
 
         metrics_text = validation_metrics(model, x_val, y_val, classification)
         log_event(
@@ -165,24 +199,17 @@ def main() -> None:
             team_id=args.team,
             model_key=args.model,
             epoch=epoch,
-            training_loss=float(loss.detach()),
+            training_loss=float(last_loss.detach()) if last_loss is not None else None,
             validation_metrics=metrics_text,
         )
         if epoch % 20 == 0 or epoch == args.epochs - 1:
             print(f"epoch={epoch:03d} {metrics_text}")
-            log_event(
-                logger,
-                "training.progress",
-                team_id=args.team,
-                model_key=args.model,
-                epoch=epoch,
-                validation_metrics=metrics_text,
-            )
 
     output_dir = workspace / "models"
     output_dir.mkdir(parents=True, exist_ok=True)
     output = output_dir / mspec["artifact"]
     export_model(model, len(features), output)
+
     final_metrics = validation_metrics(model, x_val, y_val, classification)
     print(final_metrics)
     print(f"Saved PyTorch Export model: {output}")
