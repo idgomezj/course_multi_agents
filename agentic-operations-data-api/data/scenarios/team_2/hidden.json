@@ -1,0 +1,102 @@
+{
+  "team_id": "team_2",
+  "scope": "hidden",
+  "scenarios": [
+    {
+      "id": "T2-H01",
+      "title": "Demand decline with large incoming PO",
+      "description": "Stable demand softens while a large purchase order is already inbound.",
+      "visible": {
+        "confirmed_orders": {
+          "FG01": 930
+        },
+        "incoming_purchase_warning": {
+          "RM01": "large open PO"
+        }
+      },
+      "realized": {
+        "demand_multiplier": {
+          "FG01": [
+            0.94,
+            0.9,
+            0.88,
+            0.86
+          ]
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "forecast_moving_average",
+          "get_open_purchase_orders",
+          "get_inventory",
+          "calculate_plan_cost"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md"
+        ]
+      }
+    },
+    {
+      "id": "T2-H02",
+      "title": "Volume discount with warehouse pressure",
+      "description": "A supplier discount is available but warehouse and working-capital pressure are elevated.",
+      "visible": {
+        "supplier_discount_available": {
+          "SUP02": true
+        },
+        "warehouse_utilization": 0.93,
+        "working_capital_pressure": "high"
+      },
+      "realized": {
+        "demand_multiplier": {
+          "FG01": 1,
+          "FG02": 0.98,
+          "FG03": 1.01
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "get_supplier_options",
+          "get_inventory",
+          "calculate_plan_cost",
+          "search_knowledge"
+        ],
+        "rag_expected_sources": [
+          "supplier_contracts.md",
+          "operations_policy.md"
+        ]
+      }
+    },
+    {
+      "id": "T2-H03",
+      "title": "Stable service under capital constraint",
+      "description": "Demand remains stable but management tightens inventory and capital limits.",
+      "visible": {
+        "confirmed_orders": {
+          "FG01": 1005,
+          "FG02": 808,
+          "FG03": 626
+        },
+        "working_capital_pressure": "very_high"
+      },
+      "realized": {
+        "demand_multiplier": {
+          "FG01": 1.01,
+          "FG02": 0.99,
+          "FG03": 1
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "forecast_moving_average",
+          "get_inventory",
+          "calculate_plan_cost",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md"
+        ]
+      }
+    }
+  ]
+}
