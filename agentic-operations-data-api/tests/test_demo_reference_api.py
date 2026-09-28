@@ -32,3 +32,9 @@ def test_demo_reference_endpoint_supports_every_case0_scenario(scenario_id, expe
 def test_demo_reference_unknown_scenario_is_controlled_404():
     response = client.get("/demo/api/reference/T0-DOES-NOT-EXIST")
     assert response.status_code == 404
+
+
+def test_student_training_endpoints_are_not_exposed():
+    paths = {getattr(route, "path", None) for route in app.routes}
+    assert "/v1/teams/{team_id}/model-spec" not in paths
+    assert "/v1/teams/{team_id}/training-data/{model_key}" not in paths
