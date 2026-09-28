@@ -61,6 +61,36 @@ def load_model_spec(team_id: str) -> dict[str, Any]:
 
 
 @lru_cache
+def load_training_source(team_id: str) -> dict[str, Any]:
+    """Load the raw historical JSON source used for student model development.
+
+    This is intentionally not a model-ready training dataset: it contains raw,
+    imperfect business observations that students must inspect, clean, filter,
+    transform and label themselves.
+    """
+    if team_id == "team_0":
+        raise KeyError("Case 0 uses the instructor's internal worked-example training flow")
+    if team_id not in available_teams():
+        raise KeyError(team_id)
+
+    path = DATA_DIR / "training_sources" / f"{team_id}.json"
+    if not path.exists():
+        raise KeyError(f"Raw training source not found for {team_id}")
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    records = payload.get("records", [])
+    log_event(
+        logger,
+        "store.training_source.loaded",
+        team_id=team_id,
+        path=str(path),
+        record_count=len(records),
+        columns=sorted(records[0]) if records else [],
+    )
+    return payload
+
+
+@lru_cache
 def load_knowledge(team_id: str) -> tuple[dict[str, str], ...]:
     if team_id not in available_teams():
         raise KeyError(team_id)
