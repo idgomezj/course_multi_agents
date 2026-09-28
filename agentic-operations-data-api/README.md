@@ -145,6 +145,14 @@ demo_app/
 
 ## Data API endpoints
 
+The canonical first call for any team activity is:
+
+- `GET /v1/teams/{team_id}/start-context` — complete student-visible case context, knowledge, authorized scenario list, workflow/resources, and AI-client tutor policy when an AI client is detected
+
+The challenge runtime loads this context before scenario/model-resolution work.
+
+Other endpoints:
+
 - `GET /health`
 - `GET /v1/teams`
 - `GET /v1/teams/{team_id}/bootstrap`
@@ -159,6 +167,28 @@ demo_app/
 - `GET /v1/teams/team_0/reference-solution?scenario_id=T0-P01`
 - `GET /v1/teams/team_0/reference-solution?scenario_id=T0-P02`
 - `GET /v1/teams/team_0/reference-solution?scenario_id=T0-P03`
+
+## Canonical start context
+
+`/v1/teams/{team_id}/start-context` is designed as the authoritative starting point. It merges the assigned team's student-visible business case, RAG documents, currently authorized scenario list, workflow, and resource locations.
+
+The service classifies the caller using, in order:
+
+1. `X-Client-Type`;
+2. `X-AI-Client`;
+3. User-Agent heuristics.
+
+Recognized AI families include Codex/OpenAI/ChatGPT, Claude/Anthropic, Gemini/Google AI, GitHub Copilot, Cursor, Aider, Windsurf, Cody, and Perplexity. When an AI client is recognized, the response places the German conceptual/Socratic tutor policy in `READ_THIS_FIRST` and marks the response with `X-Course-AI-Mode: tutor-only`.
+
+The built-in challenge application identifies itself as `challenge-runtime`, so its Operations Manager receives the operational runtime context rather than tutor-only behavior.
+
+**Important:** HTTP client identification is best-effort. Headers can be changed or spoofed, and an external AI is not technically forced to obey text returned by an API. This mechanism is an instructional/academic-integrity control, not a security boundary.
+
+The editable policy text and workflow live in:
+
+```text
+data/start_context.json
+```
 
 ## Authentication
 
