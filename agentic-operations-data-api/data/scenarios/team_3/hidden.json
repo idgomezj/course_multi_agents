@@ -1,0 +1,102 @@
+{
+  "team_id": "team_3",
+  "scope": "hidden",
+  "scenarios": [
+    {
+      "id": "T3-H01",
+      "title": "Demand change with late inbound material",
+      "description": "A demand increase coincides with a supplier delivery warning in a JIT environment.",
+      "visible": {
+        "confirmed_orders": {
+          "FG02": 910
+        },
+        "supplier_recent_late_rate": {
+          "SUP02": 0.34
+        },
+        "production_date_change_days": -1
+      },
+      "realized": {
+        "demand_multiplier": {
+          "FG02": [
+            1.1,
+            1.15,
+            1.12,
+            1.05
+          ]
+        },
+        "supplier_delay_days": {
+          "SUP02": 4
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "predict_supplier_delay",
+          "predict_arrival_time",
+          "calculate_jit_requirement",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md"
+        ]
+      }
+    },
+    {
+      "id": "T3-H02",
+      "title": "Cheaper supplier after production pull-forward",
+      "description": "Production moves earlier while the lower-cost supplier has uncertain arrival performance.",
+      "visible": {
+        "production_date_change_days": -4,
+        "supplier_recent_late_rate": {
+          "SUP02": 0.31,
+          "SUP04": 0.05
+        },
+        "season_risk": 0.42
+      },
+      "realized": {
+        "supplier_delay_days": {
+          "SUP02": 5,
+          "SUP04": 0
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "predict_arrival_time",
+          "find_alternative_supplier",
+          "calculate_jit_requirement",
+          "calculate_plan_cost"
+        ],
+        "rag_expected_sources": [
+          "supplier_contracts.md",
+          "operations_policy.md"
+        ]
+      }
+    },
+    {
+      "id": "T3-H03",
+      "title": "Simultaneous small deliveries",
+      "description": "Several materials are scheduled to arrive close to their production need dates.",
+      "visible": {
+        "delivery_concentration": "multiple receipts within two days",
+        "season_risk": 0.28
+      },
+      "realized": {
+        "supplier_delay_days": {
+          "SUP01": 1,
+          "SUP03": 2,
+          "SUP04": 0
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "get_open_purchase_orders",
+          "predict_arrival_time",
+          "calculate_jit_requirement",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md"
+        ]
+      }
+    }
+  ]
+}
