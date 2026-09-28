@@ -55,3 +55,10 @@ La media del lead time no es suficiente: la variabilidad es esencial.
 ## Qué hace este caso distinto
 
 La decisión óptima depende fuertemente del timing. “Comprar más por seguridad” y “elegir el proveedor más barato” suelen ser malas heurísticas.
+
+## Evidencia para entrenamiento
+
+El equipo recibe `student/team_3/training/raw_case_history.csv`, con órdenes históricas, cantidades, cantidades típicas, fechas de orden/necesidad, lead time nominal y realizado, confiabilidad, tardanzas recientes y riesgo estacional.
+
+El equipo debe derivar variables como `order_qty_ratio` y urgencia, y construir los targets de retraso y tiempo de llegada usando los resultados realizados. El lead time realizado es outcome y no puede filtrarse como input del mismo ejemplo.
+
