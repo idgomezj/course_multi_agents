@@ -12,11 +12,24 @@
 
 ## Modelos PyTorch — 20%
 
+No se evalúa únicamente el artifact final. Esta parte incluye:
+
+- construcción del dataset supervisado a partir de `raw_case_history.csv`;
+- definición y justificación de features/targets compatibles con `model_contract.json`;
+- prevención de target leakage;
+- estrategia de train/validation apropiada al tipo de dato;
+- arquitectura, loss, optimizer, regularización e hiperparámetros;
+- evidencia experimental y comparación contra baseline;
+- desempeño en holdout no visto.
+
 Las métricas dependen del caso. Ejemplos:
-- MAE/RMSE para forecast;
+
+- MAE/RMSE para forecast/arrival-time;
 - precision/recall/F1 para riesgos;
 - calibration cuando la probabilidad es parte de la decisión;
-- evaluación en holdout no visto.
+- robustez/generalización en holdout no visto.
+
+Una métrica aparentemente excelente obtenida con leakage o una construcción inválida del dataset no recibe crédito completo.
 
 ## RAG — 15%
 
