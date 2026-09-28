@@ -147,9 +147,17 @@ demo_app/
 
 The canonical first call for any team activity is:
 
-- `GET /v1/teams/{team_id}/start-context` — complete student-visible case context, knowledge, authorized scenario list, workflow/resources, and AI-client tutor policy when an AI client is detected
+- `GET /v1/teams/{team_id}/start-context` — complete public student-visible case context, knowledge, authorized public scenario list, workflow/resources, and AI-client tutor policy when an AI client is detected. **No token is required for the public start context.**
 
 The challenge runtime loads this context before scenario/model-resolution work.
+
+Local human/browser example:
+
+```bash
+curl http://localhost:8100/v1/teams/team_3/start-context
+```
+
+This returns Team 3's public canonical context. A hidden scenario token is required only when switching the start context to the hidden scenario scope.
 
 Other endpoints:
 
@@ -172,11 +180,15 @@ Other endpoints:
 
 `/v1/teams/{team_id}/start-context` is designed as the authoritative starting point. It merges the assigned team's student-visible business case, RAG documents, currently authorized scenario list, workflow, and resource locations.
 
-The service classifies the caller using, in order:
+A normal request does not need to identify itself. If there is no AI signal, the caller is treated as a normal human/browser by default.
 
-1. `X-Client-Type`;
-2. `X-AI-Client`;
+For AI detection, the service uses available request metadata in this order:
+
+1. `X-Client-Type` when an integration explicitly supplies it;
+2. `X-AI-Client` when an integration explicitly supplies it;
 3. User-Agent heuristics.
+
+Therefore a person can simply open or GET the endpoint with no special headers.
 
 Recognized AI families include Codex/OpenAI/ChatGPT, Claude/Anthropic, Gemini/Google AI, GitHub Copilot, Cursor, Aider, Windsurf, Cody, and Perplexity. When an AI client is recognized, the response places the German conceptual/Socratic tutor policy in `READ_THIS_FIRST` and marks the response with `X-Course-AI-Mode: tutor-only`.
 
@@ -193,6 +205,8 @@ data/start_context.json
 ## Authentication
 
 Teams 1–5 have exactly **two scenario tokens each**: one public token and one hidden token. They are controlled in `data/scenario_access.json`; see `SCENARIO_ACCESS.md` for the current values and field-sharing policy.
+
+The canonical public `/start-context` endpoint is the exception: it is intentionally readable without a token. Supplying the team's hidden token allows that endpoint to return the hidden scenario scope. The other protected team/scenario/training/evaluation endpoints keep their normal token checks.
 
 The same token also authorizes that team's base case, knowledge, and training-source requests. Send the active token as `X-Scenario-Token` or through the backward-compatible `X-Team-Token` header.
 
