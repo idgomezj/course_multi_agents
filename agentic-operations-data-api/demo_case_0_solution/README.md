@@ -10,6 +10,21 @@ The example demonstrates:
 - validating feasibility and comparing total operating cost;
 - adapting the plan to different operational scenarios.
 
+## Clean model-training data
+
+Case 0 deliberately includes **clean, ready-to-train, deterministic datasets** so it can validate the platform rather than test data preparation:
+
+```text
+demo_case_0_solution/training/
+├── README.md
+├── model_a_training.csv   # 3,000 clean demand-forecast rows
+└── model_b_training.csv   # 3,000 clean supplier-delay rows
+```
+
+`train_models.py` reads these committed files directly. It does not generate training examples at runtime.
+
+This is intentionally different from Teams 1–5, where students receive raw historical JSON and must construct the supervised datasets themselves.
+
 ## Published reference scenarios
 
 Every Case 0 public scenario now has its own published reference plan under:
