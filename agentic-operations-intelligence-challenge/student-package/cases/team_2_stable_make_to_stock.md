@@ -52,3 +52,10 @@ Predice riesgo de terminar el horizonte con inventario excesivo.
 ## Qué hace este caso distinto
 
 Una arquitectura o Skill diseñada para “protegerse” comprando buffer puede ser económicamente muy mala.
+
+## Evidencia para entrenamiento
+
+El equipo recibe `student/team_2/training/raw_case_history.csv`, con historia semanal de demanda, posición de inventario, recibos y costo de almacenamiento.
+
+No existe un dataset supervisado listo. El equipo debe crear ventanas de forecast y definir/documentar el target de riesgo de exceso de inventario a partir de los resultados reales posteriores. La construcción debe reflejar el contexto estable del caso y evitar fabricar volatilidad artificial que no existe en la operación.
+
