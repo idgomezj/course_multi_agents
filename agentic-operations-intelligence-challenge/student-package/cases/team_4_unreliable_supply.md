@@ -56,3 +56,10 @@ Predice probabilidad de rechazo/falla de calidad.
 ## Qué hace este caso distinto
 
 Aquí mantener inventario puede ser racional: la ausencia de buffer puede costar mucho más que almacenarlo.
+
+## Evidencia para entrenamiento
+
+El equipo recibe `student/team_4/training/raw_case_history.csv`, con historial de órdenes, entregas y resultados de inspección de calidad.
+
+El equipo debe construir por sí mismo los datasets de supplier-delay y supplier-quality, incluyendo labels derivados de resultados reales. Los outcomes de llegada/rechazo no pueden utilizarse como features conocidos antes de la recepción.
+
