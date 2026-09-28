@@ -24,7 +24,8 @@ Este directorio define **su parte** del proyecto. No contiene hidden tests reale
 - constraint validator;
 - cost engine;
 - benchmark/oracle;
-- datasets de entrenamiento por caso;
+- evidencia histórica cruda por caso para que el estudiante construya sus datasets supervisados;
+- contratos locales de I/O de los modelos;
 - holdouts privados;
 - documentos RAG por caso;
 - scenario generators;
@@ -42,7 +43,8 @@ Este directorio define **su parte** del proyecto. No contiene hidden tests reale
 ## Lo que construyen los estudiantes
 
 Solo:
-- PyTorch models;
+- construcción del dataset supervisado a partir de la evidencia histórica entregada;
+- entrenamiento/experimentación de los PyTorch models;
 - RAG;
 - Skills.
 
