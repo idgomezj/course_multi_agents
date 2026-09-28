@@ -15,6 +15,23 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "benchmark_cost",
+          "cost_gap",
+          "violations",
+          "trace",
+          "plan",
+          "evaluation_breakdown"
         ]
       },
       "hidden": {
@@ -29,6 +46,18 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "violations"
         ]
       }
     },
@@ -46,6 +75,23 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "benchmark_cost",
+          "cost_gap",
+          "violations",
+          "trace",
+          "plan",
+          "evaluation_breakdown"
         ]
       },
       "hidden": {
@@ -60,6 +106,18 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "violations"
         ]
       }
     },
@@ -77,6 +135,23 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "benchmark_cost",
+          "cost_gap",
+          "violations",
+          "trace",
+          "plan",
+          "evaluation_breakdown"
         ]
       },
       "hidden": {
@@ -91,6 +166,18 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "violations"
         ]
       }
     },
@@ -108,6 +195,23 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "benchmark_cost",
+          "cost_gap",
+          "violations",
+          "trace",
+          "plan",
+          "evaluation_breakdown"
         ]
       },
       "hidden": {
@@ -122,6 +226,18 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "violations"
         ]
       }
     },
@@ -139,6 +255,23 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "benchmark_cost",
+          "cost_gap",
+          "violations",
+          "trace",
+          "plan",
+          "evaluation_breakdown"
         ]
       },
       "hidden": {
@@ -153,6 +286,18 @@
           "title",
           "description",
           "visible"
+        ],
+        "evaluation_fields": [
+          "team_id",
+          "scenario_id",
+          "operational_score",
+          "feasibility_score",
+          "service_score",
+          "cost_score",
+          "skill_tool_score",
+          "rag_score",
+          "total_cost",
+          "violations"
         ]
       }
     }
