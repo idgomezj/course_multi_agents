@@ -3,11 +3,20 @@ from __future__ import annotations
 import os
 import logging
 from time import perf_counter
+from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
 
-from .auth import authorize_team, authorized_teams
+from .auth import (
+    authorize_scenario_access,
+    authorize_team,
+    authorized_teams,
+    require_hidden_scenario_access,
+    require_public_scenario_access,
+)
+from .config import scenario_scope_config
 from .store import (
     case_without_scenarios,
     load_case,
@@ -17,6 +26,9 @@ from .store import (
     public_scenario,
     public_scenarios,
     reference_solution,
+    scenario_for_scope,
+    scenario_shared_view,
+    scenarios_for_scope,
 )
 from .observability import log_event, new_trace_id, reset_trace_context, set_trace_context, setup_logging
 
@@ -37,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Agentic Operations Challenge Data API + Case 0 Demo",
-    version="1.3.0",
+    version="1.4.0",
     description="Team-scoped data service plus a self-contained fully solved Case 0 end-to-end demonstration.",
 )
 
@@ -84,7 +96,51 @@ async def request_logging_middleware(request: Request, call_next):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "agentic-operations-data-api", "version": "1.3.0"}
+    return {"status": "ok", "service": "agentic-operations-data-api", "version": "1.4.0"}
+
+
+class ScenarioEvaluationRequest(BaseModel):
+    plan: MonthlyOperationsPlan
+    trace: list[dict[str, Any]] = Field(default_factory=list)
+    rag_hits: list[str] = Field(default_factory=list)
+
+
+def _resolve_scenario_scope(
+    access_scope: str,
+    requested_scope: str | None = None,
+    scenario_id: str | None = None,
+) -> str:
+    if access_scope in {"public", "hidden"}:
+        if requested_scope and requested_scope != access_scope:
+            raise HTTPException(
+                status_code=403,
+                detail=f"This token is scoped to {access_scope} scenarios",
+            )
+        return access_scope
+
+    if requested_scope in {"public", "hidden"}:
+        return requested_scope
+    if scenario_id and "-H" in scenario_id:
+        return "hidden"
+    return "public"
+
+
+def _evaluation_shared_view(team_id: str, scope: str, payload: dict[str, Any]) -> dict[str, Any]:
+    fields = scenario_scope_config(team_id, scope).get("evaluation_fields", [])
+    if not fields:
+        fields = [
+            "team_id",
+            "scenario_id",
+            "operational_score",
+            "feasibility_score",
+            "service_score",
+            "cost_score",
+            "skill_tool_score",
+            "rag_score",
+            "total_cost",
+            "violations",
+        ]
+    return {field: payload[field] for field in fields if field in payload}
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +167,6 @@ def bootstrap(team_id: str, _: str = Depends(authorize_team)):
         "team_id": team_id,
         "case": case_without_scenarios(team_id),
         "knowledge": list(load_knowledge(team_id)),
-        "public_scenarios": public_scenarios(team_id),
     }
 
 
@@ -151,15 +206,117 @@ def training_source(team_id: str, _: str = Depends(authorize_team)):
     return payload
 
 
+@app.get("/v1/teams/{team_id}/scenarios")
+def token_scoped_scenarios(
+    team_id: str,
+    scope: str | None = Query(default=None),
+    access_scope: str = Depends(authorize_scenario_access),
+):
+    effective_scope = _resolve_scenario_scope(access_scope, scope)
+    return [
+        scenario_shared_view(team_id, effective_scope, scenario, detail=False)
+        for scenario in scenarios_for_scope(team_id, effective_scope)
+    ]
+
+
 @app.get("/v1/teams/{team_id}/scenarios/public")
-def scenarios(team_id: str, _: str = Depends(authorize_team)):
-    return public_scenarios(team_id)
+def public_scenario_list(
+    team_id: str,
+    _: str = Depends(require_public_scenario_access),
+):
+    return [
+        scenario_shared_view(team_id, "public", scenario, detail=False)
+        for scenario in public_scenarios(team_id)
+    ]
 
 
 @app.get("/v1/teams/{team_id}/scenarios/public/{scenario_id}")
-def scenario(team_id: str, scenario_id: str, _: str = Depends(authorize_team)):
+def public_scenario_detail(
+    team_id: str,
+    scenario_id: str,
+    _: str = Depends(require_public_scenario_access),
+):
     try:
-        return public_scenario(team_id, scenario_id)
+        scenario = scenario_for_scope(team_id, "public", scenario_id)
+        return scenario_shared_view(team_id, "public", scenario, detail=True)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Unknown public scenario") from exc
+
+
+@app.get("/v1/teams/{team_id}/scenarios/hidden")
+def hidden_scenario_list(
+    team_id: str,
+    _: str = Depends(require_hidden_scenario_access),
+):
+    return [
+        scenario_shared_view(team_id, "hidden", scenario, detail=False)
+        for scenario in scenarios_for_scope(team_id, "hidden")
+    ]
+
+
+@app.get("/v1/teams/{team_id}/scenarios/hidden/{scenario_id}")
+def hidden_scenario_detail(
+    team_id: str,
+    scenario_id: str,
+    _: str = Depends(require_hidden_scenario_access),
+):
+    try:
+        scenario = scenario_for_scope(team_id, "hidden", scenario_id)
+        return scenario_shared_view(team_id, "hidden", scenario, detail=True)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Unknown hidden scenario") from exc
+
+
+@app.post("/v1/teams/{team_id}/scenarios/{scenario_id}/evaluate")
+def evaluate_team_scenario(
+    team_id: str,
+    scenario_id: str,
+    request: ScenarioEvaluationRequest,
+    scope: str | None = Query(default=None),
+    access_scope: str = Depends(authorize_scenario_access),
+):
+    effective_scope = _resolve_scenario_scope(access_scope, scope, scenario_id)
+    try:
+        scenario = scenario_for_scope(team_id, effective_scope, scenario_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Unknown scenario") from exc
+
+    if request.plan.team_id != team_id or request.plan.scenario_id != scenario_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Plan team_id/scenario_id must match the evaluation path",
+        )
+
+    result = evaluate_plan(
+        load_case(team_id),
+        scenario,
+        request.plan,
+        request.trace,
+        set(request.rag_hits),
+    )
+    payload = result.model_dump()
+    log_event(
+        logger,
+        "scenario.evaluation.completed",
+        team_id=team_id,
+        scenario_id=scenario_id,
+        scenario_scope=effective_scope,
+        operational_score=payload.get("operational_score"),
+    )
+    return _evaluation_shared_view(team_id, effective_scope, payload)
+
+
+@app.get("/v1/teams/{team_id}/scenarios/{scenario_id}")
+def token_scoped_scenario_detail(
+    team_id: str,
+    scenario_id: str,
+    scope: str | None = Query(default=None),
+    access_scope: str = Depends(authorize_scenario_access),
+):
+    effective_scope = _resolve_scenario_scope(access_scope, scope, scenario_id)
+    try:
+        scenario = scenario_for_scope(team_id, effective_scope, scenario_id)
+        return scenario_shared_view(team_id, effective_scope, scenario, detail=True)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="Unknown scenario") from exc
 
