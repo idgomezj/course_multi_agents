@@ -1,0 +1,160 @@
+{
+  "_comment": "Development/control file for scenario access. Because this repository may be visible, rotate these values for any real deployment or override with SCENARIO_TOKENS_JSON.",
+  "teams": {
+    "team_1": {
+      "public": {
+        "token": "scn_t1_pub_c7a64b9e0f2d4a1b8e5c79d3f06a21b4",
+        "list_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      },
+      "hidden": {
+        "token": "scn_t1_hid_91e5c3a7b2d84f06a1c9e47b5d30f268",
+        "list_fields": [
+          "id",
+          "title",
+          "description"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      }
+    },
+    "team_2": {
+      "public": {
+        "token": "scn_t2_pub_4d8a1f73c6e209b5a8473d1e6c92f054",
+        "list_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      },
+      "hidden": {
+        "token": "scn_t2_hid_b3f0751c8a6d42e99f3147c05e8a26bd",
+        "list_fields": [
+          "id",
+          "title",
+          "description"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      }
+    },
+    "team_3": {
+      "public": {
+        "token": "scn_t3_pub_85c1e7b402ad4936bf7051d9a63e28fc",
+        "list_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      },
+      "hidden": {
+        "token": "scn_t3_hid_2a94d6f17cbe40858d31e7a64f09bc52",
+        "list_fields": [
+          "id",
+          "title",
+          "description"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      }
+    },
+    "team_4": {
+      "public": {
+        "token": "scn_t4_pub_f31a8c406e7b25d9940c1fa683bd572e",
+        "list_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      },
+      "hidden": {
+        "token": "scn_t4_hid_6d0b24f9c18e437aa5f7031cb82e964d",
+        "list_fields": [
+          "id",
+          "title",
+          "description"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      }
+    },
+    "team_5": {
+      "public": {
+        "token": "scn_t5_pub_19e4c7a52d8b4306af91d3e705bc264f",
+        "list_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      },
+      "hidden": {
+        "token": "scn_t5_hid_a6073f9d1c4e58b2d9306af17e45bc82",
+        "list_fields": [
+          "id",
+          "title",
+          "description"
+        ],
+        "detail_fields": [
+          "id",
+          "title",
+          "description",
+          "visible"
+        ]
+      }
+    }
+  }
+}
