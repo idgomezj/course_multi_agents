@@ -1,0 +1,135 @@
+{
+  "team_id": "team_1",
+  "scope": "hidden",
+  "scenarios": [
+    {
+      "id": "T1-H01",
+      "title": "Promotion surge with material pressure",
+      "description": "A promotion creates a demand surge while one material is tight.",
+      "visible": {
+        "promotion_products": [
+          "FG01"
+        ],
+        "confirmed_orders": {
+          "FG01": 1580
+        },
+        "forecast_disagreement": {
+          "FG01": 0.39
+        },
+        "material_warning": "RM02 inventory below normal buffer"
+      },
+      "realized": {
+        "demand_multiplier": {
+          "FG01": [
+            1.42,
+            1.48,
+            1.24,
+            1.12
+          ]
+        },
+        "supplier_delay_days": {
+          "SUP02": 2
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "forecast_pytorch",
+          "estimate_forecast_uncertainty",
+          "get_inventory",
+          "calculate_plan_cost",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md"
+        ]
+      }
+    },
+    {
+      "id": "T1-H02",
+      "title": "Forecast conflict with capacity pressure",
+      "description": "Confirmed demand and forecast disagree while near-term capacity is constrained.",
+      "visible": {
+        "confirmed_orders": {
+          "FG02": 1180
+        },
+        "forecast_disagreement": {
+          "FG02": 0.41
+        },
+        "capacity_warning": {
+          "L1": "high utilization"
+        }
+      },
+      "realized": {
+        "demand_multiplier": {
+          "FG02": [
+            1.18,
+            1.25,
+            1.15,
+            1.08
+          ]
+        },
+        "downtime_hours": {
+          "L1": [
+            4,
+            2,
+            0,
+            0
+          ]
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "forecast_pytorch",
+          "estimate_forecast_uncertainty",
+          "get_production_capacity",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md"
+        ]
+      }
+    },
+    {
+      "id": "T1-H03",
+      "title": "Demand spike with supplier delay",
+      "description": "A volatile product receives a demand signal while a supplier shows elevated delivery risk.",
+      "visible": {
+        "promotion_products": [
+          "FG03"
+        ],
+        "confirmed_orders": {
+          "FG03": 960
+        },
+        "supplier_recent_late_rate": {
+          "SUP02": 0.46
+        },
+        "season_risk": 0.58
+      },
+      "realized": {
+        "demand_multiplier": {
+          "FG03": [
+            1.3,
+            1.44,
+            1.38,
+            1.18
+          ]
+        },
+        "supplier_delay_days": {
+          "SUP02": 6
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "forecast_pytorch",
+          "predict_supplier_delay",
+          "find_alternative_supplier",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "operations_policy.md",
+          "supplier_contracts.md"
+        ]
+      }
+    }
+  ]
+}
