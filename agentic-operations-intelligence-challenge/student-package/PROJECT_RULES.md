@@ -17,6 +17,7 @@ El equipo no puede:
 
 - modificar la plataforma o el evaluador;
 - modificar el contrato de I/O del modelo para cambiar la interfaz esperada por las tools;
+- modificar `raw_case_history.csv` o reemplazar la evidencia histórica suministrada; los estudiantes deben crear archivos derivados nuevos;
 - pedir a la Data API filas de entrenamiento o intentar descubrir datos/holdouts privados;
 - hardcodear respuestas por scenario ID;
 - detectar el test y devolver una respuesta precalculada;
