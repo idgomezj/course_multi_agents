@@ -26,6 +26,7 @@ class DataApiClient:
         base_url: str | None = None,
         team_token: str | None = None,
         instructor_token: str | None = None,
+        client_type: str | None = None,
         timeout: float = 20.0,
     ):
         self.base_url = (base_url or os.getenv("DATA_API_URL", "http://localhost:8100")).rstrip("/")
@@ -33,7 +34,13 @@ class DataApiClient:
         self.instructor_token = (
             instructor_token if instructor_token is not None else os.getenv("DATA_API_INSTRUCTOR_TOKEN")
         )
+        self.client_type = (
+            client_type
+            if client_type is not None
+            else os.getenv("DATA_API_CLIENT_TYPE", "challenge-runtime")
+        )
         self.timeout = timeout
+        self._start_context_cache: dict[str, dict[str, Any]] = {}
 
     def _headers(self) -> dict[str, str]:
         headers: dict[str, str] = {}
@@ -41,6 +48,8 @@ class DataApiClient:
             headers["X-Team-Token"] = self.team_token
         if self.instructor_token:
             headers["X-Instructor-Token"] = self.instructor_token
+        if self.client_type:
+            headers["X-Client-Type"] = self.client_type
         return headers
 
     def _get(self, path: str, params: dict[str, Any] | None = None) -> Any:
@@ -149,7 +158,16 @@ class DataApiClient:
     def list_teams(self) -> list[dict[str, Any]]:
         return self._get("/v1/teams")
 
+    def start_context(self, team_id: str, *, refresh: bool = False) -> dict[str, Any]:
+        """Load the canonical case context before any scenario/model-resolution work."""
+        if not refresh and team_id in self._start_context_cache:
+            return self._start_context_cache[team_id]
+        payload = self._get(f"/v1/teams/{team_id}/start-context")
+        self._start_context_cache[team_id] = payload
+        return payload
+
     def bootstrap(self, team_id: str) -> dict[str, Any]:
+        # Kept for compatibility. New runtime code should use start_context().
         return self._get(f"/v1/teams/{team_id}/bootstrap")
 
     def get_case(self, team_id: str) -> dict[str, Any]:
@@ -162,10 +180,12 @@ class DataApiClient:
 
     def get_scenarios(self, team_id: str) -> list[dict[str, Any]]:
         """Return the scenario set selected by the active token scope."""
+        self.start_context(team_id)
         return self._get(f"/v1/teams/{team_id}/scenarios")
 
     def get_scenario(self, team_id: str, scenario_id: str) -> dict[str, Any]:
         """Return only the fields this token is allowed to see."""
+        self.start_context(team_id)
         return self._get(f"/v1/teams/{team_id}/scenarios/{scenario_id}")
 
     def evaluate_scenario(
