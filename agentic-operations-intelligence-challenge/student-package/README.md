@@ -2,38 +2,76 @@
 
 ## Su misión
 
-La aplicación, el Manager, las tools y la infraestructura ya están construidos.
+La aplicación, el Manager, las tools, el simulador y el evaluador ya están construidos.
 
-Su equipo solo modifica:
+Su equipo debe enseñar al sistema cómo operar su caso mediante:
 
-1. sus modelos PyTorch;
-2. la configuración/estrategia RAG permitida;
-3. sus Skills.
+1. construcción y entrenamiento de sus modelos PyTorch;
+2. configuración/estrategia RAG;
+3. diseño/mejora de Skills.
 
-Toda la información empresarial de su caso se obtiene en runtime mediante la **Data API del curso**. Su token solo debe permitir acceso al equipo asignado.
+## El entrenamiento también es parte del reto
 
-## El sistema debe
+No existe un endpoint que entregue un dataset supervisado listo.
 
-- producir un plan mensual integrado;
-- cumplir demanda/servicio;
-- respetar materiales, capacidad, proveedores y políticas;
-- manejar la incertidumbre particular del caso;
-- minimizar el costo operacional total.
+Cada equipo recibe dentro de su paquete:
 
-## No pueden modificar
+```text
+student/team_X/training/
+├── CASE_TRAINING.md
+├── raw_case_history.csv
+└── model_contract.json
+```
 
-- Manager Agent;
+`raw_case_history.csv` contiene evidencia histórica de negocio, no features/targets ya preparados. El equipo debe transformar esa historia en:
+
+```text
+model_a_training.csv
+model_b_training.csv
+```
+
+según el contexto del caso y el contrato del modelo.
+
+Esto exige construir ventanas, features y labels, decidir cómo validar, evitar leakage y justificar las decisiones. El equipo puede modificar la arquitectura y el procedimiento de entrenamiento, pero el modelo exportado debe respetar el contrato de entrada/salida entregado.
+
+## Uso de la Data API
+
+La Data API se utiliza **durante la ejecución de escenarios** para obtener el estado autorizado del negocio, documentos y escenarios públicos. No entrega training rows ni un generador de respuestas para los modelos.
+
+La evaluación final utilizará escenarios y holdouts no vistos durante el desarrollo.
+
+## Qué pueden modificar
+
+Como parte del trabajo de modelos pueden:
+
+- construir sus CSV supervisados locales a partir del historial entregado;
+- modificar el trainer/arquitectura/hyperparámetros;
+- entrenar y exportar `model_a.pt2` y `model_b.pt2`;
+- modificar RAG dentro del alcance permitido;
+- modificar Skills.
+
+## Qué NO pueden modificar
+
+No se puede modificar:
+
+- Manager Agent de runtime;
 - backend/framework;
 - frontend;
 - implementación de tools;
 - simulador;
 - motor de costos;
-- evaluator;
+- evaluator/scoring;
 - schemas;
-- Data API.
+- Data API;
+- escenarios/holdouts ocultos;
+- el contrato de I/O del modelo para evadir la plataforma.
 
-## No deben almacenar copias locales de los datos
+## Resultado final
 
-No creen una copia del dataset o documentos RAG para evitar la API. El training script y el runtime solicitan la información al servicio usando `DATA_API_URL` y `DATA_API_TOKEN`.
+El sistema debe producir un plan mensual integrado que:
 
-La evaluación final utilizará escenarios no vistos durante el desarrollo.
+- cumpla servicio;
+- respete materiales, capacidad, proveedores y políticas;
+- maneje la incertidumbre particular del caso;
+- minimice el costo operacional total;
+- generalice a escenarios no vistos.
