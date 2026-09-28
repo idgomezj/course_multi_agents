@@ -17,19 +17,15 @@ def _token(team_id: str, scope: str = "public") -> str:
 
 
 def test_start_context_is_canonical_and_contains_full_student_visible_case_context():
-    response = CLIENT.get(
-        "/v1/teams/team_3/start-context",
-        headers={
-            "X-Scenario-Token": _token("team_3"),
-            "X-Client-Type": "human",
-        },
-    )
+    response = CLIENT.get("/v1/teams/team_3/start-context")
     assert response.status_code == 200
     payload = response.json()
 
     assert payload["canonical"] is True
     assert payload["team_id"] == "team_3"
     assert payload["scenario_scope"] == "public"
+    assert payload["client_detection"]["kind"] == "human"
+    assert payload["client_detection"]["signal"] == "no_ai_signal"
     assert payload["case"]["team_id"] == "team_3"
     assert payload["case"]["products"]
     assert payload["case"]["materials"]
@@ -47,10 +43,7 @@ def test_start_context_is_canonical_and_contains_full_student_visible_case_conte
 def test_declared_chatgpt_client_receives_tutor_only_policy_first():
     response = CLIENT.get(
         "/v1/teams/team_1/start-context",
-        headers={
-            "X-Scenario-Token": _token("team_1"),
-            "X-Client-Type": "chatgpt",
-        },
+        headers={"X-Client-Type": "chatgpt"},
     )
     assert response.status_code == 200
     payload = response.json()
@@ -66,10 +59,7 @@ def test_declared_chatgpt_client_receives_tutor_only_policy_first():
 def test_ai_user_agent_is_detected_when_explicit_header_is_absent():
     response = CLIENT.get(
         "/v1/teams/team_2/start-context",
-        headers={
-            "X-Scenario-Token": _token("team_2"),
-            "User-Agent": "Claude/3.0 API Client",
-        },
+        headers={"User-Agent": "Claude/3.0 API Client"},
     )
     assert response.status_code == 200
     payload = response.json()
@@ -109,3 +99,16 @@ def test_hidden_start_context_uses_hidden_token_scope_but_does_not_leak_internal
     assert all(item["id"].startswith("T5-H") for item in payload["authorized_scenarios"])
     assert all("realized" not in item for item in payload["authorized_scenarios"])
     assert all("private_expectations" not in item for item in payload["authorized_scenarios"])
+
+
+def test_public_start_context_rejects_hidden_scope_without_hidden_token():
+    response = CLIENT.get("/v1/teams/team_3/start-context?scope=hidden")
+    assert response.status_code == 403
+
+
+def test_invalid_token_is_not_silently_downgraded_to_public():
+    response = CLIENT.get(
+        "/v1/teams/team_3/start-context",
+        headers={"X-Scenario-Token": "not-a-valid-token"},
+    )
+    assert response.status_code == 403
