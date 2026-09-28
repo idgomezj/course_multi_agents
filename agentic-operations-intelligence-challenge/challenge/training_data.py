@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -13,12 +14,18 @@ def model_contract_path(team_id: str) -> Path:
     return student_path(team_id) / "training" / "model_contract.json"
 
 
-def raw_case_history_path(team_id: str) -> Path:
-    return student_path(team_id) / "training" / "raw_case_history.csv"
-
-
 def processed_training_path(team_id: str, model_key: str) -> Path:
     return student_path(team_id) / "training" / f"{model_key}_training.csv"
+
+
+def downloaded_raw_source_path(team_id: str) -> Path:
+    """Suggested location for the raw JSON a student downloads from the Data API."""
+    return student_path(team_id) / "training" / "raw_source.json"
+
+
+def training_source_url(team_id: str) -> str:
+    base = os.getenv("DATA_API_URL", "http://localhost:8100").rstrip("/")
+    return f"{base}/v1/teams/{team_id}/training-source.json"
 
 
 def load_model_spec(team_id: str) -> dict[str, Any]:
@@ -27,17 +34,9 @@ def load_model_spec(team_id: str) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(
             f"Local model contract not found: {path}. "
-            "The model contract is part of the assigned case package, not the Data API."
+            "The model contract is part of the assigned case package."
         )
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def load_raw_case_history(team_id: str) -> pd.DataFrame:
-    """Load readable raw historical evidence supplied with the case."""
-    path = raw_case_history_path(team_id)
-    if not path.exists():
-        raise FileNotFoundError(f"Raw case history not found: {path}")
-    return pd.read_csv(path)
 
 
 def load_training_frame(
@@ -45,11 +44,11 @@ def load_training_frame(
     model_key: str,
     dataset_path: str | Path | None = None,
 ) -> pd.DataFrame:
-    """Load a supervised dataset BUILT BY THE STUDENT from the raw case history.
+    """Load a supervised dataset built by the student from the raw JSON source.
 
-    The platform intentionally does not generate features or labels. Students must
-    create model_a_training.csv/model_b_training.csv from raw_case_history.csv and
-    the business case description.
+    The platform intentionally does not fetch, clean, filter, engineer or label
+    model-training rows. Students must retrieve the raw JSON source from the
+    team-scoped Data API and create model_a_training.csv/model_b_training.csv.
     """
     spec = load_model_spec(team_id)
     if model_key not in spec.get("models", {}):
@@ -57,12 +56,14 @@ def load_training_frame(
 
     path = Path(dataset_path) if dataset_path else processed_training_path(team_id, model_key)
     if not path.exists():
-        raw = raw_case_history_path(team_id)
         brief = student_path(team_id) / "training" / "CASE_TRAINING.md"
+        raw_target = downloaded_raw_source_path(team_id)
         raise FileNotFoundError(
             f"Training dataset not found: {path}\n"
-            f"Build it yourself from {raw} using the assignment guidance in {brief}.\n"
-            f"The Data API does not provide training rows."
+            f"Retrieve the raw JSON from {training_source_url(team_id)} and save/inspect it "
+            f"(suggested path: {raw_target}).\n"
+            f"Then build {path.name} yourself using the business guidance in {brief}. "
+            "The API intentionally does not return a cleaned or model-ready training table."
         )
 
     frame = pd.read_csv(path)
@@ -76,7 +77,7 @@ def load_training_frame(
         )
     if len(frame) < 20:
         raise ValueError(
-            f"{path} has only {len(frame)} rows. Build a defensible training dataset "
-            "from the supplied history before training."
+            f"{path} has only {len(frame)} rows. Build a defensible supervised dataset "
+            "from the raw JSON source before training."
         )
     return frame
