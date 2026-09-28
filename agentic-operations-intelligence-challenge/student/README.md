@@ -37,7 +37,7 @@ and the fixed runtime interface:
 student/team_X/training/model_contract.json
 ```
 
-Read `CASE_TRAINING.md` and the assigned case description. Then build the supervised datasets yourself.
+Treat `raw_case_history.csv` and `model_contract.json` as read-only assignment inputs. Read `CASE_TRAINING.md` and the assigned case description, then build new supervised dataset files yourself.
 
 That work includes, depending on the case:
 
