@@ -1,0 +1,100 @@
+{
+  "team_id": "team_4",
+  "scope": "hidden",
+  "scenarios": [
+    {
+      "id": "T4-H01",
+      "title": "Delay and quality deterioration",
+      "description": "The same supplier shows both delivery and quality deterioration.",
+      "visible": {
+        "supplier_recent_late_rate": {
+          "SUP02": 0.48
+        },
+        "supplier_recent_reject_rate": {
+          "SUP02": 0.17
+        },
+        "supplier_process_change": {
+          "SUP02": 1
+        }
+      },
+      "realized": {
+        "supplier_delay_days": {
+          "SUP02": 7
+        },
+        "supplier_reject_fraction": {
+          "SUP02": 0.24
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "predict_supplier_delay",
+          "predict_supplier_quality",
+          "find_alternative_supplier",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "supplier_contracts.md",
+          "operations_policy.md"
+        ]
+      }
+    },
+    {
+      "id": "T4-H02",
+      "title": "Two supplier failures",
+      "description": "Two suppliers simultaneously show elevated disruption risk for critical materials.",
+      "visible": {
+        "supplier_recent_late_rate": {
+          "SUP01": 0.39,
+          "SUP02": 0.47
+        },
+        "season_risk": 0.74
+      },
+      "realized": {
+        "supplier_delay_days": {
+          "SUP01": 6,
+          "SUP02": 8
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "predict_supplier_delay",
+          "find_alternative_supplier",
+          "calculate_plan_cost",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "supplier_contracts.md"
+        ]
+      }
+    },
+    {
+      "id": "T4-H03",
+      "title": "Critical material under port disruption",
+      "description": "A critical material is exposed to a regional logistics disruption.",
+      "visible": {
+        "critical_material": "RM03",
+        "port_disruption_risk": "high",
+        "supplier_recent_late_rate": {
+          "SUP03": 0.26
+        }
+      },
+      "realized": {
+        "supplier_delay_days": {
+          "SUP03": 9
+        }
+      },
+      "private_expectations": {
+        "required_tools": [
+          "predict_supplier_delay",
+          "find_alternative_supplier",
+          "search_knowledge",
+          "validate_plan"
+        ],
+        "rag_expected_sources": [
+          "supplier_contracts.md",
+          "operations_policy.md"
+        ]
+      }
+    }
+  ]
+}
