@@ -101,6 +101,53 @@ def authorize_scenario_access(
     raise HTTPException(status_code=403, detail="Scenario token is not authorized for this team")
 
 
+def start_context_scenario_access(
+    team_id: str,
+    x_team_token: str | None = Header(default=None),
+    x_scenario_token: str | None = Header(default=None),
+    x_instructor_token: str | None = Header(default=None),
+) -> str:
+    """Resolve start-context scope.
+
+    Public start context is intentionally open: no token means public scope.
+    A valid hidden token upgrades only this request to hidden scope. If a token
+    is presented but is invalid for the requested team, reject it rather than
+    silently treating it as public.
+    """
+    settings = get_settings()
+    if team_id not in available_teams():
+        raise HTTPException(status_code=404, detail="Unknown team")
+
+    if _equal(x_instructor_token, settings.instructor_token):
+        log_event(logger, "auth.start_context.allowed", team_id=team_id, auth_mode="instructor")
+        return "instructor"
+
+    token = _presented_token(x_scenario_token, x_team_token)
+    if not token:
+        log_event(logger, "auth.start_context.allowed", team_id=team_id, auth_mode="open_public")
+        return "public"
+
+    scope = scenario_scope_for_token(team_id, token)
+    if scope:
+        log_event(
+            logger,
+            "auth.start_context.allowed",
+            team_id=team_id,
+            auth_mode=f"scenario_{scope}",
+        )
+        return scope
+
+    log_event(
+        logger,
+        "auth.start_context.denied",
+        level=logging.WARNING,
+        team_id=team_id,
+        has_team_token=bool(x_team_token),
+        has_scenario_token=bool(x_scenario_token),
+    )
+    raise HTTPException(status_code=403, detail="Token is not authorized for this team")
+
+
 def require_public_scenario_access(
     team_id: str,
     x_team_token: str | None = Header(default=None),
