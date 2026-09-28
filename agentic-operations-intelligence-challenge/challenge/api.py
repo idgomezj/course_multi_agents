@@ -9,7 +9,6 @@ from pydantic import BaseModel
 
 from .config import FRONTEND_DIR
 from .data_api import DataApiError, get_data_client
-from .evaluator import evaluate_plan
 from .llm_config import default_manager_model_id, manager_model_status, resolve_manager_model
 from .manager import run_manager
 from .observability import log_event, new_trace_id, reset_trace_context, set_trace_context, setup_logging
@@ -102,8 +101,13 @@ async def evaluate(request: EvaluateRequest):
         scenario = get_public_scenario(request.team_id, request.scenario_id)
         selected_model, _settings = resolve_manager_model(request.model_id)
         plan, deps = await run_manager(request.team_id, scenario, request.model_id)
-        result = evaluate_plan(deps.case, scenario, plan, deps.trace, deps.rag_hits)
-        payload = result.model_dump()
+        payload = get_data_client().evaluate_scenario(
+            request.team_id,
+            request.scenario_id,
+            plan.model_dump(),
+            deps.trace,
+            sorted(deps.rag_hits),
+        )
         payload["manager_model_id"] = request.model_id or default_manager_model_id()
         payload["manager_model"] = selected_model
         log_event(
