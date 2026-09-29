@@ -6,6 +6,7 @@ import os
 import sys
 import traceback
 import uuid
+from datetime import datetime
 from contextvars import ContextVar, Token
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -114,55 +115,83 @@ def sanitize(value: Any, *, depth: int = 0) -> Any:
 
 
 class StructuredFormatter(logging.Formatter):
-    """Human-readable formatter styled like Uvicorn's terminal output."""
+    """Text formatter: level, time, pid, trace, span, file, body."""
 
     _LEVEL_COLORS = {
-        logging.DEBUG: "\x1b[36m",      # cyan
-        logging.INFO: "\x1b[32m",       # green
-        logging.WARNING: "\x1b[33m",    # yellow
-        logging.ERROR: "\x1b[31m",      # red
-        logging.CRITICAL: "\x1b[1;31m", # bold red
+        logging.DEBUG: "\x1b[36m",
+        logging.INFO: "\x1b[32m",
+        logging.WARNING: "\x1b[33m",
+        logging.ERROR: "\x1b[31m",
+        logging.CRITICAL: "\x1b[1;31m",
     }
     _RESET = "\x1b[0m"
 
     def __init__(self, service_name: str, json_mode: bool = False, use_colors: bool = False):
         super().__init__()
         self.service_name = service_name
-        # Kept only for backward-compatible construction in tests/callers.
-        # Runtime logging is intentionally text-only.
         self.json_mode = False
         self.use_colors = use_colors
 
     def _level_prefix(self, record: logging.LogRecord) -> str:
         prefix = f"{record.levelname}:"
-        padded = f"{prefix:<9}"
         if not self.use_colors:
-            return padded
+            return prefix
         color = self._LEVEL_COLORS.get(record.levelno, "")
-        return f"{color}{padded}{self._RESET}" if color else padded
+        return f"{color}{prefix}{self._RESET}" if color else prefix
+
+    @staticmethod
+    def _text_value(value: Any) -> str:
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if value is None:
+            return "null"
+        if isinstance(value, (int, float)):
+            return str(value)
+        if isinstance(value, str):
+            if value and not any(ch.isspace() for ch in value) and "=" not in value:
+                return value
+            return json.dumps(value, ensure_ascii=False)
+        return json.dumps(value, default=str, ensure_ascii=False, separators=(",", ":"))
 
     def format(self, record: logging.LogRecord) -> str:
-        event = getattr(record, "event", record.getMessage())
+        event = str(getattr(record, "event", record.getMessage()))
         data = sanitize(getattr(record, "event_data", {}))
-        trace_id = getattr(record, "trace_id", current_trace_id())
-        span_id = getattr(record, "span_id", current_span_id())
+        trace_id = str(getattr(record, "trace_id", current_trace_id()))
+        span_id = str(getattr(record, "span_id", current_span_id()))
+        timestamp = datetime.fromtimestamp(record.created).astimezone().isoformat(timespec="milliseconds")
 
-        suffix = ""
-        if data:
-            suffix = " " + json.dumps(data, default=str, ensure_ascii=False)
+        body_parts = [event]
+        if isinstance(data, dict):
+            body_parts.extend(
+                f"{key}={self._text_value(value)}"
+                for key, value in data.items()
+            )
+        elif data:
+            body_parts.append(self._text_value(data))
 
-        context_parts = [
-            f"[{record.filename}:{record.lineno}:{record.funcName}]",
-        ]
-        if trace_id != "-":
-            context_parts.append(f"[trace={trace_id}]")
-        if span_id != "-":
-            context_parts.append(f"[span={span_id}]")
-
-        message = f"{self._level_prefix(record)} {' '.join(context_parts)} {event}{suffix}"
+        body = " ".join(body_parts)
+        message = (
+            f"{self._level_prefix(record)} "
+            f"{timestamp} "
+            f"pid={record.process} "
+            f"trace={trace_id} "
+            f"span={span_id} "
+            f"file={record.filename}:{record.lineno} "
+            f"body={body}"
+        )
         if record.exc_info:
             message += "\n" + "".join(traceback.format_exception(*record.exc_info))
         return message
+
+
+def _route_uvicorn_logs_through_root() -> None:
+    """Use the same formatter for Uvicorn error/access/application records."""
+    for logger_name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
+        external = logging.getLogger(logger_name)
+        external.handlers.clear()
+        external.propagate = True
+
+
 
 def setup_logging(service_name: str) -> logging.Logger:
     """Configure safe console + rotating-file logs exactly once per process."""
@@ -201,6 +230,7 @@ def setup_logging(service_name: str) -> logging.Logger:
             file_handler.setFormatter(file_formatter)
             root.addHandler(file_handler)
 
+        _route_uvicorn_logs_through_root()
         setattr(root, marker, True)
 
     logger = logging.getLogger(service_name)
@@ -209,7 +239,7 @@ def setup_logging(service_name: str) -> logging.Logger:
         "logging.configured",
         level=logging.INFO,
         log_level=level_name,
-        log_format="uvicorn-style-text",
+        log_format="level-time-pid-trace-span-file-body-text",
         log_colors=_truthy("LOG_COLORS", "true"),
         log_file=os.getenv("LOG_FILE", ""),
         log_payloads=_truthy("LOG_PAYLOADS", "true"),
