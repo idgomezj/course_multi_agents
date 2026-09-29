@@ -51,16 +51,16 @@ def test_structured_formatter_uses_requested_text_field_order():
     record.span_id = "span-456"
 
     text_line = StructuredFormatter("test-service", use_colors=False).format(record)
-    assert text_line.startswith("<INFO> ")
+    assert text_line.startswith("INFO ")
     assert "[trace_id:trace-123]" in text_line
     assert "[span_id:span-456]" in text_line
-    assert "<example_worker.py>" in text_line
-    assert "<demo.event safe=true>" in text_line
+    assert "example_worker.py -  " in text_line
+    assert text_line.endswith("demo.event safe=true")
 
-    # Required field order: <level> time [trace_id:] [span_id:] <file> <body>.
+    # Required field order: LEVEL time [trace_id:] [span_id:] file -  body.
     assert text_line.index("[trace_id:") < text_line.index("[span_id:")
-    assert text_line.index("[span_id:") < text_line.index("<example_worker.py>")
-    assert text_line.index("<example_worker.py>") < text_line.index("<demo.event")
+    assert text_line.index("[span_id:") < text_line.index("example_worker.py -  ")
+    assert text_line.index("example_worker.py -  ") < text_line.index("demo.event")
 
 
 def test_structured_formatter_colors_level_prefix():
@@ -82,9 +82,9 @@ def test_structured_formatter_colors_level_prefix():
     colored = StructuredFormatter("test-service", use_colors=True).format(record)
     plain = StructuredFormatter("test-service", use_colors=False).format(record)
 
-    assert colored.startswith("\x1b[32m<INFO>")
+    assert colored.startswith("\x1b[32mINFO")
     assert "\x1b[0m" in colored
-    assert plain.startswith("<INFO> ")
+    assert plain.startswith("INFO ")
     assert "\x1b[" not in plain
 
 
