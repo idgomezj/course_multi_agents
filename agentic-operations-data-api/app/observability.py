@@ -175,7 +175,7 @@ class StructuredFormatter(logging.Formatter):
             f"{timestamp} "
             f"[trace_id:{trace_id}] "
             f"[span_id:{span_id}] "
-            f"<{record.filename}:{record.lineno}> "
+            f"<{record.filename}> "
             f"<{body}>"
         )
         if record.exc_info:
