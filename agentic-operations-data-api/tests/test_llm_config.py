@@ -16,10 +16,10 @@ def test_manager_model_status_does_not_expose_api_key_values(monkeypatch):
     assert openai["configured"] is True
 
 
-def test_deepseek_disables_thinking_for_structured_tool_output():
+def test_deepseek_disables_thinking_without_version_specific_openai_settings():
     model, settings = resolve_manager_model("deepseek")
     assert model.startswith("deepseek:")
-    assert settings is not None
+    assert settings == {"thinking": False}
 
 
 def test_manager_request_limit_defaults_and_is_bounded(monkeypatch):
