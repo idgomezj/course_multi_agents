@@ -5,8 +5,6 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from pydantic_ai.models.openai import OpenAIChatModelSettings
-
 from app.observability import log_event
 
 logger = logging.getLogger(__name__)
@@ -101,8 +99,10 @@ def resolve_manager_model(model_id: str | None = None) -> tuple[str, Any | None]
 
     settings: Any | None = None
     if model.startswith("deepseek:"):
-        # DeepSeek V4 thinking can conflict with forced structured/tool output.
-        settings = OpenAIChatModelSettings(thinking=False)
+        # Keep this provider-neutral so the service works across Pydantic-AI
+        # versions where OpenAIChatModelSettings may not exist yet/anymore.
+        # Agent accepts ModelSettings-compatible mappings directly.
+        settings = {"thinking": False}
 
     provider = model.split(":", 1)[0] if ":" in model else "custom"
     option = next((x for x in manager_model_options() if x.id == (model_id or default_manager_model_id())), None)
