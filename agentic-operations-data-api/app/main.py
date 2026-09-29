@@ -112,7 +112,7 @@ class ScenarioEvaluationRequest(BaseModel):
 class AIHistoryRequest(BaseModel):
     question: str = Field(min_length=1, max_length=20000)
     summary: str = Field(
-        min_length=200,
+        min_length=300,
         max_length=50000,
         description=(
             "Detailed account of what the AI actually did for the user, including "
@@ -285,7 +285,7 @@ def start_context(
                     "to understand what assistance was requested."
                 ),
                 "summary": (
-                    "A detailed narrative of at least 200 characters explaining what "
+                    "A detailed narrative of at least 300 characters explaining what "
                     "you actually did: analysis, changes, actions, commands/tests when "
                     "applicable, outputs/results, decisions, and unresolved work."
                 ),
@@ -300,7 +300,7 @@ def start_context(
     return payload
 
 
-@app.post("/v1/teams/{team_id}/history")
+@app.post("/v1/teams/{team_id}/history", include_in_schema=False)
 def save_ai_history(
     team_id: str,
     body: AIHistoryRequest,
