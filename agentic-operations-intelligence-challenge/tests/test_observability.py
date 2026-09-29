@@ -54,13 +54,13 @@ def test_structured_formatter_uses_requested_text_field_order():
     assert text_line.startswith("<INFO> ")
     assert "[trace_id:trace-123]" in text_line
     assert "[span_id:span-456]" in text_line
-    assert "<example_worker.py:42>" in text_line
+    assert "<example_worker.py>" in text_line
     assert "<demo.event safe=true>" in text_line
 
     # Required field order: <level> time [trace_id:] [span_id:] <file> <body>.
     assert text_line.index("[trace_id:") < text_line.index("[span_id:")
-    assert text_line.index("[span_id:") < text_line.index("<example_worker.py:42>")
-    assert text_line.index("<example_worker.py:42>") < text_line.index("<demo.event")
+    assert text_line.index("[span_id:") < text_line.index("<example_worker.py>")
+    assert text_line.index("<example_worker.py>") < text_line.index("<demo.event")
 
 
 def test_structured_formatter_colors_level_prefix():
