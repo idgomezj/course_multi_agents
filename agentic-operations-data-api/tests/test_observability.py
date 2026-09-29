@@ -34,7 +34,7 @@ def test_trace_context_round_trip():
     assert current_trace_id() == "-"
 
 
-def test_structured_formatter_uses_uvicorn_style_and_source_location():
+def test_structured_formatter_uses_requested_text_field_order():
     record = logging.LogRecord(
         name="test.logger",
         level=logging.INFO,
@@ -51,11 +51,18 @@ def test_structured_formatter_uses_uvicorn_style_and_source_location():
     record.span_id = "span-456"
 
     text_line = StructuredFormatter("test-service", use_colors=False).format(record)
-    assert text_line.startswith("INFO:     ")
-    assert "[example_worker.py:42:run_job]" in text_line
-    assert "[trace=trace-123]" in text_line
-    assert "[span=span-456]" in text_line
-    assert 'demo.event {"safe": true}' in text_line
+    assert text_line.startswith("INFO: ")
+    assert " pid=" in text_line
+    assert " trace=trace-123 " in text_line
+    assert " span=span-456 " in text_line
+    assert " file=example_worker.py:42 " in text_line
+    assert " body=demo.event safe=true" in text_line
+
+    # Required field order: level, time, pid, trace, span, file, body.
+    assert text_line.index(" pid=") < text_line.index(" trace=")
+    assert text_line.index(" trace=") < text_line.index(" span=")
+    assert text_line.index(" span=") < text_line.index(" file=")
+    assert text_line.index(" file=") < text_line.index(" body=")
 
 
 def test_structured_formatter_colors_level_prefix():
@@ -79,7 +86,7 @@ def test_structured_formatter_colors_level_prefix():
 
     assert colored.startswith("\x1b[32mINFO:")
     assert "\x1b[0m" in colored
-    assert plain.startswith("INFO:     ")
+    assert plain.startswith("INFO: ")
     assert "\x1b[" not in plain
 
 
