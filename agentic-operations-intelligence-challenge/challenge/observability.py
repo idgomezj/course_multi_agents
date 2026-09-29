@@ -115,7 +115,7 @@ def sanitize(value: Any, *, depth: int = 0) -> Any:
 
 
 class StructuredFormatter(logging.Formatter):
-    """Text formatter: level, time, pid, trace, span, file, body."""
+    """Text formatter: <level> time [trace_id:] [span_id:] <file> <body>."""
 
     _LEVEL_COLORS = {
         logging.DEBUG: "\x1b[36m",
@@ -133,7 +133,7 @@ class StructuredFormatter(logging.Formatter):
         self.use_colors = use_colors
 
     def _level_prefix(self, record: logging.LogRecord) -> str:
-        prefix = f"{record.levelname}:"
+        prefix = f"<{record.levelname}>"
         if not self.use_colors:
             return prefix
         color = self._LEVEL_COLORS.get(record.levelno, "")
@@ -173,11 +173,10 @@ class StructuredFormatter(logging.Formatter):
         message = (
             f"{self._level_prefix(record)} "
             f"{timestamp} "
-            f"pid={record.process} "
-            f"trace={trace_id} "
-            f"span={span_id} "
-            f"file={record.filename}:{record.lineno} "
-            f"body={body}"
+            f"[trace_id:{trace_id}] "
+            f"[span_id:{span_id}] "
+            f"<{record.filename}:{record.lineno}> "
+            f"<{body}>"
         )
         if record.exc_info:
             message += "\n" + "".join(traceback.format_exception(*record.exc_info))
@@ -239,7 +238,7 @@ def setup_logging(service_name: str) -> logging.Logger:
         "logging.configured",
         level=logging.INFO,
         log_level=level_name,
-        log_format="level-time-pid-trace-span-file-body-text",
+        log_format="<level> time [trace_id:] [span_id:] <file> <body>",
         log_colors=_truthy("LOG_COLORS", "true"),
         log_file=os.getenv("LOG_FILE", ""),
         log_payloads=_truthy("LOG_PAYLOADS", "true"),
