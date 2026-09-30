@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from .config import FRONTEND_DIR, student_path
+from .config import FRONTEND_DIR, student_path, student_team_ids
 from .data_api import DataApiError, get_data_client
 from .llm_config import default_manager_model_id, manager_model_status, resolve_manager_model
 from .manager import run_manager
@@ -77,29 +77,56 @@ def manager_models():
     }
 
 
+def _require_student_team(team_id: str) -> None:
+    try:
+        allowed = student_team_ids()
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    if team_id not in allowed:
+        raise HTTPException(status_code=404, detail="Team is not available in this student package")
+
+
 @app.get("/api/teams")
 def teams():
+    """List Team 1-5 workspaces from the student package using public start context."""
     try:
-        return get_data_client().list_teams()
+        out = []
+        for team_id in student_team_ids():
+            context = get_data_client().public_start_context(team_id)
+            case = context.get("case", {})
+            out.append({
+                "team_id": team_id,
+                "name": case.get("name", team_id),
+                "description": case.get("description", ""),
+                "objective": case.get("objective", ""),
+            })
+        return out
     except DataApiError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @app.get("/api/scenarios/{team_id}")
 def scenarios(team_id: str):
+    """Return public scenario cards, including expected optimized cost when shared."""
+    _require_student_team(team_id)
     try:
-        return [student_visible_scenario(x) for x in list_public_scenarios(team_id)]
+        context = get_data_client().public_start_context(team_id)
+        return [
+            student_visible_scenario(x)
+            for x in context.get("authorized_scenarios", [])
+        ]
     except DataApiError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
-
-
 @app.get("/api/status/{team_id}")
 def team_status(team_id: str):
-    """Return the same runtime-readiness information shown by the Case 0 demo."""
+    """Return the same runtime-readiness information shown by the instructor demo."""
+    _require_student_team(team_id)
     try:
-        context = get_data_client().start_context(team_id)
+        context = get_data_client().public_start_context(team_id)
         workspace = student_path(team_id)
         model_spec = load_model_spec(team_id)
     except DataApiError as exc:
@@ -136,6 +163,7 @@ def team_status(team_id: str):
 
 @app.post("/api/evaluate")
 async def evaluate(request: EvaluateRequest):
+    _require_student_team(request.team_id)
     log_event(logger, "evaluation.requested", team_id=request.team_id, scenario_id=request.scenario_id, model_id=request.model_id)
     try:
         scenario = get_public_scenario(request.team_id, request.scenario_id)
