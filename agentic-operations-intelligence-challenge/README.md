@@ -71,6 +71,23 @@ GET /v1/teams/{team_id}/start-context
 
 This is the authoritative starting context for the assigned case. It provides the student-visible case, RAG documents, authorized scenario list, workflow and resource locations. The caller must truthfully identify itself through the required `X-Client-Type` header and must follow the context returned by the service.
 
+## Frontend capabilities
+
+The challenge frontend now exposes the same transferable review capabilities as the richer Case 0 demo while preserving team/scenario access rules:
+
+- runtime readiness badges for Data, RAG, Skills, local PyTorch artifacts, and LLM providers;
+- the selected case objective and service-level target;
+- public scenario description and visible conditions;
+- **Objective Price / Benchmark** before a public evaluation when the active scope allows it;
+- Operational, Feasibility, Service, Total Cost, Cost Gap, Cost Score, RAG, and Skills/Tools metrics;
+- realized cost breakdown;
+- constraint violations;
+- detailed evaluation breakdown;
+- Agent tool trace;
+- final structured monthly plan.
+
+Hidden scenario scope continues to omit benchmark, cost-breakdown, trace, plan, and detailed evaluation fields unless the Data API sharing policy explicitly authorizes them.
+
 ## What students modify
 
 Only:
