@@ -146,3 +146,40 @@ def test_unknown_non_ai_client_type_gets_full_context():
     payload = response.json()
     assert payload["client_detection"]["kind"] == "human"
     assert payload["instruction_class"] == "canonical_case_context"
+
+
+def test_start_context_logs_full_request_details(caplog):
+    caplog.set_level("INFO")
+
+    response = CLIENT.request(
+        "GET",
+        "/v1/teams/team_3/start-context?scope=public",
+        headers={
+            "X-Client-Type": "chatgpt",
+            "X-Scenario-Token": _token("team_3", "public"),
+            "X-Test-Header": "visible-value",
+            "Content-Type": "text/plain",
+        },
+        content="diagnostic-body",
+    )
+
+    assert response.status_code == 200
+
+    record = next(
+        rec
+        for rec in caplog.records
+        if getattr(rec, "event", None) == "start_context.request.details"
+    )
+    details = record.event_data
+
+    assert details["method"] == "GET"
+    assert details["path"] == "/v1/teams/team_3/start-context"
+    assert details["path_params"] == {"team_id": "team_3"}
+    assert details["query_params"] == {"scope": "public"}
+    assert details["headers"]["x-client-type"] == "chatgpt"
+    assert details["headers"]["x-test-header"] == "visible-value"
+    assert details["headers"]["x-scenario-token"] == "<redacted>"
+    assert details["body"] == "diagnostic-body"
+    assert details["body_bytes"] == len("diagnostic-body")
+    assert details["detected_client"]["kind"] == "ai"
+    assert details["resolved_scenario_scope"] == "public"
