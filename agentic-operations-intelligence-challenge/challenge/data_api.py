@@ -29,7 +29,7 @@ class DataApiClient:
         client_type: str | None = None,
         timeout: float = 20.0,
     ):
-        self.base_url = (base_url or os.getenv("DATA_API_URL", "http://localhost:8100")).rstrip("/")
+        self.base_url = (base_url or os.getenv("DATA_API_URL", "https://course-agentic-api.idgomezj.com")).rstrip("/")
         self.team_token = team_token if team_token is not None else os.getenv("DATA_API_TOKEN")
         self.instructor_token = (
             instructor_token if instructor_token is not None else os.getenv("DATA_API_INSTRUCTOR_TOKEN")
