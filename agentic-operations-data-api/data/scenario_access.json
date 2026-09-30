@@ -8,13 +8,15 @@
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "detail_fields": [
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "evaluation_fields": [
           "team_id",
@@ -28,6 +30,7 @@
           "total_cost",
           "benchmark_cost",
           "cost_gap",
+          "cost_breakdown",
           "violations",
           "trace",
           "plan",
@@ -68,13 +71,15 @@
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "detail_fields": [
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "evaluation_fields": [
           "team_id",
@@ -88,6 +93,7 @@
           "total_cost",
           "benchmark_cost",
           "cost_gap",
+          "cost_breakdown",
           "violations",
           "trace",
           "plan",
@@ -128,13 +134,15 @@
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "detail_fields": [
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "evaluation_fields": [
           "team_id",
@@ -148,6 +156,7 @@
           "total_cost",
           "benchmark_cost",
           "cost_gap",
+          "cost_breakdown",
           "violations",
           "trace",
           "plan",
@@ -188,13 +197,15 @@
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "detail_fields": [
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "evaluation_fields": [
           "team_id",
@@ -208,6 +219,7 @@
           "total_cost",
           "benchmark_cost",
           "cost_gap",
+          "cost_breakdown",
           "violations",
           "trace",
           "plan",
@@ -248,13 +260,15 @@
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "detail_fields": [
           "id",
           "title",
           "description",
-          "visible"
+          "visible",
+          "benchmark_cost"
         ],
         "evaluation_fields": [
           "team_id",
@@ -268,6 +282,7 @@
           "total_cost",
           "benchmark_cost",
           "cost_gap",
+          "cost_breakdown",
           "violations",
           "trace",
           "plan",
