@@ -12,8 +12,6 @@ Su equipo debe enseñar al sistema cómo operar su caso mediante:
 
 ## El entrenamiento también es parte del reto
 
-**Case 0 is the instructor validation exception:** its two datasets are clean, deterministic and ready to train so the platform logic can be validated end-to-end. Teams 1–5 do not receive that shortcut.
-
 No existe un endpoint que entregue un dataset supervisado listo.
 
 Cada equipo recibe dentro de su paquete:
@@ -35,6 +33,12 @@ model_b_training.csv
 según el contexto del caso y el contrato del modelo.
 
 Esto exige construir ventanas, features y labels, decidir cómo validar, evitar leakage y justificar las decisiones. El equipo puede modificar la arquitectura y el procedimiento de entrenamiento, pero el modelo exportado debe respetar el contrato de entrada/salida entregado.
+
+## Dashboard de evaluación
+
+El frontend del estudiante muestra, para los escenarios públicos de su equipo, el **Expected Optimized Cost** antes de ejecutar el Manager. Después de una ejecución puede comparar ese objetivo con el costo realizado, revisar factibilidad, servicio, RAG, Skills/Tools, desglose de costos, violaciones, trace y plan estructurado.
+
+La información pública del dashboard puede cargarse antes de configurar el token. El token asignado al equipo sigue siendo obligatorio para ejecutar la evaluación.
 
 ## Uso de la Data API
 
