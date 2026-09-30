@@ -38,6 +38,15 @@ Esto exige construir ventanas, features y labels, decidir cómo validar, evitar 
 
 ## Uso de la Data API
 
+La Data API del curso está publicada en:
+
+```text
+https://course-agentic-api.idgomezj.com
+```
+
+El paquete del estudiante ya usa esta URL como valor predeterminado. No es necesario ejecutar la Data API localmente.
+
+
 La Data API se utiliza **durante la ejecución de escenarios** para obtener el estado autorizado del negocio, documentos y escenarios públicos. No entrega training rows ni un generador de respuestas para los modelos.
 
 La evaluación final utilizará escenarios y holdouts no vistos durante el desarrollo.
