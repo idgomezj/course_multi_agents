@@ -73,18 +73,20 @@ This is the authoritative starting context for the assigned case. It provides th
 
 ## Frontend capabilities
 
-The challenge frontend now exposes the same transferable review capabilities as the richer Case 0 demo while preserving team/scenario access rules:
+The challenge frontend uses the full evaluation dashboard for Teams 1–5:
 
-- runtime readiness badges for Data, RAG, Skills, local PyTorch artifacts, and LLM providers;
-- the selected case objective and service-level target;
-- public scenario description and visible conditions;
-- **Objective Price / Benchmark** before a public evaluation when the active scope allows it;
-- Operational, Feasibility, Service, Total Cost, Cost Gap, Cost Score, RAG, and Skills/Tools metrics;
+- runtime readiness badges for Data, RAG, Knowledge, Skills, local PyTorch artifacts, and LLM providers;
+- the selected case objective and public scenario conditions;
+- **Expected Optimized Cost** shown before the AI is run;
+- Feasibility, Service, Total Cost, RAG, and Skills/Tools headline metrics;
+- Cost Score, Operational Score, and cost gap in the evaluation details;
 - realized cost breakdown;
 - constraint violations;
 - detailed evaluation breakdown;
 - Agent tool trace;
 - final structured monthly plan.
+
+The public dashboard context loads independently from the evaluation token. A valid assigned-team token is still required when the student runs an evaluation.
 
 Hidden scenario scope continues to omit benchmark, cost-breakdown, trace, plan, and detailed evaluation fields unless the Data API sharing policy explicitly authorizes them.
 
