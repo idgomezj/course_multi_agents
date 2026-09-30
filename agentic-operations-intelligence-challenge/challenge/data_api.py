@@ -41,21 +41,28 @@ class DataApiClient:
         )
         self.timeout = timeout
         self._start_context_cache: dict[str, dict[str, Any]] = {}
+        self._public_start_context_cache: dict[str, dict[str, Any]] = {}
 
-    def _headers(self) -> dict[str, str]:
+    def _headers(self, *, include_auth: bool = True) -> dict[str, str]:
         headers: dict[str, str] = {}
-        if self.team_token:
+        if include_auth and self.team_token:
             headers["X-Team-Token"] = self.team_token
-        if self.instructor_token:
+        if include_auth and self.instructor_token:
             headers["X-Instructor-Token"] = self.instructor_token
         if self.client_type:
             headers["X-Client-Type"] = self.client_type
         return headers
 
-    def _get(self, path: str, params: dict[str, Any] | None = None) -> Any:
+    def _get(
+        self,
+        path: str,
+        params: dict[str, Any] | None = None,
+        *,
+        include_auth: bool = True,
+    ) -> Any:
         url = f"{self.base_url}{path}"
         started = perf_counter()
-        headers = self._headers()
+        headers = self._headers(include_auth=include_auth)
         headers["X-Trace-Id"] = current_trace_id()
         log_event(
             logger,
@@ -65,7 +72,11 @@ class DataApiClient:
             path=path,
             params=params or {},
             timeout_seconds=self.timeout,
-            auth_mode="instructor" if self.instructor_token else ("team" if self.team_token else "none"),
+            auth_mode=(
+                "none"
+                if not include_auth
+                else ("instructor" if self.instructor_token else ("team" if self.team_token else "none"))
+            ),
         )
         try:
             response = httpx.get(
@@ -159,11 +170,26 @@ class DataApiClient:
         return self._get("/v1/teams")
 
     def start_context(self, team_id: str, *, refresh: bool = False) -> dict[str, Any]:
-        """Load the canonical case context before any scenario/model-resolution work."""
+        """Load token-aware canonical context for runtime/evaluation work."""
         if not refresh and team_id in self._start_context_cache:
             return self._start_context_cache[team_id]
         payload = self._get(f"/v1/teams/{team_id}/start-context")
         self._start_context_cache[team_id] = payload
+        return payload
+
+    def public_start_context(self, team_id: str, *, refresh: bool = False) -> dict[str, Any]:
+        """Load public UI context without sending team/instructor authorization.
+
+        This lets the student UI show the assigned case, public scenarios, and
+        expected optimized cost even before the evaluation token is configured.
+        """
+        if not refresh and team_id in self._public_start_context_cache:
+            return self._public_start_context_cache[team_id]
+        payload = self._get(
+            f"/v1/teams/{team_id}/start-context",
+            include_auth=False,
+        )
+        self._public_start_context_cache[team_id] = payload
         return payload
 
     def bootstrap(self, team_id: str) -> dict[str, Any]:
