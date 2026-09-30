@@ -24,7 +24,7 @@ def downloaded_raw_source_path(team_id: str) -> Path:
 
 
 def training_source_url(team_id: str) -> str:
-    base = os.getenv("DATA_API_URL", "http://localhost:8100").rstrip("/")
+    base = os.getenv("DATA_API_URL", "https://course-agentic-api.idgomezj.com").rstrip("/")
     return f"{base}/v1/teams/{team_id}/training-source.json"
 
 
