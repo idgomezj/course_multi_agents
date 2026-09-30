@@ -85,3 +85,13 @@ def test_bootstrap_does_not_leak_scenarios():
     payload = response.json()
     assert "public_scenarios" not in payload
     assert "hidden_scenarios" not in payload
+
+
+def test_public_evaluation_policy_exposes_cost_breakdown_but_hidden_does_not():
+    public_fields = ACCESS["teams"]["team_3"]["public"]["evaluation_fields"]
+    hidden_fields = ACCESS["teams"]["team_3"]["hidden"]["evaluation_fields"]
+
+    assert "benchmark_cost" in public_fields
+    assert "cost_breakdown" in public_fields
+    assert "benchmark_cost" not in hidden_fields
+    assert "cost_breakdown" not in hidden_fields
