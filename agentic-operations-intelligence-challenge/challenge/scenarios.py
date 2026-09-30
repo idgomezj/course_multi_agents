@@ -20,4 +20,5 @@ def student_visible_scenario(scenario: dict[str, Any]) -> dict[str, Any]:
         "title": scenario["title"],
         "description": scenario.get("description", ""),
         "visible": scenario.get("visible", {}),
+        "benchmark_cost": scenario.get("benchmark_cost"),
     }
