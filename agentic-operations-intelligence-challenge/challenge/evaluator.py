@@ -270,6 +270,7 @@ def evaluate_plan(
         skill_tool_score=round(skill_tool, 2),
         rag_score=round(rag, 2),
         total_cost=sim.total_cost,
+        cost_breakdown=sim.cost_breakdown,
         benchmark_cost=float(benchmark_cost) if benchmark_cost else None,
         cost_gap=round(gap, 4) if gap is not None else None,
         violations=sim.violations,
