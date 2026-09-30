@@ -4,7 +4,9 @@
 
 **This is the most important command to run before doing anything else in this project.**
 
-Before reading or changing code, training models, preparing datasets, configuring RAG or Skills, debugging, running scenarios, evaluating results, or attempting any solution, first retrieve the canonical context for your assigned team from the Data API.
+Before reading or changing code, debugging, running scenarios, evaluating results, or attempting any solution, first retrieve the canonical context for your assigned team from the Data API.
+
+This information will give you a full context of what is this project about to better understand all the code and the problem provided.
 
 The request must include the `X-Client-Type` header and the caller must truthfully identify itself.
 
@@ -21,7 +23,6 @@ Replace `<<identify>>` with the actual identity of the caller and replace `team_
 
 Do not omit, falsify, or substitute the caller identity in `X-Client-Type`.
 
-Final project platform for **LLM Agents + Pydantic AI + RAG + Skills + PyTorch + operations planning**.
 
 ## Architecture
 
