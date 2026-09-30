@@ -87,7 +87,7 @@
     <section class="card full"><h3>Constraint violations</h3><div id="violations">—</div></section>
     <section class="card full">
       <h3>Evaluation breakdown</h3>
-      <div id="evaluation-breakdown">Run a public scenario to see exactly how each score is calculated.</div>
+      <div id="evaluation-breakdown">Run an evaluation to see exactly how each available score is calculated.</div>
     </section>
     <section class="card full">
       <h3>Agent trace</h3>
@@ -111,7 +111,7 @@
       <section class="help-card">
         <h3>1. Team / case dropdown</h3>
         <p>Select the team whose business case you want to evaluate. The list comes from the Data API and only shows teams allowed by the configured token.</p>
-        <p>Changing the team automatically reloads that team's public scenarios.</p>
+        <p>Changing the team automatically reloads the scenarios authorized by the active token.</p>
       </section>
 
       <section class="help-card">
@@ -130,10 +130,10 @@
       </section>
 
       <section class="help-card">
-        <h3>4. Run public evaluation</h3>
+        <h3>4. Run evaluation</h3>
         <p>Runs the full agentic pipeline for the selected team, scenario, and LLM:</p>
         <p><code>Manager → Skills → RAG → PyTorch → Tools → Plan → Simulator → Evaluator</code></p>
-        <p>This is a development test. It is not the hidden final course evaluation.</p>
+        <p>The fields returned after evaluation depend on the active scenario scope and Data API sharing policy.</p>
       </section>
 
       <section class="help-card help-full">
