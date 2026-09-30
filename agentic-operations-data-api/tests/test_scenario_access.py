@@ -25,7 +25,8 @@ def test_public_token_lists_only_public_scenarios_and_safe_fields():
     assert scenarios
     assert all(item["id"].startswith("T1-P") for item in scenarios)
     assert all("realized" not in item for item in scenarios)
-    assert all("benchmark_cost" not in item for item in scenarios)
+    assert all("benchmark_cost" in item for item in scenarios)
+    assert all(isinstance(item["benchmark_cost"], (int, float)) for item in scenarios)
     assert all("public_expectations" not in item for item in scenarios)
 
 
