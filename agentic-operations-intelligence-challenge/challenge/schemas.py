@@ -73,6 +73,7 @@ class EvaluationResult(BaseModel):
     skill_tool_score: float = Field(ge=0, le=100)
     rag_score: float = Field(ge=0, le=100)
     total_cost: float
+    cost_breakdown: dict[str, float] = Field(default_factory=dict)
     benchmark_cost: float | None = None
     cost_gap: float | None = None
     violations: list[ConstraintViolation]
