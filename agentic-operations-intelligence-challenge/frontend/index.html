@@ -1,56 +1,67 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agentic Operations Intelligence Challenge</title>
   <style>
-    :root { --bg:#f4f5ef; --card:#fff; --ink:#20251b; --muted:#687064; --lime:#dffc62; --olive:#304117; --line:#d7ddcf; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:Inter,Arial,sans-serif; background:var(--bg); color:var(--ink); }
-    header { background:var(--olive); color:white; padding:28px 34px; }
-    .header-row { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
-    header h1 { margin:0 0 6px; font-size:28px; }
-    header p { margin:0; color:#dce4cf; }
-    .help-button { background:transparent; color:white; border:1px solid rgba(255,255,255,.35); white-space:nowrap; }
-    .help-button:hover { background:rgba(255,255,255,.08); }
-    main { max-width:1200px; margin:24px auto; padding:0 20px 50px; }
-    .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; }
-    .controls { grid-column:span 12; display:flex; gap:12px; flex-wrap:wrap; align-items:end; }
-    label { display:flex; flex-direction:column; gap:6px; font-size:12px; font-weight:700; color:var(--muted); min-width:260px; }
-    select,button { border:1px solid var(--line); border-radius:10px; padding:11px 12px; font-size:14px; background:white; }
-    button { background:var(--lime); border-color:var(--lime); color:#18200d; font-weight:800; cursor:pointer; }
-    button:disabled { opacity:.5; cursor:wait; }
-    .metric { grid-column:span 2; min-height:110px; }
-    .metric strong { display:block; font-size:30px; margin-top:8px; }
-    .metric span { color:var(--muted); font-size:12px; }
-    .wide { grid-column:span 6; }
-    .full { grid-column:span 12; }
-    pre { white-space:pre-wrap; word-break:break-word; font-size:12px; background:#f8faf5; border-radius:12px; padding:14px; max-height:420px; overflow:auto; }
-    table { width:100%; border-collapse:collapse; font-size:12px; }
-    th,td { padding:9px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
-    .ok { color:#375c15; font-weight:800; }
-    .bad { color:#a33; font-weight:800; }
-    #status { font-size:13px; color:var(--muted); }
-    .runtime-status { flex-basis:100%; padding-top:4px; }
-    .pill { display:inline-block; padding:5px 8px; border-radius:999px; background:#eef3e6; font-size:12px; margin:3px; }
-    .subtle { color:var(--muted); font-size:13px; line-height:1.55; }
-    dialog.help-dialog { width:min(920px,calc(100vw - 32px)); max-height:88vh; border:0; border-radius:20px; padding:0; box-shadow:0 24px 80px rgba(0,0,0,.28); color:var(--ink); }
-    dialog.help-dialog::backdrop { background:rgba(15,20,10,.64); backdrop-filter:blur(3px); }
-    .help-shell { padding:24px; overflow:auto; max-height:88vh; }
-    .help-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding-bottom:16px; border-bottom:1px solid var(--line); }
-    .help-head h2 { margin:0 0 6px; }
-    .help-head p { margin:0; color:var(--muted); }
-    .help-close { background:white; border-color:var(--line); min-width:44px; }
-    .help-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:18px; }
-    .help-card { border:1px solid var(--line); border-radius:14px; padding:15px; background:#fbfcf8; }
-    .help-card h3 { margin:0 0 8px; font-size:15px; }
-    .help-card p { margin:0 0 8px; color:#4f584b; font-size:13px; line-height:1.55; }
-    .help-card ul,.help-card ol { margin:8px 0 0 20px; padding:0; color:#4f584b; font-size:13px; line-height:1.55; }
-    .help-card code { background:#eef2e8; padding:2px 5px; border-radius:5px; }
-    .help-full { grid-column:1 / -1; }
-    @media (max-width:800px) { .metric,.wide { grid-column:span 12; } label { min-width:100%; } .header-row{flex-direction:column}.help-grid{grid-template-columns:1fr}.help-full{grid-column:auto} }
+    :root{--bg:#f3f5ef;--panel:#fff;--ink:#20251b;--muted:#687064;--deep:#283914;--lime:#dffc62;--line:#d9dfd1;--good:#426c20;--bad:#aa3b36}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    header{background:var(--deep);color:white;padding:30px 34px}
+    .header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+    header h1{margin:0 0 5px;font-size:30px}
+    header p{margin:0;color:#dce5cf}
+    .help-button{background:transparent;color:white;border:1px solid rgba(255,255,255,.35);white-space:nowrap}
+    .help-button:hover{background:rgba(255,255,255,.08)}
+    main{max-width:1250px;margin:24px auto;padding:0 20px 60px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:15px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}
+    .full{grid-column:span 12}
+    .half{grid-column:span 6}
+    .metric{grid-column:span 2}
+    .metric span{font-size:12px;color:var(--muted)}
+    .metric strong{display:block;font-size:27px;margin-top:7px}
+    .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+    label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+    select,button{padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:white;font-size:14px}
+    select{min-width:250px}
+    button{background:var(--lime);border-color:var(--lime);font-weight:800;cursor:pointer}
+    button:disabled{opacity:.5;cursor:wait}
+    pre{white-space:pre-wrap;word-break:break-word;background:#f8faf5;padding:13px;border-radius:12px;max-height:440px;overflow:auto;font-size:12px}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+    .pill{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef3e6;font-size:12px;margin:3px}
+    .good{color:var(--good);font-weight:800}
+    .bad{color:var(--bad);font-weight:800}
+    #statusText{color:var(--muted);font-size:13px}
+    .subtle{color:var(--muted);font-size:13px;line-height:1.55}
+    .scenario-summary{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+    .cost-row{display:flex;justify-content:space-between;gap:18px;padding:5px 0;border-bottom:1px solid #edf0e8}
+    .cost-row:last-child{border-bottom:0}
+    .cost-row span:last-child{font-weight:700}
+    dialog.help-dialog{width:min(940px,calc(100vw - 32px));max-height:88vh;border:0;border-radius:20px;padding:0;box-shadow:0 24px 80px rgba(0,0,0,.28);color:var(--ink)}
+    dialog.help-dialog::backdrop{background:rgba(15,20,10,.64);backdrop-filter:blur(3px)}
+    .help-shell{padding:24px;overflow:auto;max-height:88vh}
+    .help-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+    .help-head h2{margin:0 0 6px}
+    .help-head p{margin:0;color:var(--muted)}
+    .help-close{background:white;border-color:var(--line);min-width:44px}
+    .help-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+    .help-card{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fbfcf8}
+    .help-card h3{margin:0 0 8px;font-size:15px}
+    .help-card p{margin:0 0 8px;color:#4f584b;font-size:13px;line-height:1.55}
+    .help-card ul,.help-card ol{margin:8px 0 0 20px;padding:0;color:#4f584b;font-size:13px;line-height:1.55}
+    .help-card code{background:#eef2e8;padding:2px 5px;border-radius:5px}
+    .help-full{grid-column:1/-1}
+    @media(max-width:850px){
+      .metric,.half{grid-column:span 12}
+      .header-row{flex-direction:column}
+      .help-grid{grid-template-columns:1fr}
+      .help-full{grid-column:auto}
+      select{min-width:min(100%,360px);width:100%}
+      label{width:100%}
+    }
   </style>
 </head>
 <body>
@@ -58,42 +69,60 @@
   <div class="header-row">
     <div>
       <h1>Agentic Operations Intelligence Challenge</h1>
-      <p>Train PyTorch specialists · Improve RAG · Design Skills · Minimize operational cost</p>
+      <p>Data API + PyTorch + RAG + Skills + Pydantic AI + Tools + Simulator + Cost Evaluation</p>
     </div>
     <button id="helpOpen" class="help-button" type="button" aria-haspopup="dialog">Help / How to use</button>
   </div>
 </header>
+
 <main>
   <div class="grid">
-    <section class="card controls">
-      <label>Team / case<select id="team"></select></label>
-      <label>Scenario<select id="scenario"></select></label>
-      <label>Manager LLM<select id="managerModel"></select></label>
-      <button id="run">Run evaluation</button>
-      <span id="status">Ready.</span>
-      <div id="runtimeStatus" class="runtime-status subtle">Loading runtime status...</div>
+    <section class="card full">
+      <div class="controls">
+        <label>Team / case<select id="team"></select></label>
+        <label>Scenario<select id="scenario"></select></label>
+        <label>Manager LLM<select id="managerModel"></select></label>
+        <button id="agentBtn">Run AI Manager end-to-end</button>
+        <span id="statusText">Loading...</span>
+      </div>
+      <div id="runtimeStatus" style="margin-top:12px"></div>
+      <div id="scenarioSummary" class="scenario-summary subtle">Loading scenario context...</div>
     </section>
-    <section class="card metric"><span>Operational</span><strong id="m-operational">—</strong></section>
-    <section class="card metric"><span>Feasibility</span><strong id="m-feasible">—</strong></section>
-    <section class="card metric"><span>Service</span><strong id="m-service">—</strong></section>
-    <section class="card metric"><span>Total Cost</span><strong id="m-total-cost">—</strong></section>
-    <section class="card metric"><span>Objective Price / Benchmark</span><strong id="m-objective">—</strong></section>
-    <section class="card metric"><span>Cost Gap</span><strong id="m-cost-gap">—</strong></section>
-    <section class="card metric"><span>Cost Score</span><strong id="m-cost">—</strong></section>
-    <section class="card metric"><span>RAG</span><strong id="m-rag">—</strong></section>
-    <section class="card metric"><span>Skills / Tools</span><strong id="m-skills">—</strong></section>
-    <section class="card wide"><h3>Scenario / objective</h3><div id="summary" class="subtle">Select a scenario to inspect its public context and objective cost.</div></section>
-    <section class="card wide"><h3>Cost breakdown</h3><div id="cost-breakdown" class="subtle">Run an evaluation to see realized cost components.</div></section>
-    <section class="card full"><h3>Constraint violations</h3><div id="violations">—</div></section>
+
+    <section class="card metric"><span>Feasibility</span><strong id="feasibility">—</strong></section>
+    <section class="card metric"><span>Service</span><strong id="service">—</strong></section>
+    <section class="card metric"><span>Total Cost</span><strong id="totalCost">—</strong></section>
+    <section class="card metric"><span>Expected Optimized Cost</span><strong id="expectedCost">—</strong></section>
+    <section class="card metric"><span>RAG</span><strong id="ragScore">—</strong></section>
+    <section class="card metric"><span>Skills/Tools</span><strong id="skillScore">—</strong></section>
+
+    <section class="card half">
+      <h3>Cost breakdown</h3>
+      <div id="costBreakdown" class="subtle">Run an evaluation.</div>
+    </section>
+
+    <section class="card half">
+      <h3>Violations</h3>
+      <div id="violations" class="subtle">Run an evaluation.</div>
+    </section>
+
     <section class="card full">
       <h3>Evaluation breakdown</h3>
-      <div id="evaluation-breakdown">Run an evaluation to see exactly how each available score is calculated.</div>
+      <div id="evaluationBreakdown" class="subtle">Run an AI evaluation to see exactly how each available score is calculated.</div>
     </section>
+
     <section class="card full">
-      <h3>Agent trace</h3>
-      <table><thead><tr><th>#</th><th>Tool</th><th>Inputs</th><th>Output</th></tr></thead><tbody id="trace"></tbody></table>
+      <h3>Agent tool trace</h3>
+      <table>
+        <thead><tr><th>#</th><th>Tool</th><th>Inputs</th><th>Output</th></tr></thead>
+        <tbody id="trace"></tbody>
+      </table>
     </section>
-    <section class="card full"><h3>Structured monthly plan</h3><pre id="plan">—</pre></section>
+
+    <section class="card full">
+      <h3>Structured monthly plan</h3>
+      <pre id="plan">—</pre>
+    </section>
   </div>
 </main>
 
@@ -101,109 +130,99 @@
   <div class="help-shell">
     <div class="help-head">
       <div>
-        <h2 id="helpTitle">How to use and review the challenge frontend</h2>
-        <p>This guide explains what each control shows, what the evaluation button does, and how to review a run.</p>
+        <h2 id="helpTitle">How to use the challenge</h2>
+        <p>Use this guide to understand the case, expected optimized cost, runtime readiness, evaluation scores, and agent trace.</p>
       </div>
       <button id="helpClose" class="help-close" type="button" aria-label="Close help">✕</button>
     </div>
 
     <div class="help-grid">
       <section class="help-card">
-        <h3>1. Team / case dropdown</h3>
-        <p>Select the team whose business case you want to evaluate. The list comes from the Data API and only shows teams allowed by the configured token.</p>
-        <p>Changing the team automatically reloads the scenarios authorized by the active token.</p>
+        <h3>1. Team / case</h3>
+        <p>The student package only exposes the Team 1–5 workspaces available to that package. The instructor-only demo case is not part of this frontend.</p>
+        <p>The public case context is loaded independently from the evaluation token so you can inspect the assignment even before running an evaluation.</p>
       </section>
 
       <section class="help-card">
-        <h3>2. Scenario dropdown and objective cost</h3>
-        <p>Select the scenario available to the active token. Public scenarios show their published objective price / benchmark cost before a run. Hidden scopes do not reveal benchmark values unless the server explicitly authorizes them.</p>
-        <p>Changing the scenario refreshes its description, visible conditions, and objective card immediately.</p>
+        <h3>2. Scenario and expected optimized cost</h3>
+        <p>Select a public development scenario. Its published <b>Expected Optimized Cost</b> is shown immediately in the metric row.</p>
+        <p>Use this target to check whether your system is converging toward a good operational plan. It is a cost benchmark, not a published reference plan.</p>
       </section>
 
       <section class="help-card">
-        <h3>3. Manager LLM dropdown</h3>
-        <p>Select the foundation model used only for the Manager/orchestrator. The rest of the system stays the same: PyTorch models, RAG, Skills, tools, simulator, and evaluator.</p>
+        <h3>3. Manager LLM</h3>
+        <p>Select the LLM used as the Manager/orchestrator. PyTorch models, RAG, Skills, tools, simulator, and evaluator remain the same.</p>
         <ul>
-          <li><b>ready</b>: the required API key is configured.</li>
-          <li><b>API key missing</b>: that provider cannot run until its key is configured.</li>
+          <li><b>READY</b>: provider key is configured.</li>
+          <li><b>KEY MISSING</b>: configure that provider before running it.</li>
         </ul>
       </section>
 
       <section class="help-card">
-        <h3>4. Run evaluation</h3>
-        <p>Runs the full agentic pipeline for the selected team, scenario, and LLM:</p>
-        <p><code>Manager → Skills → RAG → PyTorch → Tools → Plan → Simulator → Evaluator</code></p>
-        <p>The fields returned after evaluation depend on the active scenario scope and Data API sharing policy.</p>
+        <h3>4. Run AI Manager end-to-end</h3>
+        <p>Runs the complete workflow:</p>
+        <p><code>LLM Manager → Skills → RAG → PyTorch → Tools → Structured Plan → Server Evaluation</code></p>
+        <p>The evaluation token must be valid when you run the scenario.</p>
       </section>
 
       <section class="help-card help-full">
-        <h3>5. Runtime status and score cards</h3>
-        <p>The readiness badges show Data API/case availability, RAG configuration, Skill count, PyTorch model artifacts, and configured LLM providers.</p>
+        <h3>5. Runtime status badges</h3>
         <ul>
-          <li><b>Operational</b>: business result. For feasible plans it combines 35% feasibility, 25% service, and 40% cost. A critical feasibility violation gates Operational to 0.</li>
-          <li><b>Feasibility</b>: whether the submitted plan respects hard operating constraints.</li>
-          <li><b>Service</b>: realized service compared with the case service-level target.</li>
+          <li><b>Data</b>: assigned business case loaded.</li>
+          <li><b>RAG</b>: team RAG configuration is present.</li>
+          <li><b>Knowledge</b>: number of documents supplied by the Data API.</li>
+          <li><b>Skills</b>: number of team Skill files.</li>
+          <li><b>model_a.pt2 / model_b.pt2</b>: local trained PyTorch artifacts.</li>
+          <li><b>LLM badges</b>: provider configuration state.</li>
+        </ul>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>6. Main result cards</h3>
+        <ul>
+          <li><b>Feasibility</b>: whether the plan satisfies hard operational constraints.</li>
+          <li><b>Service</b>: realized service performance.</li>
           <li><b>Total Cost</b>: realized simulated operating cost.</li>
-          <li><b>Objective Price / Benchmark</b>: published public target cost for the selected scenario when available.</li>
-          <li><b>Cost Gap</b>: percentage difference between realized and benchmark cost.</li>
-          <li><b>Cost Score</b>: score derived from that cost gap.</li>
-          <li><b>RAG</b>: whether the agent retrieved the expected organizational evidence.</li>
-          <li><b>Skills / Tools</b>: whether the agent used Skills, expected operational tools, cost/validation discipline, and an efficient tool workflow.</li>
+          <li><b>Expected Optimized Cost</b>: the public benchmark for the selected scenario.</li>
+          <li><b>RAG</b>: expected organizational evidence retrieved.</li>
+          <li><b>Skills / Tools</b>: procedural Skill/tool discipline and workflow quality.</li>
         </ul>
       </section>
 
       <section class="help-card">
-        <h3>6. Scenario, cost breakdown, and violations</h3>
-        <p><b>Scenario / objective</b> shows the selected scenario description, public visible conditions, objective cost, realized cost, and cost gap.</p>
-        <p><b>Cost breakdown</b> shows the realized cost components returned by the evaluator.</p>
-        <p><b>Constraint violations</b> shows hard or soft simulator findings. Critical violations make the plan infeasible.</p>
+        <h3>7. Cost breakdown</h3>
+        <p>After a run, compare realized total cost with the expected optimized cost. This panel also shows the cost gap, Cost Score, Operational Score, and individual cost components when returned by the evaluator.</p>
       </section>
 
       <section class="help-card">
-        <h3>7. Evaluation breakdown</h3>
-        <p>Use this section to understand <i>why</i> a score was assigned. It shows the Operational formula, RAG source coverage, loaded Skills/tool coverage, cost/validation use, efficiency penalties, and missing expected tools.</p>
+        <h3>8. Violations</h3>
+        <p>Review simulator findings. Critical violations make the operational plan infeasible even if the numerical cost is low.</p>
       </section>
 
       <section class="help-card">
-        <h3>8. Agent trace</h3>
-        <p>Review each tool call in order, including its inputs and outputs. Use the trace to answer questions such as:</p>
-        <ul>
-          <li>Did the agent load a relevant Skill?</li>
-          <li>Did it retrieve the right RAG evidence?</li>
-          <li>Did it use the PyTorch model?</li>
-          <li>Did it inspect inventory/open POs?</li>
-          <li>Did it calculate cost and validate the plan?</li>
-        </ul>
+        <h3>9. Evaluation breakdown</h3>
+        <p>Explains the operational score, cost/service/feasibility contributions, RAG coverage, Skills/Tools usage, validation discipline, and efficiency diagnostics returned for the public scenario.</p>
       </section>
 
       <section class="help-card">
-        <h3>9. Structured monthly plan</h3>
-        <p>This is the final Pydantic-validated plan produced by the Manager. Review production orders, purchase orders, actions, assumptions, and explanation.</p>
-        <p>A plan can be feasible but still economically poor, so compare it with the cost score and trace.</p>
+        <h3>10. Agent tool trace</h3>
+        <p>Review the Manager's tool calls in order to confirm that it actually used the intended architecture rather than producing an unsupported answer.</p>
       </section>
 
       <section class="help-card help-full">
-        <h3>10. Recommended testing workflow</h3>
+        <h3>11. Recommended workflow</h3>
         <ol>
-          <li>Select the assigned team.</li>
-          <li>Select one public scenario.</li>
-          <li>Select a configured Manager LLM.</li>
-          <li>Run the public evaluation.</li>
+          <li>Select your assigned team and a public scenario.</li>
+          <li>Read the scenario and note the Expected Optimized Cost.</li>
+          <li>Confirm RAG, Skills, models, and an LLM provider are ready.</li>
+          <li>Run the AI Manager.</li>
           <li>Check feasibility and service first.</li>
-          <li>Review cost and cost gap.</li>
+          <li>Compare Total Cost with Expected Optimized Cost.</li>
+          <li>Review Cost Score, cost gap, and cost components.</li>
           <li>Review RAG and Skills/Tools diagnostics.</li>
-          <li>Inspect the Agent trace to confirm the architecture was actually used.</li>
-          <li>Inspect the final structured plan.</li>
-          <li>Change one component at a time (PyTorch, RAG, Skills, or LLM) and rerun so the effect is measurable.</li>
-          <li>Repeat across multiple scenarios; do not optimize only for one scenario.</li>
+          <li>Inspect the tool trace and structured plan.</li>
+          <li>Improve one component at a time and rerun across multiple public scenarios.</li>
         </ol>
-      </section>
-
-      <section class="help-card help-full">
-        <h3>11. Logs and deeper debugging</h3>
-        <p>The frontend summarizes the run; the server logs explain what happened internally. Each request receives an <code>X-Trace-Id</code>. Use that trace ID to correlate Manager, tool, RAG, model, Data API, simulator, and evaluator events in the logs.</p>
-        <p>Each structured log includes the source <code>file</code>, <code>line</code>, and <code>function</code>. Text logs show <code>[filename.py:line:function]</code>, so you can jump directly from a runtime event to the code that emitted it.</p>
-        <p>See <code>LOGGING.md</code> for observability details and <code>EVALUATION.md</code> for the exact scoring rules.</p>
       </section>
     </div>
   </div>
