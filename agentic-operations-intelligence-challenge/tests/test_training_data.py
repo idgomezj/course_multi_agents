@@ -14,8 +14,8 @@ from challenge.training_data import (
 def test_model_contract_is_local_and_training_source_is_api_json(team_id):
     spec = load_model_spec(team_id)
     assert set(spec["models"]) == {"model_a", "model_b"}
-    assert training_source_url(team_id).endswith(
-        f"/v1/teams/{team_id}/training-source.json"
+    assert training_source_url(team_id) == (
+        f"https://course-agentic-api.idgomezj.com/v1/teams/{team_id}/training-source.json"
     )
 
 
