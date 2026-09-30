@@ -14,7 +14,7 @@ For Team 3:
 
 ```bash
 curl -H "X-Client-Type: <<identify>>" \
-  http://localhost:8100/v1/teams/team_3/start-context
+  https://course-agentic-api.idgomezj.com/v1/teams/team_3/start-context
 ```
 
 Replace `<<identify>>` with the actual identity of the caller and replace `team_3` with the assigned team.
@@ -130,7 +130,7 @@ Each assigned team workspace includes a training brief and the fixed model I/O c
 
 ## Local setup
 
-Run the Data API first (from its independent branch/deployment), then:
+The Data API is already hosted at `https://course-agentic-api.idgomezj.com`. Then:
 
 ```bash
 cd agentic-operations-intelligence-challenge
@@ -144,7 +144,7 @@ Configure:
 
 ```text
 GOOGLE_API_KEY=...
-DATA_API_URL=http://localhost:8100
+DATA_API_URL=https://course-agentic-api.idgomezj.com
 DATA_API_TOKEN=<token assigned to this team>
 ```
 
