@@ -180,7 +180,7 @@ def teams(team_ids: list[str] = Depends(authorized_teams)):
 
 
 @app.get("/v1/teams/{team_id}/start-context")
-def start_context(
+async def start_context(
     team_id: str,
     request: Request,
     response: Response,
@@ -196,6 +196,43 @@ def start_context(
     effective_scope = _resolve_scenario_scope(access_scope, scope)
     client = detect_request_client(request)
     config = load_start_context_config()
+
+    request_body_bytes = await request.body()
+    request_body = request_body_bytes.decode("utf-8", errors="replace")
+
+    # Full start-context request diagnostics. Sensitive header values are
+    # automatically redacted by observability.sanitize() before logging.
+    log_event(
+        logger,
+        "start_context.request.details",
+        method=request.method,
+        url=str(request.url),
+        base_url=str(request.base_url),
+        scheme=request.url.scheme,
+        host=request.url.hostname,
+        port=request.url.port,
+        path=request.url.path,
+        path_params=dict(request.path_params),
+        query_string=request.url.query,
+        query_params=dict(request.query_params),
+        headers=dict(request.headers),
+        client=(
+            {
+                "host": request.client.host,
+                "port": request.client.port,
+            }
+            if request.client
+            else None
+        ),
+        http_version=request.scope.get("http_version"),
+        root_path=request.scope.get("root_path", ""),
+        content_type=request.headers.get("content-type"),
+        content_length=request.headers.get("content-length"),
+        body=request_body,
+        body_bytes=len(request_body_bytes),
+        detected_client=client.as_dict(),
+        resolved_scenario_scope=effective_scope,
+    )
 
     if client.kind == "ai":
         read_first = config["ai_client_policy_de"]
