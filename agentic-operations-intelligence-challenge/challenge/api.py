@@ -7,12 +7,13 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from .config import FRONTEND_DIR
+from .config import FRONTEND_DIR, student_path
 from .data_api import DataApiError, get_data_client
 from .llm_config import default_manager_model_id, manager_model_status, resolve_manager_model
 from .manager import run_manager
 from .observability import log_event, new_trace_id, reset_trace_context, set_trace_context, setup_logging
 from .scenarios import get_public_scenario, list_public_scenarios, student_visible_scenario
+from .training_data import load_model_spec
 
 setup_logging("agentic-operations-challenge")
 logger = logging.getLogger(__name__)
@@ -92,6 +93,45 @@ def scenarios(team_id: str):
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
+
+
+@app.get("/api/status/{team_id}")
+def team_status(team_id: str):
+    """Return the same runtime-readiness information shown by the Case 0 demo."""
+    try:
+        context = get_data_client().start_context(team_id)
+        workspace = student_path(team_id)
+        model_spec = load_model_spec(team_id)
+    except DataApiError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except (FileNotFoundError, ValueError) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    models = {}
+    for key, spec in model_spec.get("models", {}).items():
+        artifact = str(spec.get("artifact", f"{key}.pt2"))
+        preferred = workspace / "models" / artifact
+        legacy = preferred.with_suffix(".pt") if preferred.suffix == ".pt2" else preferred
+        models[key] = {
+            "artifact": artifact,
+            "ready": preferred.exists() or legacy.exists(),
+            "legacy_artifact_present": legacy.exists() and not preferred.exists(),
+        }
+
+    case = context.get("case", {})
+    return {
+        "team_id": team_id,
+        "case_loaded": bool(case),
+        "case_name": case.get("name"),
+        "objective": case.get("objective"),
+        "service_level_target": case.get("policies", {}).get("service_level_target"),
+        "knowledge_documents": len(context.get("knowledge", [])),
+        "rag_ready": (workspace / "rag" / "config.yaml").exists(),
+        "skill_count": len(list((workspace / "skills").glob("*.md"))),
+        "models": models,
+        "manager_model_id": default_manager_model_id(),
+        "manager_models": manager_model_status(),
+    }
 
 
 @app.post("/api/evaluate")
