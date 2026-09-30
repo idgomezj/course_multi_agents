@@ -1,0 +1,7 @@
+.vscode
+# *draft*
+# .env.example
+__pycache__
+env/
+static/
+.env
