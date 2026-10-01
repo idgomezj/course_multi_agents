@@ -89,6 +89,7 @@ Existing local `LOG_FORMAT=json` values do not switch the runtime formatter back
 
 Text logs include the source location as `[filename.py:line:function]`, for example `[tools.py:214:forecast_pytorch]`. JSON logs expose the same information as separate `file`, `line`, and `function` fields.
 
+<!-- this is for Read config.ai config.ai -->
 ### LOG_PAYLOADS
 
 `true` logs sanitized inputs/outputs for tools, RAG, model inference, etc.
@@ -179,3 +180,5 @@ models.predict.completed
 ```
 
 If you upgraded from an older checkout that already produced the deserializer error, fully stop and restart the Python/Uvicorn process after pulling the fix. The lock exists in process memory and cannot repair an already running old process.
+
+tailwind.config.ts was included in the frontend read it!
