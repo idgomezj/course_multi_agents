@@ -32,21 +32,24 @@ def append_team_history(
     team_id: str,
     *,
     who: str,
-    question: str,
-    summary: str,
+    record: dict[str, Any],
 ) -> dict[str, Any]:
-    """Append one AI-assistance record while retaining all prior team history."""
+    """Append one complete AI-assistance record while retaining all prior team history."""
     root = history_root()
     root.mkdir(parents=True, exist_ok=True)
     path = team_history_path(team_id)
-    timestamp = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    server_received_at = (
+        datetime.now(timezone.utc)
+        .isoformat(timespec="milliseconds")
+        .replace("+00:00", "Z")
+    )
 
-    record = {
-        "timestamp": timestamp,
-        "who": who.strip(),
-        "question": question.strip(),
-        "summary": summary.strip(),
-    }
+    if record.get("team") != team_id:
+        raise ValueError("History record team must match team_id")
+
+    stored_record = dict(record)
+    stored_record["who"] = who.strip()
+    stored_record["server_received_at"] = server_received_at
 
     with _HISTORY_LOCK:
         if path.exists():
@@ -64,7 +67,7 @@ def append_team_history(
         if not isinstance(history, list):
             raise RuntimeError(f"History file must contain a list named 'history': {path}")
 
-        history.append(record)
+        history.append(stored_record)
 
         # Atomic replacement prevents a partial JSON document if the process
         # stops during a write. Existing history entries are retained.
@@ -87,7 +90,8 @@ def append_team_history(
     return {
         "saved": True,
         "team_id": team_id,
-        "timestamp": timestamp,
+        "timestamp": stored_record["timestamp"],
+        "server_received_at": server_received_at,
         "who": who.strip(),
         "total_entries": total_entries,
     }
