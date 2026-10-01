@@ -381,16 +381,24 @@ def calculate_working_capital_cost(ctx: RunContext[RuntimeDeps], purchase_value:
     return ctx.deps.record("calculate_working_capital_cost", {"purchase_value": purchase_value}, out)
 
 
-def calculate_plan_cost(ctx: RunContext[RuntimeDeps], candidate_plan: dict[str, Any]) -> dict[str, float]:
-    """Estimate known cost of a candidate plan before finalizing it."""
-    plan = MonthlyOperationsPlan.model_validate(candidate_plan)
+def calculate_plan_cost(
+    ctx: RunContext[RuntimeDeps],
+    candidate_plan: MonthlyOperationsPlan,
+) -> dict[str, float]:
+    """Estimate known cost of a complete candidate MonthlyOperationsPlan before finalizing it."""
+    plan = candidate_plan
+    candidate_payload = plan.model_dump()
     out = estimate_plan_cost(ctx.deps.case, plan)
-    return ctx.deps.record("calculate_plan_cost", {"candidate_plan": candidate_plan}, out)
+    return ctx.deps.record("calculate_plan_cost", {"candidate_plan": candidate_payload}, out)
 
 
-def validate_plan(ctx: RunContext[RuntimeDeps], candidate_plan: dict[str, Any]) -> dict[str, Any]:
-    """Run the public deterministic simulator against the current development scenario."""
-    plan = MonthlyOperationsPlan.model_validate(candidate_plan)
+def validate_plan(
+    ctx: RunContext[RuntimeDeps],
+    candidate_plan: MonthlyOperationsPlan,
+) -> dict[str, Any]:
+    """Validate a complete candidate MonthlyOperationsPlan in the deterministic simulator."""
+    plan = candidate_plan
+    candidate_payload = plan.model_dump()
     result = simulate_month(ctx.deps.case, ctx.deps.scenario, plan)
     out = {
         "feasible": result.feasible,
@@ -398,7 +406,7 @@ def validate_plan(ctx: RunContext[RuntimeDeps], candidate_plan: dict[str, Any]) 
         "violations": [v.model_dump() for v in result.violations],
         "estimated_realized_cost": result.total_cost,
     }
-    return ctx.deps.record("validate_plan", {"candidate_plan": candidate_plan}, out)
+    return ctx.deps.record("validate_plan", {"candidate_plan": candidate_payload}, out)
 
 
 ALL_TOOLS = [
