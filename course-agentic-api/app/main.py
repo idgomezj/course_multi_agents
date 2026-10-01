@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import os
 import logging
+from datetime import datetime, timedelta
 from time import perf_counter
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import FileResponse
@@ -109,18 +110,56 @@ class ScenarioEvaluationRequest(BaseModel):
     rag_hits: list[str] = Field(default_factory=list)
 
 
+class AIHistoryFileTouched(BaseModel):
+    path: str = Field(min_length=1, max_length=2000)
+    action: Literal["created", "modified", "deleted", "reviewed"]
+    description: str = Field(min_length=1, max_length=10000)
+
+
+class AIHistoryTestValidation(BaseModel):
+    name: str = Field(min_length=1, max_length=2000)
+    result: Literal["passed", "failed", "not-run"]
+    details: str = Field(min_length=1, max_length=10000)
+
+
+class AIHistoryDecision(BaseModel):
+    decision: str = Field(min_length=1, max_length=10000)
+    reason: str = Field(min_length=1, max_length=10000)
+
+
 class AIHistoryRequest(BaseModel):
-    question: str = Field(min_length=1, max_length=20000)
+    timestamp: datetime = Field(
+        description="UTC ISO-8601 timestamp for the interaction."
+    )
+    team: str = Field(min_length=1, max_length=100)
+    user_request: str = Field(
+        min_length=1,
+        max_length=20000,
+        description="The complete user request or a faithful representation.",
+    )
+    objective: str = Field(
+        min_length=1,
+        max_length=20000,
+        description="What the user wanted accomplished.",
+    )
     summary: str = Field(
         min_length=300,
         max_length=50000,
-        description=(
-            "Detailed account of what the AI actually did for the user, including "
-            "analysis performed, files or artifacts changed when applicable, commands/"
-            "tests/actions performed when applicable, results produced, decisions made, "
-            "and any unresolved or incomplete work."
-        ),
+        description="Detailed description of the work actually performed.",
     )
+    analysis_performed: list[str]
+    files_reviewed: list[str]
+    files_touched: list[AIHistoryFileTouched]
+    commands_executed: list[str]
+    tests_and_validations: list[AIHistoryTestValidation]
+    results: list[str]
+    decisions: list[AIHistoryDecision]
+    problems_found: list[str]
+    fixes_applied: list[str]
+    unresolved_work: list[str]
+    working_branch: str | None
+    project_commit: str | None
+    status: Literal["completed", "partial", "blocked"]
 
 
 def _resolve_scenario_scope(
@@ -317,18 +356,57 @@ async def start_context(
                 )
             },
             "payload": {
-                "question": (
-                    "The user's original/current request, preserving enough detail "
-                    "to understand what assistance was requested."
-                ),
+                "timestamp": "UTC ISO-8601 time of the interaction, for example 2026-09-30T21:47:00Z.",
+                "team": f"The assigned team. Must exactly match {team_id}.",
+                "user_request": "The complete user request or a faithful representation.",
+                "objective": "What the user wanted accomplished.",
                 "summary": (
-                    "A detailed narrative of at least 300 characters explaining what "
-                    "you actually did: analysis, changes, actions, commands/tests when "
-                    "applicable, outputs/results, decisions, and unresolved work."
+                    "A detailed description of the work actually performed. "
+                    "Must be at least 300 characters."
                 ),
+                "analysis_performed": [
+                    "Important investigations, reasoning steps, or technical analysis actually performed."
+                ],
+                "files_reviewed": [
+                    "Repository or artifact paths actually inspected."
+                ],
+                "files_touched": [
+                    {
+                        "path": "File path.",
+                        "action": "created|modified|deleted|reviewed",
+                        "description": "What changed or was reviewed and why.",
+                    }
+                ],
+                "commands_executed": [
+                    "Shell, Git, script, tool, or other actions actually executed."
+                ],
+                "tests_and_validations": [
+                    {
+                        "name": "Test or check name.",
+                        "result": "passed|failed|not-run",
+                        "details": "Important result or reason it was not run.",
+                    }
+                ],
+                "results": ["Important outputs, findings, or produced results."],
+                "decisions": [
+                    {
+                        "decision": "Decision actually made.",
+                        "reason": "Reason for the decision.",
+                    }
+                ],
+                "problems_found": ["Errors, bugs, or issues actually discovered."],
+                "fixes_applied": ["Fixes or modifications actually performed."],
+                "unresolved_work": ["Anything still incomplete or blocked."],
+                "working_branch": "Actual project branch used, or null when not available.",
+                "project_commit": "Project commit SHA when available, otherwise null.",
+                "status": "completed|partial|blocked",
             },
             "rules": [
                 "Send one report after each completed interaction/work item.",
+                "Every payload field shown above is required; use empty arrays when a category has no items.",
+                "The timestamp must be timezone-aware UTC and the team must match the URL team.",
+                "Do not invent commands, tests, modifications, pushes, validations, commits, or results.",
+                "Do not include passwords, API keys, scenario tokens, authorization headers, cookies, credentials, private keys, or other secrets.",
                 "Do not replace or omit earlier reports; the server retains team history.",
                 "Use an accurate, detailed summary rather than a generic one-line statement.",
             ],
@@ -358,19 +436,36 @@ def save_ai_history(
             detail="This reporting endpoint accepts AI-identified clients only",
         )
 
+    if body.team != team_id:
+        raise HTTPException(
+            status_code=400,
+            detail="History payload team must match the team_id in the request path",
+        )
+
+    if body.timestamp.tzinfo is None or body.timestamp.utcoffset() != timedelta(0):
+        raise HTTPException(
+            status_code=422,
+            detail="History timestamp must be timezone-aware UTC",
+        )
+
     raw_who = (request.headers.get("X-Client-Type") or client.name).strip()
+    history_record = body.model_dump(mode="json")
     result = append_team_history(
         team_id,
         who=raw_who,
-        question=body.question,
-        summary=body.summary,
+        record=history_record,
     )
     log_event(
         logger,
         "ai_history.report_received",
         team_id=team_id,
         who=raw_who,
+        status=body.status,
         summary_chars=len(body.summary),
+        files_reviewed=len(body.files_reviewed),
+        files_touched=len(body.files_touched),
+        commands_executed=len(body.commands_executed),
+        tests_and_validations=len(body.tests_and_validations),
     )
     return result
 
