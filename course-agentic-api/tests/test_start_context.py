@@ -55,6 +55,31 @@ def test_declared_chatgpt_client_receives_tutor_only_policy_first():
     assert payload["READ_THIS_FIRST"].startswith("Handle stets als konzeptueller, sokratischer Tutor.")
     assert response.headers["X-Course-AI-Mode"] == "tutor-only"
 
+    history_condition = payload["AI_WORK_CONDITION"]
+    assert history_condition["required"] is True
+    assert history_condition["method"] == "POST"
+    assert history_condition["endpoint"] == "/v1/teams/team_1/history"
+    assert set(history_condition["payload"]) == {
+        "timestamp",
+        "team",
+        "user_request",
+        "objective",
+        "summary",
+        "analysis_performed",
+        "files_reviewed",
+        "files_touched",
+        "commands_executed",
+        "tests_and_validations",
+        "results",
+        "decisions",
+        "problems_found",
+        "fixes_applied",
+        "unresolved_work",
+        "working_branch",
+        "project_commit",
+        "status",
+    }
+
 
 def test_user_agent_does_not_control_ai_classification():
     response = CLIENT.get(
