@@ -27,6 +27,15 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 
+def _manager_tool_retry_limit() -> int:
+    raw = os.getenv("MANAGER_TOOL_RETRY_LIMIT", "3").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        value = 3
+    return max(1, min(value, 8))
+
+
 def _manager_request_limit() -> int:
     raw = os.getenv("MANAGER_REQUEST_LIMIT", "75").strip()
     try:
@@ -104,6 +113,7 @@ def build_agent(model_id: str | None = None) -> Agent:
         "output_type": MonthlyOperationsPlan,
         "tools": ALL_TOOLS,
         "instructions": BASE_INSTRUCTIONS,
+        "retries": {"tools": _manager_tool_retry_limit()},
     }
     if model_settings is not None:
         kwargs["model_settings"] = model_settings
@@ -156,6 +166,7 @@ async def run_manager(
             logger,
             "manager.usage_limits",
             request_limit=request_limit,
+            tool_retry_limit=_manager_tool_retry_limit(),
         )
         result = await agent.run(
             prompt,
