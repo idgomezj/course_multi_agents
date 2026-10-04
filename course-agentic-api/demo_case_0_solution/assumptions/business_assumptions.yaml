@@ -1,0 +1,13 @@
+# Solved Case 0 assumptions, each tied to visible company evidence.
+confirmed_orders:
+  interpretation: "Strong evidence of near-term demand, but compare against model/statistical signals before treating them as the full forecast."
+  evidence: "operations_policy.md and public scenario visible data"
+supplier_choice:
+  interpretation: "Use total operational cost and timing risk, not unit price alone."
+  evidence: "supplier_contracts.md and operations_policy.md"
+inventory:
+  interpretation: "Inventory is allowed but early purchasing creates holding and working-capital cost."
+  evidence: "operations_policy.md"
+document_authority:
+  interpretation: "Current operations policy/contracts outrank drafts, obsolete policy and unrelated corporate documents."
+  evidence: "document status/effective language"
