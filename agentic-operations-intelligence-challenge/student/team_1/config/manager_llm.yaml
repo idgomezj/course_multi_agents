@@ -1,0 +1,9 @@
+# Optional provider override. null keeps the runtime/UI default.
+provider: null              # google | openai | anthropic | deepseek | null
+temperature: 0.20
+max_tokens: 3000
+reasoning_mode: medium      # low | medium | high
+max_rag_documents: 5
+include_model_diagnostics: true
+include_cost_breakdown: true
+include_previous_plan: false
