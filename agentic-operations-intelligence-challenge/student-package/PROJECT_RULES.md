@@ -4,7 +4,7 @@
 
 El equipo puede:
 
-- construir los datasets supervisados de `model_a` y `model_b` a partir del archivo histórico crudo entregado con su caso;
+- construir los datasets supervisados de `model_a` y `model_b` a partir del historial crudo JSON obtenido desde `/v1/teams/{team_id}/training-source.json` con el token de su equipo;
 - definir transformaciones, ventanas temporales, features derivados y labels compatibles con el contrato;
 - cambiar arquitectura, preprocessing interno, hiperparámetros y entrenamiento de los modelos PyTorch asignados;
 - modificar la configuración RAG autorizada;
@@ -17,7 +17,7 @@ El equipo no puede:
 
 - modificar la plataforma o el evaluador;
 - modificar el contrato de I/O del modelo para cambiar la interfaz esperada por las tools;
-- modificar `raw_case_history.csv` o reemplazar la evidencia histórica suministrada; los estudiantes deben crear archivos derivados nuevos;
+- modificar, falsificar o sustituir el historial crudo recibido desde la Data API; los estudiantes deben conservarlo como evidencia de entrada y crear archivos derivados nuevos;
 - pedir a la Data API filas de entrenamiento o intentar descubrir datos/holdouts privados;
 - hardcodear respuestas por scenario ID;
 - detectar el test y devolver una respuesta precalculada;
@@ -28,14 +28,20 @@ El equipo no puede:
 
 ## 2. Entrenamiento
 
-El paquete incluye:
+El paquete local incluye:
 
 - descripción del caso;
 - `CASE_TRAINING.md`;
-- `raw_case_history.csv`;
 - `model_contract.json`.
 
-No incluye un dataset supervisado terminado.
+El historial crudo se obtiene como JSON desde:
+
+```text
+GET /v1/teams/{team_id}/training-source.json
+X-Scenario-Token: <token asignado al equipo>
+```
+
+Cada token está limitado a su equipo. El endpoint devuelve observaciones históricas crudas, no un dataset supervisado terminado.
 
 El equipo debe producir localmente `model_a_training.csv` y `model_b_training.csv`. La construcción del dataset forma parte de la evaluación técnica y debe poder explicarse en la defensa.
 
