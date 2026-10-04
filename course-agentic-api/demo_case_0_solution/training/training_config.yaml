@@ -1,0 +1,28 @@
+# Solved Case 0 training configuration.
+models:
+  model_a:
+    architecture: custom
+    hidden_layers: [64, 32]
+    activation: relu
+    dropout: 0.08
+    epochs: 240
+    learning_rate: 0.002
+    batch_size: 96
+    optimizer: adamw
+    loss: mse
+    weight_decay: 0.0002
+  model_b:
+    architecture: custom
+    hidden_layers: [64, 32]
+    activation: relu
+    dropout: 0.08
+    epochs: 240
+    learning_rate: 0.002
+    batch_size: 96
+    optimizer: adamw
+    loss: bce
+    weight_decay: 0.0002
+validation:
+  method: chronological
+  validation_fraction: 0.18
+  seed: 42
