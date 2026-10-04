@@ -35,6 +35,16 @@ jobs:
         working-directory: agentic-operations-intelligence-challenge
         run: python -m pytest -q
 
+      - name: Validate every case runtime without saving team solutions
+        run: python scripts/validate_all_case_runtimes.py
+
+      - name: Verify validation did not persist student solutions
+        run: |
+          if git status --porcelain -- agentic-operations-intelligence-challenge/student | grep .; then
+            echo "Validation modified or created files under student/."
+            exit 1
+          fi
+
       - name: Compile modified Python surfaces
         run: |
           python -m py_compile             course-agentic-api/app/main.py             course-agentic-api/app/auth.py             course-agentic-api/app/store.py             course-agentic-api/demo_app/student_config.py             course-agentic-api/demo_app/manager.py             course-agentic-api/demo_app/model_registry.py             course-agentic-api/demo_app/rag.py             course-agentic-api/demo_app/runtime.py             course-agentic-api/demo_app/simulator.py             course-agentic-api/demo_app/tools.py             course-agentic-api/demo_case_0_solution/train_models.py             agentic-operations-intelligence-challenge/challenge/student_config.py             agentic-operations-intelligence-challenge/challenge/manager.py             agentic-operations-intelligence-challenge/challenge/model_registry.py             agentic-operations-intelligence-challenge/challenge/rag.py             agentic-operations-intelligence-challenge/challenge/runtime.py             agentic-operations-intelligence-challenge/challenge/simulator.py             agentic-operations-intelligence-challenge/challenge/tools.py             agentic-operations-intelligence-challenge/student/train_pytorch.py
