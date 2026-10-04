@@ -37,8 +37,8 @@ El paquete local incluye:
 El historial crudo se obtiene como JSON desde:
 
 ```text
-GET https://course-agentic-api.idgomezj.com/v1/teams/{team_id}/training-source.json
-X-Team-Token: <token asignado al equipo>
+GET /v1/teams/{team_id}/training-source.json
+X-Scenario-Token: <token asignado al equipo>
 ```
 
 Cada token está limitado a su equipo. El endpoint devuelve observaciones históricas crudas, no un dataset supervisado terminado.
