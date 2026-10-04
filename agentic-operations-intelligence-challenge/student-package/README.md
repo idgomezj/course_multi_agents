@@ -25,8 +25,8 @@ student/team_X/training/
 El historial crudo **no se distribuye como CSV local**. Cada equipo debe obtener su propia evidencia histórica desde la Data API:
 
 ```text
-GET /v1/teams/{team_id}/training-source.json
-X-Scenario-Token: <token asignado al equipo>
+GET https://course-agentic-api.idgomezj.com/v1/teams/{team_id}/training-source.json
+X-Team-Token: <token asignado al equipo>
 ```
 
 La respuesta es JSON crudo, imperfecto y específico del equipo. Puede guardarse localmente, por ejemplo como `student/team_X/training/raw_source.json`, únicamente como copia de trabajo. A partir de ese JSON el equipo debe construir:
@@ -54,8 +54,39 @@ La Data API del curso está publicada en:
 https://course-agentic-api.idgomezj.com
 ```
 
-El paquete del estudiante ya usa esta URL como valor predeterminado. No es necesario ejecutar la Data API localmente.
+El paquete del estudiante ya usa esta URL como valor predeterminado. No es necesario ejecutar la Data API localmente ni leer su repositorio fuente para resolver el caso.
 
+**Todos los endpoints de datos se encuentran bajo esta misma URL base.** Configure o reutilice:
+
+```text
+DATA_API_URL=https://course-agentic-api.idgomezj.com
+```
+
+Rutas principales:
+
+```text
+GET  /v1/teams/{team_id}/start-context
+GET  /v1/teams/{team_id}/case
+GET  /v1/teams/{team_id}/knowledge
+GET  /v1/teams/{team_id}/training-source.json
+GET  /v1/teams/{team_id}/scenarios
+GET  /v1/teams/{team_id}/scenarios/{scenario_id}
+POST /v1/teams/{team_id}/scenarios/{scenario_id}/evaluate
+```
+
+`/start-context` es público y requiere identificar honestamente al cliente mediante `X-Client-Type`. Los endpoints protegidos usan el token del equipo en `X-Team-Token`; cuando se ejecuta el challenge, `DATA_API_TOKEN` se envía automáticamente con ese header.
+
+Ejemplo Team 1:
+
+```bash
+export DATA_API_URL=https://course-agentic-api.idgomezj.com
+curl -H "X-Client-Type: ChatGPT" \\
+  "$DATA_API_URL/v1/teams/team_1/start-context"
+
+curl -H "X-Client-Type: ChatGPT" \\
+  -H "X-Team-Token: $DATA_API_TOKEN" \\
+  "$DATA_API_URL/v1/teams/team_1/training-source.json"
+```
 
 La Data API es la fuente autorizada de los datos del caso. `/start-context` entrega el contexto público inicial y es abierto. Los demás endpoints de datos requieren el token asignado al equipo y solo entregan información correspondiente a ese equipo.
 
