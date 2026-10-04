@@ -1,5 +1,7 @@
 name: Config-driven challenge validation
 
+# Final validation covers the challenge runtime, Data API, and solved Case 0.
+
 on:
   push:
     branches:
