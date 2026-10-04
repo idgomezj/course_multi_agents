@@ -2,17 +2,26 @@
 
 Case 0 is the only fully worked example. It exists so students can see the expected level of analysis before beginning Teams 1–5.
 
-The example demonstrates:
+The example demonstrates the complete student process:
+- reviewing imperfect raw evidence before using a clean reproducible reference dataset;
+- configuring training architecture/hyperparameters and feature selection;
 - training the assigned PyTorch demand and supplier-risk models;
-- configuring retrieval for the Case 0 company documents;
-- designing planning, sourcing and cost-comparison procedures;
+- configuring RAG retrieval and document authority across current, obsolete, draft and irrelevant documents;
+- designing Skills and tool-use procedures;
+- configuring forecast blending, risk thresholds, planning priorities and Manager LLM settings;
+- documenting business assumptions;
+- respecting hard budget, inventory, overtime, expedite, service, supplier and approval constraints;
 - producing four-week production and purchasing plans;
 - validating feasibility and comparing total operating cost;
-- adapting the plan to different operational scenarios.
+- adapting the same solved configuration to different operational scenarios.
 
-## Clean model-training data
+The rationale for every solved setting is in [SOLUTION_DECISIONS.md](./SOLUTION_DECISIONS.md).
 
-Case 0 deliberately includes **clean, ready-to-train, deterministic datasets** so it can validate the platform rather than test data preparation:
+## Raw-data walkthrough + clean reproducible model training
+
+Case 0 now also exposes a small **imperfect worked raw-data sample** through the same Data API training-source route used by student teams. See [training/RAW_DATA_WALKTHROUGH.md](./training/RAW_DATA_WALKTHROUGH.md) for the solved analysis decisions.
+
+The reference models still use **clean, ready-to-train, deterministic datasets** so the instructor can validate the platform reproducibly:
 
 ```text
 demo_case_0_solution/training/
@@ -23,7 +32,27 @@ demo_case_0_solution/training/
 
 `train_models.py` reads these committed files directly. It does not generate training examples at runtime.
 
-This is intentionally different from Teams 1–5, where students receive raw historical JSON and must construct the supervised datasets themselves.
+The difference is now narrower: Case 0 shows the data-quality reasoning explicitly and then uses committed clean reference CSVs for deterministic validation. Teams 1–5 must perform the corresponding cleaning/feature/label construction themselves from their own raw JSON and produce their own supervised CSVs.
+
+## Solved configuration surfaces
+
+Case 0 contains the fully populated reference versions of:
+
+```text
+training/training_config.yaml
+training/feature_config.yaml
+rag/config.yaml
+rag/document_priorities.yaml
+skills/*.md
+config/forecast_policy.yaml
+config/risk_policy.yaml
+config/planning_objectives.yaml
+config/tool_policy.yaml
+config/manager_llm.yaml
+assumptions/business_assumptions.yaml
+```
+
+The demo runtime loads these files. They are not documentation-only examples.
 
 ## Published reference scenarios
 
