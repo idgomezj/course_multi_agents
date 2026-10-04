@@ -8,18 +8,18 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_student_visible_public_scenario_keeps_benchmark_cost():
     scenario = {
-        "id": "T3-P01",
+        "id": "EXAMPLE-PUBLIC-01",
         "title": "Example",
         "description": "Example scenario",
-        "visible": {"season_risk": 0.4},
-        "benchmark_cost": 61000,
-        "realized": {"supplier_delay_days": {"SUP02": 4}},
-        "public_expectations": {"required_tools": ["calculate_plan_cost"]},
+        "visible": {"example_signal": 0.37},
+        "benchmark_cost": 12345,
+        "realized": {"example_private_outcome": 99},
+        "public_expectations": {"required_tools": ["example_tool"]},
     }
 
     payload = student_visible_scenario(scenario)
 
-    assert payload["benchmark_cost"] == 61000
+    assert payload["benchmark_cost"] == 12345
     assert "realized" not in payload
     assert "public_expectations" not in payload
 
