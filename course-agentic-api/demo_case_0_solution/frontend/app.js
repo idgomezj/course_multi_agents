@@ -18,9 +18,10 @@ function pct(v){return v==null?'—':Number(v).toFixed(1)+'%'}
 function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 
 async function init(){
-  const [status,scenarios]=await Promise.all([
+  const [status,scenarios,config]=await Promise.all([
     getJson('/demo/api/status'),
-    getJson('/demo/api/scenarios')
+    getJson('/demo/api/scenarios'),
+    getJson('/demo/api/config')
   ]);
   scenarioEl.innerHTML=scenarios.map(x=>'<option value="'+x.id+'">'+x.id+' — '+x.title+'</option>').join('');
   managerModelEl.innerHTML=status.manager_models.map(x=>{
@@ -34,9 +35,16 @@ async function init(){
     '<span class="pill">Skills: '+status.skill_count+'</span>',
     '<span class="pill">'+status.models.model_a.artifact+': '+(status.models.model_a.ready?'READY':'NOT TRAINED')+'</span>',
     '<span class="pill">'+status.models.model_b.artifact+': '+(status.models.model_b.ready?'READY':'NOT TRAINED')+'</span>',
+    ...Object.entries(status.solved_config_files||{}).map(([k,v])=>'<span class="pill">'+escapeHtml(k)+': '+(v?'READY':'MISSING')+'</span>'),
     ...status.manager_models.map(x=>'<span class="pill">'+x.label+': '+(x.configured?'READY':'KEY MISSING')+'</span>')
   ].join('');
-  statusText.textContent='Ready. Use Reference first, then AI Manager.';
+  document.querySelector('#solvedConfig').innerHTML=
+    '<b>Hard constraints:</b><pre>'+escapeHtml(JSON.stringify(status.hard_constraints||{},null,2))+'</pre>'+
+    '<b>Forecast policy:</b><pre>'+escapeHtml(JSON.stringify(config.runtime.forecast_policy||{},null,2))+'</pre>'+
+    '<b>Risk policy:</b><pre>'+escapeHtml(JSON.stringify(config.runtime.risk_policy||{},null,2))+'</pre>'+
+    '<b>Planning objectives:</b><pre>'+escapeHtml(JSON.stringify(config.runtime.planning_objectives||{},null,2))+'</pre>'+
+    '<b>Document authority:</b><pre>'+escapeHtml(JSON.stringify(config.runtime.document_priorities||{},null,2))+'</pre>';
+  statusText.textContent='Ready. Review the solved configuration, then use Reference and AI Manager.';
 }
 
 function resetTrace(){document.querySelector('#trace').innerHTML='';}
