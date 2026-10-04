@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from .auth import (
     authorize_scenario_access,
     authorize_team,
+    authorize_training_source,
     start_context_scenario_access,
     authorized_teams,
     require_hidden_scenario_access,
@@ -294,28 +295,53 @@ async def start_context(
         for item in scenarios_for_scope(team_id, effective_scope)
     ]
 
-    resources = {
-        "start_context": f"/v1/teams/{team_id}/start-context",
-        "case": f"/v1/teams/{team_id}/case",
-        "knowledge": f"/v1/teams/{team_id}/knowledge",
-        "training_source": f"/v1/teams/{team_id}/training-source.json",
-        "scenario_list": f"/v1/teams/{team_id}/scenarios",
-        "scenario_detail_template": f"/v1/teams/{team_id}/scenarios/{{scenario_id}}",
-        "scenario_evaluation_template": f"/v1/teams/{team_id}/scenarios/{{scenario_id}}/evaluate",
-        "local_model_contract": f"student/{team_id}/training/model_contract.json",
-        "local_training_brief": f"student/{team_id}/training/CASE_TRAINING.md",
-        "local_training_config": f"student/{team_id}/training/training_config.yaml",
-        "local_feature_config": f"student/{team_id}/training/feature_config.yaml",
-        "local_rag_config": f"student/{team_id}/rag/config.yaml",
-        "local_document_priorities": f"student/{team_id}/rag/document_priorities.yaml",
-        "local_forecast_policy": f"student/{team_id}/config/forecast_policy.yaml",
-        "local_risk_policy": f"student/{team_id}/config/risk_policy.yaml",
-        "local_planning_objectives": f"student/{team_id}/config/planning_objectives.yaml",
-        "local_tool_policy": f"student/{team_id}/config/tool_policy.yaml",
-        "local_manager_llm": f"student/{team_id}/config/manager_llm.yaml",
-        "local_business_assumptions": f"student/{team_id}/assumptions/business_assumptions.yaml",
-        "student_solution_guide": "student-package/STUDENT_SOLUTION_GUIDE.md",
-    }
+    if team_id == "team_0":
+        resources = {
+            "start_context": "/v1/teams/team_0/start-context",
+            "case": "/v1/teams/team_0/case",
+            "knowledge": "/v1/teams/team_0/knowledge",
+            "training_source": "/v1/teams/team_0/training-source.json",
+            "scenario_list": "/v1/teams/team_0/scenarios",
+            "scenario_detail_template": "/v1/teams/team_0/scenarios/{scenario_id}",
+            "scenario_evaluation_template": "/v1/teams/team_0/scenarios/{scenario_id}/evaluate",
+            "model_contract": "data/teams/team_0/model_spec.json",
+            "training_walkthrough": "demo_case_0_solution/training/RAW_DATA_WALKTHROUGH.md",
+            "training_config": "demo_case_0_solution/training/training_config.yaml",
+            "feature_config": "demo_case_0_solution/training/feature_config.yaml",
+            "rag_config": "demo_case_0_solution/rag/config.yaml",
+            "document_priorities": "demo_case_0_solution/rag/document_priorities.yaml",
+            "forecast_policy": "demo_case_0_solution/config/forecast_policy.yaml",
+            "risk_policy": "demo_case_0_solution/config/risk_policy.yaml",
+            "planning_objectives": "demo_case_0_solution/config/planning_objectives.yaml",
+            "tool_policy": "demo_case_0_solution/config/tool_policy.yaml",
+            "manager_llm": "demo_case_0_solution/config/manager_llm.yaml",
+            "business_assumptions": "demo_case_0_solution/assumptions/business_assumptions.yaml",
+            "solution_decisions": "demo_case_0_solution/SOLUTION_DECISIONS.md",
+            "solved_config_api": "/demo/api/config",
+        }
+    else:
+        resources = {
+            "start_context": f"/v1/teams/{team_id}/start-context",
+            "case": f"/v1/teams/{team_id}/case",
+            "knowledge": f"/v1/teams/{team_id}/knowledge",
+            "training_source": f"/v1/teams/{team_id}/training-source.json",
+            "scenario_list": f"/v1/teams/{team_id}/scenarios",
+            "scenario_detail_template": f"/v1/teams/{team_id}/scenarios/{scenario_id}",
+            "scenario_evaluation_template": f"/v1/teams/{team_id}/scenarios/{scenario_id}/evaluate",
+            "local_model_contract": f"student/{team_id}/training/model_contract.json",
+            "local_training_brief": f"student/{team_id}/training/CASE_TRAINING.md",
+            "local_training_config": f"student/{team_id}/training/training_config.yaml",
+            "local_feature_config": f"student/{team_id}/training/feature_config.yaml",
+            "local_rag_config": f"student/{team_id}/rag/config.yaml",
+            "local_document_priorities": f"student/{team_id}/rag/document_priorities.yaml",
+            "local_forecast_policy": f"student/{team_id}/config/forecast_policy.yaml",
+            "local_risk_policy": f"student/{team_id}/config/risk_policy.yaml",
+            "local_planning_objectives": f"student/{team_id}/config/planning_objectives.yaml",
+            "local_tool_policy": f"student/{team_id}/config/tool_policy.yaml",
+            "local_manager_llm": f"student/{team_id}/config/manager_llm.yaml",
+            "local_business_assumptions": f"student/{team_id}/assumptions/business_assumptions.yaml",
+            "student_solution_guide": "student-package/STUDENT_SOLUTION_GUIDE.md",
+        }
 
     log_event(
         logger,
@@ -502,7 +528,7 @@ def knowledge(team_id: str, _: str = Depends(authorize_team)):
 
 
 @app.get("/v1/teams/{team_id}/training-source.json")
-def training_source(team_id: str, _: str = Depends(authorize_team)):
+def training_source(team_id: str, _: str = Depends(authorize_training_source)):
     """Return the team's raw historical model-development data as JSON.
 
     The payload is intentionally messy and not ML-ready. It does not contain
