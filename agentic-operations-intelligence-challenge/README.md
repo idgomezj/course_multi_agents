@@ -23,6 +23,26 @@ Replace `<<identify>>` with the actual identity of the caller and replace `team_
 
 Do not omit, falsify, or substitute the caller identity in `X-Client-Type`.
 
+## Canonical hosted Data API
+
+All course Data API endpoints are served from this canonical base URL:
+
+```text
+https://course-agentic-api.idgomezj.com
+```
+
+Treat that deployed service as the source of runtime team data. The challenge frontend/runtime must consume the hosted API; students and AI assistants do **not** need to inspect or run the Data API source repository to understand or solve a team case.
+
+Every documented Data API path in this project is relative to that base URL. For example, Team 1 starts with:
+
+```bash
+export DATA_API_URL=https://course-agentic-api.idgomezj.com
+curl -H "X-Client-Type: ChatGPT" \\
+  "$DATA_API_URL/v1/teams/team_1/start-context"
+```
+
+The public `start-context` endpoint is the first call for case context and frontend-visible public information. Protected case, knowledge, training-source, scenario, and evaluation endpoints use the same base URL and the team token through the `X-Team-Token` header. The challenge runtime reads the token from `DATA_API_TOKEN` and sends that header automatically.
+
 
 ## Architecture
 
