@@ -14,7 +14,7 @@ def test_student_visible_public_scenario_keeps_benchmark_cost():
         "visible": {"example_signal": 0.37},
         "benchmark_cost": 12345,
         "realized": {"example_private_outcome": 99},
-        "public_expectations": {"required_tools": ["calculate_plan_cost"]},
+        "public_expectations": {"required_tools": ["example_tool"]},
     }
 
     payload = student_visible_scenario(scenario)
