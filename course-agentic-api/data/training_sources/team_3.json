@@ -3348,5 +3348,25 @@
       "source_system": "supplier_portal",
       "buyer_comment": null
     }
-  ]
+  ],
+  "purpose": "Raw JIT supplier-order evidence. Students must separate order-time information from realized delivery outcomes.",
+  "data_quality_notes": {
+    "raw_source": true,
+    "not_training_ready": true,
+    "expected_issues": [
+      "missing realized lead times",
+      "missing reliability/late-rate values",
+      "supplier ID formatting inconsistencies",
+      "partial receipt notes",
+      "buyer corrections",
+      "mixed source systems"
+    ]
+  },
+  "analysis_expectations": [
+    "What was knowable at order time?",
+    "How should urgency be derived from order/need dates?",
+    "When does nominal lead time understate risk?",
+    "Are recent late rates drifting?"
+  ],
+  "student_warning": "Do not modify the raw evidence or treat every anomaly as an error. Create derived supervised datasets and document cleaning/label assumptions."
 }
