@@ -370,6 +370,14 @@ async def start_context(
         "student_editable": config.get("student_editable", []),
         "student_read_only": config.get("student_read_only", []),
         "important_rules": config.get("important_rules", []),
+        "worked_reference": {
+            "team_id": "team_0",
+            "purpose": "Fully solved example of the process and configuration surfaces. Learn the method; do not copy its numeric settings as your team solution.",
+            "demo": "/demo",
+            "solved_config_api": "/demo/api/config",
+            "solution_decisions": "demo_case_0_solution/SOLUTION_DECISIONS.md",
+            "raw_data_walkthrough": "demo_case_0_solution/training/RAW_DATA_WALKTHROUGH.md",
+        },
     }
 
     # This reporting condition is intentionally returned only to clients that
