@@ -48,6 +48,7 @@ from demo_app.llm_config import default_manager_model_id, manager_model_status, 
 from demo_app.manager import run_manager
 from demo_app.schemas import MonthlyOperationsPlan
 from demo_app.simulator import simulate_month
+from demo_app.student_config import config_status as demo_config_status, load_runtime_config as load_demo_runtime_config
 
 setup_logging("agentic-operations-data-api")
 logger = logging.getLogger(__name__)
@@ -691,6 +692,19 @@ def demo_status():
         "models": model_status,
         "manager_model_id": default_manager_model_id(),
         "manager_models": manager_model_status(),
+        "solved_config_files": demo_config_status(),
+        "hard_constraints": load_case("team_0").get("constraints", {}),
+    }
+
+
+@app.get("/demo/api/config")
+def demo_config():
+    """Return the solved Case 0 configuration used by the reference demo."""
+    return {
+        "team_id": "team_0",
+        "purpose": "Fully worked reference configuration for the student-editable surfaces.",
+        "config_files": demo_config_status(),
+        "runtime": load_demo_runtime_config(),
     }
 
 
@@ -757,11 +771,12 @@ async def demo_run_agent(
 
     try:
         log_event(logger, "demo.ai_run.requested", team_id="team_0", scenario_id=scenario_id, model_id=model_id)
-        selected_model, _settings = resolve_manager_model(model_id)
         plan, deps = await run_manager(scenario, model_id)
+        selected_id = model_id or deps.student_config.get("manager_llm", {}).get("provider")
+        selected_model, _settings = resolve_manager_model(selected_id)
         result = evaluate_plan(deps.case, scenario, plan, deps.trace, deps.rag_hits)
         payload = result.model_dump()
-        payload["manager_model_id"] = model_id or default_manager_model_id()
+        payload["manager_model_id"] = selected_id or default_manager_model_id()
         payload["manager_model"] = selected_model
         log_event(
             logger,
