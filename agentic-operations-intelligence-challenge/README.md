@@ -69,7 +69,9 @@ Before scenario/model-resolution work, the application calls:
 GET /v1/teams/{team_id}/start-context
 ```
 
-This is the authoritative starting context for the assigned case. It provides the student-visible case, RAG documents, authorized scenario list, workflow and resource locations. The caller must truthfully identify itself (use the real name) through the required `X-Client-Type` header and must follow the context returned by the service.
+This is the authoritative starting context for the assigned case. Its **public view is intentionally open and does not require a team token**. It provides the public student-visible case context, RAG documents, public scenario information, workflow and resource locations. The caller must truthfully identify itself (use the real name) through the required `X-Client-Type` header and must follow the context returned by the service.
+
+A valid scenario token may select an authorized scenario scope, but the open public start context must remain available without credentials. The detailed data endpoints below are separate and remain team-token controlled.
 
 ## Frontend capabilities
 
@@ -106,9 +108,23 @@ student/team_X/
 
 Students do not modify the Manager, application, tools, schemas, simulator, cost engine or evaluator.
 
-## What now comes from the Data API
+## Where the case data comes from
 
-For the authorized team:
+The challenge repository contains the application, Manager, tools, evaluator, local model contract, training guidance, RAG configuration and Skills workspace. The **actual team business data is provided by the Data API**, not duplicated as local case files.
+
+Access is intentionally split:
+
+| Data | Source | Access |
+|---|---|---|
+| Public starting context | `GET /v1/teams/{team_id}/start-context` | Open; no team token required |
+| Full team case data | `GET /v1/teams/{team_id}/case` | Team/scenario token required |
+| Team RAG source documents | `GET /v1/teams/{team_id}/knowledge` | Team/scenario token required |
+| Raw model-development history | `GET /v1/teams/{team_id}/training-source.json` | Team/scenario token required; JSON |
+| Public/hidden scenario data | `GET /v1/teams/{team_id}/scenarios` | Token selects authorized scope |
+| Scenario evaluation | `POST /v1/teams/{team_id}/scenarios/{scenario_id}/evaluate` | Token required and team-scoped |
+| Model I/O contract | `student/team_X/training/model_contract.json` | Local read-only assignment file |
+
+For the authorized team, the API provides:
 
 - products and demand history;
 - materials and initial inventory;
