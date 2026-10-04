@@ -59,7 +59,7 @@ Tener material no garantiza servicio. La decisión dominante es cómo usar capac
 
 ## Evidencia para entrenamiento
 
-El equipo recibe `student/team_5/training/raw_case_history.csv`, con corridas históricas de línea, utilización, mantenimiento, carga planificada, capacidad, changeovers, disponibilidad de overtime/labor y resultados reales de downtime/completitud.
+El equipo obtiene mediante `GET /v1/teams/team_5/training-source.json` datos crudos **en JSON** con corridas históricas de línea, utilización, mantenimiento, carga planificada, capacidad, changeovers, disponibilidad de overtime/labor y resultados reales de downtime/completitud. Este endpoint requiere el token asignado a Team 5; no existe un `raw_case_history.csv` local suministrado.
 
 El equipo debe derivar los targets de downtime y production feasibility, y construir los features requeridos sin usar outcomes futuros como inputs.
 
