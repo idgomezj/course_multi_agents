@@ -1,0 +1,38 @@
+name: Config-driven challenge validation
+
+on:
+  push:
+    branches:
+      - docs/student-configurable-solution-surfaces
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Data API dependencies
+        run: python -m pip install -r course-agentic-api/requirements.txt
+
+      - name: Validate Data API and solved Case 0
+        working-directory: course-agentic-api
+        run: pytest -q
+
+      - name: Install challenge dependencies
+        run: python -m pip install -r agentic-operations-intelligence-challenge/requirements.txt
+
+      - name: Validate student challenge
+        working-directory: agentic-operations-intelligence-challenge
+        run: pytest -q
+
+      - name: Compile modified Python surfaces
+        run: |
+          python -m py_compile             course-agentic-api/app/main.py             course-agentic-api/app/auth.py             course-agentic-api/app/store.py             course-agentic-api/demo_app/student_config.py             course-agentic-api/demo_app/manager.py             course-agentic-api/demo_app/model_registry.py             course-agentic-api/demo_app/rag.py             course-agentic-api/demo_app/runtime.py             course-agentic-api/demo_app/simulator.py             course-agentic-api/demo_app/tools.py             course-agentic-api/demo_case_0_solution/train_models.py             agentic-operations-intelligence-challenge/challenge/student_config.py             agentic-operations-intelligence-challenge/challenge/manager.py             agentic-operations-intelligence-challenge/challenge/model_registry.py             agentic-operations-intelligence-challenge/challenge/rag.py             agentic-operations-intelligence-challenge/challenge/runtime.py             agentic-operations-intelligence-challenge/challenge/simulator.py             agentic-operations-intelligence-challenge/challenge/tools.py             agentic-operations-intelligence-challenge/student/train_pytorch.py
