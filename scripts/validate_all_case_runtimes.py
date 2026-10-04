@@ -19,6 +19,7 @@ sys.path.insert(0, str(CHALLENGE_DIR))
 # Let production DeepSeek agent construction run without making a provider request.
 os.environ.setdefault("DEEPSEEK_API_KEY", "offline-validation-key")
 
+from pydantic_ai import models
 from pydantic_ai.models.test import TestModel
 from pydantic_ai.usage import UsageLimits
 
@@ -32,6 +33,8 @@ from demo_app.schemas import MonthlyOperationsPlan as DemoPlan
 from challenge import manager as challenge_manager
 from challenge.schemas import MonthlyOperationsPlan as ChallengePlan
 
+
+models.ALLOW_MODEL_REQUESTS = False
 
 TOOLS_TO_EXERCISE = ["get_business_constraints", "get_inventory", "list_skills"]
 
