@@ -1,0 +1,12 @@
+# Solved Case 0 tool-use policy.
+required_before_finalize:
+  - calculate_plan_cost
+  - validate_plan
+max_replans: 2
+guidance:
+  - Load a relevant Skill before a high-impact planning decision.
+  - Search current company policy and contracts before sourcing decisions.
+  - Check inventory and open purchase orders before recommending new procurement.
+  - Compare Model A with confirmed orders and statistical forecasts when demand signals differ.
+  - Use supplier-delay prediction when timing slack is material to the supplier decision.
+  - Do not repeat an identical tool call unless the underlying inputs changed.
