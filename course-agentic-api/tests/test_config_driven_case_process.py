@@ -50,7 +50,7 @@ def test_case0_raw_training_sample_contains_worked_data_quality_problems():
     payload = load_training_source("team_0")
     assert payload["dataset"] == "case0_worked_raw_training_sample"
     records = payload["records"]
-    assert any(row.get("record_id", "").endswith("-DUP") for row in records)
+    assert any(\n        any(str(row.get(key, "")).endswith("-DUP") for key in ("record_id", "order_id"))\n        for row in records\n    )
     assert any(any(value is None for value in row.values()) for row in records)
     assert any(str(row.get("supplier_id", "")).strip() != str(row.get("supplier_id", "")) for row in records if "supplier_id" in row)
 
