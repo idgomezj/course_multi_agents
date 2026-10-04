@@ -79,12 +79,12 @@ def load_model_spec(team_id: str) -> dict[str, Any]:
 def load_training_source(team_id: str) -> dict[str, Any]:
     """Load the raw historical JSON source used for student model development.
 
-    This is intentionally not a model-ready training dataset: it contains raw,
-    imperfect business observations that students must inspect, clean, filter,
-    transform and label themselves.
+    This is intentionally not a model-ready training dataset. Team 1-5 payloads
+    contain raw imperfect evidence that students must inspect, clean, transform
+    and label. Team 0 returns a worked imperfect sample that demonstrates the same
+    analysis process before the committed reference CSVs are used for reproducible
+    instructor model training.
     """
-    if team_id == "team_0":
-        raise KeyError("Case 0 uses the instructor's internal worked-example training flow")
     if team_id not in available_teams():
         raise KeyError(team_id)
 
