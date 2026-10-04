@@ -2340,5 +2340,25 @@
       "source_system": "planning",
       "planner_note": null
     }
-  ]
+  ],
+  "purpose": "Raw stable make-to-stock demand/inventory evidence. Students must distinguish normal noise from structural inventory/demand changes.",
+  "data_quality_notes": {
+    "raw_source": true,
+    "not_training_ready": true,
+    "expected_issues": [
+      "missing values",
+      "duplicate uploads",
+      "product identifier inconsistencies",
+      "receipt corrections",
+      "mixed source systems",
+      "occasional planner notes"
+    ]
+  },
+  "analysis_expectations": [
+    "Is demand truly stable over the full history?",
+    "When does incoming supply create excess inventory?",
+    "How should holding/working-capital pressure affect labels?",
+    "Which anomalies should be retained as genuine business events?"
+  ],
+  "student_warning": "Do not modify the raw evidence or treat every anomaly as an error. Create derived supervised datasets and document cleaning/label assumptions."
 }
