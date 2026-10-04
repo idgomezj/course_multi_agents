@@ -59,7 +59,7 @@ Aquí mantener inventario puede ser racional: la ausencia de buffer puede costar
 
 ## Evidencia para entrenamiento
 
-El equipo recibe `student/team_4/training/raw_case_history.csv`, con historial de órdenes, entregas y resultados de inspección de calidad.
+El equipo obtiene mediante `GET /v1/teams/team_4/training-source.json` datos crudos **en JSON** con historial de órdenes, entregas y resultados de inspección de calidad. Este endpoint requiere el token asignado a Team 4; no existe un `raw_case_history.csv` local suministrado.
 
 El equipo debe construir por sí mismo los datasets de supplier-delay y supplier-quality, incluyendo labels derivados de resultados reales. Los outcomes de llegada/rechazo no pueden utilizarse como features conocidos antes de la recepción.
 
