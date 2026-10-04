@@ -58,7 +58,7 @@ La decisión óptima depende fuertemente del timing. “Comprar más por segurid
 
 ## Evidencia para entrenamiento
 
-El equipo obtiene mediante `GET /v1/teams/team_3/training-source.json` datos crudos **en JSON** con órdenes históricas, cantidades, cantidades típicas, fechas de orden/necesidad, lead time nominal y realizado, confiabilidad, tardanzas recientes y riesgo estacional. Este endpoint requiere el token asignado a Team 3; no existe un `raw_case_history.csv` local suministrado.
+El equipo obtiene mediante `GET /v1/teams/team_3/training-source.json` datos crudos **en JSON** con órdenes históricas, cantidades, cantidades típicas, fechas de orden/necesidad, lead time nominal y realizado, confiabilidad, tardanzas recientes y riesgo estacional. Este endpoint requiere el token asignado a Team 3.
 
 El equipo debe derivar variables como `order_qty_ratio` y urgencia, y construir los targets de retraso y tiempo de llegada usando los resultados realizados. El lead time realizado es outcome y no puede filtrarse como input del mismo ejemplo.
 
