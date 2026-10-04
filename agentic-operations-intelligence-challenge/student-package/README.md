@@ -94,6 +94,19 @@ Además del estado del negocio, documentos y escenarios autorizados, la Data API
 
 La evaluación final utilizará escenarios y holdouts no vistos durante el desarrollo.
 
+### Endpoints para probar el frontend
+
+Después de ejecutar `python run.py`, el frontend usa el runtime local en `http://localhost:8000`. Puede verificar la carga de información con:
+
+```bash
+curl http://localhost:8000/api/health
+curl http://localhost:8000/api/teams
+curl http://localhost:8000/api/scenarios/team_1
+curl http://localhost:8000/api/status/team_1
+```
+
+Las rutas locales disponibles son `GET /api/health`, `GET /api/manager-models`, `GET /api/teams`, `GET /api/scenarios/{team_id}`, `GET /api/status/{team_id}` y `POST /api/evaluate`. Estas rutas alimentan el frontend, pero los datos de equipos y escenarios siguen viniendo de la Data API hospedada en `https://course-agentic-api.idgomezj.com`.
+
 ## Qué pueden modificar
 
 Como parte del trabajo de modelos pueden:
