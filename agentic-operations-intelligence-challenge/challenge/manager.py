@@ -112,7 +112,7 @@ def _student_model_settings(student_config: dict[str, Any], base: Any | None) ->
     return settings or None
 
 
-def build_agent(model_id: str | None = None, student_config: dict[str, Any] | None = None) -> tuple[Agent, str]:
+def build_agent(model_id: str | None = None, student_config: dict[str, Any] | None = None) -> Agent:
     student_config = student_config or {}
     llm_cfg = student_config.get("manager_llm", {})
     requested_model_id = model_id or llm_cfg.get("provider")
@@ -136,7 +136,7 @@ def build_agent(model_id: str | None = None, student_config: dict[str, Any] | No
     }
     if model_settings is not None:
         kwargs["model_settings"] = model_settings
-    return Agent(model, **kwargs), model
+    return Agent(model, **kwargs)
 
 
 def manager_prompt(deps: RuntimeDeps) -> str:
@@ -185,7 +185,9 @@ async def run_manager(team_id: str, scenario: dict[str, Any], model_id: str | No
     try:
         deps = build_runtime(team_id, scenario)
         prompt = manager_prompt(deps)
-        agent, resolved_model = build_agent(model_id, deps.student_config)
+        effective_model_id = model_id or deps.student_config.get("manager_llm", {}).get("provider")
+        resolved_model, _ = resolve_manager_model(effective_model_id)
+        agent = build_agent(model_id, deps.student_config)
         log_event(
             logger,
             "manager.run.started",
