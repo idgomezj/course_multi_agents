@@ -4,7 +4,7 @@
 
 This is the **raw historical evidence for your assigned business case**. It is intentionally not a training-ready ML table.
 
-Treat `raw_case_history.csv` and `model_contract.json` as read-only assignment inputs. Create new derived files rather than editing the supplied evidence or contract.
+Retrieve the raw historical evidence as JSON from `GET /v1/teams/team_2/training-source.json` using Team 2's assigned token. Treat that API response and `model_contract.json` as read-only assignment inputs. You may save the response locally as `raw_source.json` for analysis, but create new derived files rather than editing the source evidence or contract.
 
 You must build the supervised learning dataset yourself. That means deciding how historical rows become examples, deriving the required model inputs from the raw observations, constructing defensible targets from later outcomes, handling missing/noisy observations, choosing train/validation splits, and documenting your assumptions.
 
@@ -26,7 +26,7 @@ The starter trainer refuses to create the supervised rows for you; it only train
 
 ## Raw file
 
-`raw_case_history.csv` contains weekly demand plus inventory position, receipts and holding-cost observations.
+The JSON returned by `/v1/teams/team_2/training-source.json` contains weekly demand plus inventory position, receipts and holding-cost observations.
 
 The business is intentionally stable. Build rolling demand-forecast examples from the chronological demand history rather than generating arbitrary high-volatility samples.
 
