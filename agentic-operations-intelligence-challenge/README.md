@@ -254,6 +254,7 @@ GET  /api/manager-models
 GET  /api/teams
 GET  /api/scenarios/{team_id}
 GET  /api/status/{team_id}
+GET  /api/config/{team_id}
 POST /api/evaluate
 ```
 
@@ -264,7 +265,10 @@ curl http://localhost:8000/api/health
 curl http://localhost:8000/api/teams
 curl http://localhost:8000/api/scenarios/team_1
 curl http://localhost:8000/api/status/team_1
+curl http://localhost:8000/api/config/team_1
 ```
+
+`GET /api/config/{team_id}` shows the validated student configuration currently loaded by runtime; it does not expose evaluator/hidden configuration.
 
 These local frontend/runtime routes are **not a second data source**. They obtain team context and scenarios from the canonical hosted Data API at `https://course-agentic-api.idgomezj.com`. Protected evaluation/data operations still require the configured `DATA_API_TOKEN`.
 
