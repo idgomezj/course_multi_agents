@@ -200,3 +200,23 @@ def authorized_teams(
         has_instructor_token=bool(x_instructor_token),
     )
     raise HTTPException(status_code=403, detail="Invalid team/scenario token")
+
+
+def authorize_training_source(
+    team_id: str,
+    x_team_token: str | None = Header(default=None),
+    x_scenario_token: str | None = Header(default=None),
+    x_instructor_token: str | None = Header(default=None),
+) -> str:
+    """Allow the public worked Case 0 raw sample; protect Team 1-5 raw evidence."""
+    if team_id == "team_0":
+        if team_id not in available_teams():
+            raise HTTPException(status_code=404, detail="Unknown team")
+        log_event(logger, "auth.training_source.allowed", team_id=team_id, auth_mode="worked_reference_public")
+        return team_id
+    return authorize_team(
+        team_id,
+        x_team_token=x_team_token,
+        x_scenario_token=x_scenario_token,
+        x_instructor_token=x_instructor_token,
+    )
