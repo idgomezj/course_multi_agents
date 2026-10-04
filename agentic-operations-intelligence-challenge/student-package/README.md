@@ -118,7 +118,7 @@ curl http://localhost:8000/api/scenarios/team_1
 curl http://localhost:8000/api/status/team_1
 ```
 
-Las rutas locales disponibles son `GET /api/health`, `GET /api/manager-models`, `GET /api/teams`, `GET /api/scenarios/{team_id}`, `GET /api/status/{team_id}` y `POST /api/evaluate`. Estas rutas alimentan el frontend, pero los datos de equipos y escenarios siguen viniendo de la Data API hospedada en `https://course-agentic-api.idgomezj.com`.
+Las rutas locales disponibles son `GET /api/health`, `GET /api/manager-models`, `GET /api/teams`, `GET /api/scenarios/{team_id}`, `GET /api/status/{team_id}`, `GET /api/config/{team_id}` y `POST /api/evaluate`. `/api/config/{team_id}` permite confirmar exactamente qué configuración editable validó y cargó el runtime. Estas rutas alimentan el frontend, pero los datos de equipos y escenarios siguen viniendo de la Data API hospedada en `https://course-agentic-api.idgomezj.com`.
 
 ## Qué pueden modificar
 
