@@ -21,6 +21,7 @@ class RuntimeDeps:
     rag: RagIndex
     skills: SkillLibrary
     models: StudentModelRegistry
+    student_config: dict[str, Any]
     trace: list[dict[str, Any]] = field(default_factory=list)
     rag_hits: set[str] = field(default_factory=set)
 
