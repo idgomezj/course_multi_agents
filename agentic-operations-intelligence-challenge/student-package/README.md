@@ -4,11 +4,24 @@
 
 La aplicación, el Manager, las tools, el simulador y el evaluador ya están construidos.
 
-Su equipo debe enseñar al sistema cómo operar su caso mediante:
+Su equipo debe enseñar al sistema cómo operar su caso mediante análisis y configuración, no modificando el runtime.
 
-1. construcción y entrenamiento de sus modelos PyTorch;
-2. configuración/estrategia RAG;
-3. diseño/mejora de Skills.
+Las principales superficies de trabajo son:
+
+1. configuración de preparación de datos y entrenamiento de Model A / Model B;
+2. selección de features permitidos;
+3. configuración/estrategia RAG y autoridad documental;
+4. diseño/mejora de Skills;
+5. política de combinación de forecasts;
+6. thresholds y políticas de riesgo;
+7. objetivos/restricciones de planificación;
+8. política de uso de tools;
+9. settings autorizados del Manager LLM;
+10. supuestos de negocio documentados.
+
+La **estrategia de evaluación no es editable por los estudiantes**.
+
+La guía completa, incluyendo un ejemplo general deliberadamente sin resolver, está en [STUDENT_SOLUTION_GUIDE.md](./STUDENT_SOLUTION_GUIDE.md).
 
 ## El entrenamiento también es parte del reto
 
@@ -38,7 +51,7 @@ model_b_training.csv
 
 según el contexto del caso y el contrato del modelo.
 
-Esto exige construir ventanas, features y labels, decidir cómo validar, evitar leakage y justificar las decisiones. El equipo puede modificar la arquitectura y el procedimiento de entrenamiento, pero el modelo exportado debe respetar el contrato de entrada/salida entregado.
+Esto exige comprender cómo se construyen ventanas, features y labels, decidir entre las opciones de preparación/validación expuestas por el paquete, evitar leakage y justificar las decisiones. El trainer debe estar proporcionado por la plataforma para que el estudiante pueda experimentar principalmente mediante configuración de arquitectura, hiperparámetros, features y preprocessing, sin necesitar modificar el runtime Python. El modelo exportado siempre debe respetar el contrato de entrada/salida entregado.
 
 ## Dashboard de evaluación
 
@@ -109,13 +122,26 @@ Las rutas locales disponibles son `GET /api/health`, `GET /api/manager-models`, 
 
 ## Qué pueden modificar
 
-Como parte del trabajo de modelos pueden:
+El reto está diseñado para que la mayor parte del trabajo se realice mediante YAML/JSON/Markdown y configuraciones guiadas.
 
-- descargar el historial crudo JSON de su equipo desde la Data API y construir sus CSV supervisados locales;
-- modificar el trainer/arquitectura/hyperparámetros;
-- entrenar y exportar `model_a.pt2` y `model_b.pt2`;
-- modificar RAG dentro del alcance permitido;
-- modificar Skills.
+Según las opciones expuestas por el paquete del equipo, pueden:
+
+- analizar el historial crudo JSON de su equipo;
+- seleccionar opciones de limpieza/preparación de datos;
+- configurar arquitectura, hiperparámetros, loss, optimizer y validación usando settings permitidos;
+- activar/desactivar features y features derivados permitidos por el contrato;
+- entrenar y exportar `model_a.pt2` y `model_b.pt2` mediante el trainer proporcionado;
+- modificar configuración RAG;
+- configurar prioridad/autoridad documental;
+- crear o mejorar Skills;
+- configurar política de combinación de forecasts;
+- configurar thresholds/políticas de riesgo;
+- configurar objetivos y restricciones de planificación dentro de las reglas del caso;
+- configurar cuándo deben usarse tools existentes;
+- ajustar settings autorizados del Manager LLM;
+- documentar y ajustar supuestos de negocio basados en evidencia.
+
+Ver [STUDENT_SOLUTION_GUIDE.md](./STUDENT_SOLUTION_GUIDE.md) para el detalle de cada superficie editable.
 
 ## Qué NO pueden modificar
 
@@ -128,6 +154,9 @@ No se puede modificar:
 - simulador;
 - motor de costos;
 - evaluator/scoring;
+- estrategia de evaluación del curso;
+- pesos/criterios de evaluación;
+- hidden evaluation configuration;
 - schemas;
 - Data API;
 - escenarios/holdouts ocultos;
