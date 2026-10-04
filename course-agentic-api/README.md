@@ -176,10 +176,10 @@ Other endpoints:
 
 - `GET /health`
 - `GET /v1/teams`
-- `GET /v1/teams/{team_id}/bootstrap`
-- `GET /v1/teams/{team_id}/case`
-- `GET /v1/teams/{team_id}/knowledge`
-- `GET /v1/teams/{team_id}/training-source.json` — raw historical JSON for Teams 1–5; not model-ready
+- `GET /v1/teams/{team_id}/bootstrap` — token-protected team case + knowledge compatibility endpoint
+- `GET /v1/teams/{team_id}/case` — token-protected business data for the requested team only
+- `GET /v1/teams/{team_id}/knowledge` — token-protected RAG source documents for the requested team only
+- `GET /v1/teams/{team_id}/training-source.json` — token-protected raw historical JSON for that team; not model-ready
 - `GET /v1/teams/{team_id}/scenarios` — the token selects the public or hidden scenario set
 - `GET /v1/teams/{team_id}/scenarios/{scenario_id}` — token-scoped scenario detail
 - `POST /v1/teams/{team_id}/scenarios/{scenario_id}/evaluate` — server-side scoring using the internal scenario
@@ -206,9 +206,22 @@ data/start_context.json
 
 Teams 1–5 have exactly **two scenario tokens each**: one public token and one hidden token. They are controlled in `data/scenario_access.json`; see `SCENARIO_ACCESS.md` for the current values and field-sharing policy.
 
-The canonical `/start-context` endpoint is the required first context call. Scenario authorization still determines which scenario information can be returned.
+The canonical `/start-context` endpoint is the required first context call. Its public view is intentionally open: no team token is required to retrieve public starting context. If a valid scoped token is supplied, scenario authorization determines which scenario information can be returned.
 
-The same token also authorizes that team's base case, knowledge, and training-source requests. Send the active token as `X-Scenario-Token` or through the backward-compatible `X-Team-Token` header.
+All detailed team-data endpoints remain protected. The same team/scenario token authorizes only that team's `/bootstrap`, `/case`, `/knowledge`, `/training-source.json`, scenario and evaluation requests. Send the active token as `X-Scenario-Token` or through the backward-compatible `X-Team-Token` header. A token assigned to one team is not intended to authorize another team's protected data.
+
+### Data ownership and source mapping
+
+For Teams 1–5, the service resolves data by the `team_id` in the request:
+
+- base/common operating data: `data/base.yaml`;
+- team-specific case overrides and public scenarios: `data/teams/team_X.yaml`;
+- team-specific RAG documents: `data/teams/team_X/knowledge/*.md`;
+- team-specific raw model-development history: `data/training_sources/team_X.json`;
+- team-specific hidden scenarios: `data/scenarios/team_X/hidden.json`;
+- scenario sharing policy and team-scoped public/hidden tokens: `data/scenario_access.json`.
+
+The API merges common base data with the requested team's case overrides, then returns only the requested team's knowledge, raw training source and authorized scenarios. The raw training source is JSON and is intentionally not converted into supervised training CSVs by the service.
 
 The checked-in credentials are for development/course control. If students can read this branch, those values and any hidden JSON stored here are not secret. For a real exam deployment, run the service from an instructor-only source or inject production credentials and hidden scenario files at deployment time.
 
