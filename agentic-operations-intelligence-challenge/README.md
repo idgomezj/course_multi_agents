@@ -112,21 +112,57 @@ Hidden scenario scope continues to omit benchmark, cost-breakdown, trace, plan, 
 
 ## What students modify
 
-Only:
+The challenge is intentionally **configuration-driven rather than programming-driven**. Students should primarily work through YAML/JSON/Markdown and the provided training/runtime interfaces.
+
+The allowed solution surfaces include:
+
+- data-preparation choices exposed by the package;
+- Model A / Model B training settings and allowed feature selection;
+- generated `model_a.pt2` and `model_b.pt2` artifacts;
+- RAG configuration;
+- document priority/authority metadata;
+- Skills;
+- forecast-combination policy;
+- risk thresholds/policy;
+- planning objectives and allowed constraints;
+- tool-use policy;
+- authorized Manager LLM settings;
+- documented business assumptions.
+
+A representative package can expose:
 
 ```text
 student/team_X/
 ├── training/
-│   ├── CASE_TRAINING.md           # supplied assignment guidance
-│   ├── model_contract.json        # supplied fixed runtime interface
-│   ├── model_a_training.csv       # student builds
-│   └── model_b_training.csv       # student builds
-├── models/                        # student trains model_a.pt2 + model_b.pt2
-├── rag/                           # retrieval configuration
-└── skills/                        # procedural Skills
+│   ├── CASE_TRAINING.md
+│   ├── model_contract.json
+│   ├── training_config.yaml
+│   ├── feature_config.yaml
+│   ├── model_a_training.csv
+│   └── model_b_training.csv
+├── models/
+│   ├── model_a.pt2
+│   └── model_b.pt2
+├── rag/
+│   ├── config.yaml
+│   └── document_priorities.yaml
+├── skills/
+│   └── *.md
+├── config/
+│   ├── forecast_policy.yaml
+│   ├── risk_policy.yaml
+│   ├── planning_objectives.yaml
+│   ├── tool_policy.yaml
+│   └── manager_llm.yaml
+└── assumptions/
+    └── business_assumptions.yaml
 ```
 
-Students do not modify the Manager, application, tools, schemas, simulator, cost engine or evaluator.
+The exact options exposed may differ by team/case, but students should not need to modify the Manager/runtime Python implementation to solve the business problem.
+
+Students do **not** modify the Manager implementation, application, tools, schemas, simulator, cost engine, evaluator, hidden scenarios, hidden holdouts, benchmark solutions, or **evaluation strategy/scoring configuration**.
+
+The detailed student-facing specification and a completely fictitious, intentionally unsolved example are documented in [student-package/STUDENT_SOLUTION_GUIDE.md](./student-package/STUDENT_SOLUTION_GUIDE.md).
 
 ## Where the case data comes from
 
