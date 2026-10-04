@@ -70,7 +70,7 @@ Una solución que siempre minimiza inventario puede destruir nivel de servicio. 
 
 ## Evidencia para entrenamiento
 
-El equipo recibe `student/team_1/training/raw_case_history.csv`, un historial semanal **crudo** de demanda, promociones, precio, órdenes confirmadas, estacionalidad y eventos comerciales.
+El equipo obtiene mediante `GET /v1/teams/team_1/training-source.json` un historial semanal **crudo en JSON** de demanda, promociones, precio, órdenes confirmadas, estacionalidad y eventos comerciales. Este endpoint requiere el token asignado a Team 1; no existe un `raw_case_history.csv` local suministrado.
 
 No se entregan filas listas para entrenamiento ni targets calculados. El equipo debe construir ventanas temporales, derivar los features exigidos por `model_contract.json`, crear los targets de las cuatro semanas futuras y definir/documentar una medida razonable de incertidumbre usando resultados posteriores. Debe evitar leakage temporal.
 
