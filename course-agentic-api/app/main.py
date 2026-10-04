@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Agentic Operations Challenge Data API + Case 0 Demo",
-    version="1.5.0",
+    version="1.6.0",
     description="Team-scoped data service plus a self-contained fully solved Case 0 end-to-end demonstration.",
 )
 
@@ -101,7 +101,7 @@ async def request_logging_middleware(request: Request, call_next):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "agentic-operations-data-api", "version": "1.5.0"}
+    return {"status": "ok", "service": "agentic-operations-data-api", "version": "1.6.0"}
 
 
 class ScenarioEvaluationRequest(BaseModel):
@@ -297,16 +297,23 @@ async def start_context(
         "start_context": f"/v1/teams/{team_id}/start-context",
         "case": f"/v1/teams/{team_id}/case",
         "knowledge": f"/v1/teams/{team_id}/knowledge",
-        "training_source": (
-            None
-            if team_id == "team_0"
-            else f"/v1/teams/{team_id}/training-source.json"
-        ),
+        "training_source": f"/v1/teams/{team_id}/training-source.json",
         "scenario_list": f"/v1/teams/{team_id}/scenarios",
         "scenario_detail_template": f"/v1/teams/{team_id}/scenarios/{{scenario_id}}",
         "scenario_evaluation_template": f"/v1/teams/{team_id}/scenarios/{{scenario_id}}/evaluate",
         "local_model_contract": f"student/{team_id}/training/model_contract.json",
         "local_training_brief": f"student/{team_id}/training/CASE_TRAINING.md",
+        "local_training_config": f"student/{team_id}/training/training_config.yaml",
+        "local_feature_config": f"student/{team_id}/training/feature_config.yaml",
+        "local_rag_config": f"student/{team_id}/rag/config.yaml",
+        "local_document_priorities": f"student/{team_id}/rag/document_priorities.yaml",
+        "local_forecast_policy": f"student/{team_id}/config/forecast_policy.yaml",
+        "local_risk_policy": f"student/{team_id}/config/risk_policy.yaml",
+        "local_planning_objectives": f"student/{team_id}/config/planning_objectives.yaml",
+        "local_tool_policy": f"student/{team_id}/config/tool_policy.yaml",
+        "local_manager_llm": f"student/{team_id}/config/manager_llm.yaml",
+        "local_business_assumptions": f"student/{team_id}/assumptions/business_assumptions.yaml",
+        "student_solution_guide": "student-package/STUDENT_SOLUTION_GUIDE.md",
     }
 
     log_event(
