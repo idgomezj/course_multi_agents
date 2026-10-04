@@ -28,7 +28,9 @@ This branch now has **two roles**:
 1. provide team-scoped **runtime business/scenario/RAG data** through the Data API;
 2. run **Case 0 completely end-to-end on this branch**, without using `main`.
 
-Ready-made student model training data is intentionally **not** served by the API. Teams 1–5 receive raw historical JSON through a team-scoped endpoint plus a local model contract, then construct the supervised datasets themselves. Case 0 is the exception: it has committed clean, ready-to-train CSVs for platform validation.
+Ready-made student model training data is intentionally **not** served by the API. Teams 1–5 receive raw imperfect historical JSON through a team-scoped endpoint plus a local model contract, then construct the supervised datasets themselves.
+
+Case 0 now demonstrates both layers: `/v1/teams/team_0/training-source.json` exposes a small imperfect worked sample for data-quality analysis, while committed clean supervised CSVs remain the reproducible inputs for validating the reference model pipeline.
 
 ## Run Case 0 completely from this branch
 
@@ -83,6 +85,7 @@ http://localhost:8100/demo
 
 The page lets you:
 
+- inspect the solved Case 0 configuration surfaces and hard business constraints;
 - evaluate the published T0-P01, T0-P02, or T0-P03 reference plan through the simulator/cost engine without an LLM;
 - run the **AI Manager end-to-end** through RAG, Skills, PyTorch models, tools, structured planning, simulation and scoring;
 - inspect constraint violations;
@@ -94,10 +97,14 @@ The page lets you:
 ```text
 Case 0 local data
       │
-      ├── PyTorch model contract + training data
-      ├── RAG documents
-      ├── solved RAG configuration
-      └── solved Skills
+      ├── imperfect worked raw-data sample
+      ├── PyTorch model contract + clean reference training data
+      ├── solved training + feature configuration
+      ├── current + obsolete + draft + irrelevant RAG documents
+      ├── solved RAG + document-authority configuration
+      ├── solved Skills
+      ├── solved forecast/risk/planning/tool/LLM policies
+      └── explicit solved business assumptions
       │
       ▼
 Pydantic AI Manager
@@ -136,9 +143,13 @@ data/teams/team_0/
 
 demo_case_0_solution/
 ├── README.md
+├── SOLUTION_DECISIONS.md
 ├── train_models.py
 ├── training/
 │   ├── README.md
+│   ├── RAW_DATA_WALKTHROUGH.md
+│   ├── training_config.yaml
+│   ├── feature_config.yaml
 │   ├── model_a_training.csv
 │   └── model_b_training.csv
 ├── reference_plans/
@@ -146,7 +157,16 @@ demo_case_0_solution/
 │   ├── T0-P02.json
 │   └── T0-P03.json
 ├── models/                 # generated locally
-├── rag/config.yaml
+├── rag/
+│   ├── config.yaml
+│   └── document_priorities.yaml
+├── config/
+│   ├── forecast_policy.yaml
+│   ├── risk_policy.yaml
+│   ├── planning_objectives.yaml
+│   ├── tool_policy.yaml
+│   └── manager_llm.yaml
+├── assumptions/business_assumptions.yaml
 ├── skills/
 │   ├── monthly_planning.md
 │   ├── supplier_selection.md
@@ -172,6 +192,8 @@ The canonical first call for any team activity is:
 
 The project runtime loads this canonical context before scenario/model-resolution work.
 
+The start context now includes the complete company reasoning surface: company profile, customer priorities, hard business constraints, data-quality guidance, conflicting-signal guidance, RAG documents, scenario information and paths for every allowed student configuration file.
+
 Other endpoints:
 
 - `GET /health`
@@ -179,7 +201,7 @@ Other endpoints:
 - `GET /v1/teams/{team_id}/bootstrap` — token-protected team case + knowledge compatibility endpoint
 - `GET /v1/teams/{team_id}/case` — token-protected business data for the requested team only
 - `GET /v1/teams/{team_id}/knowledge` — token-protected RAG source documents for the requested team only
-- `GET /v1/teams/{team_id}/training-source.json` — token-protected raw historical JSON for that team; not model-ready
+- `GET /v1/teams/{team_id}/training-source.json` — token-protected raw historical JSON for that team; not model-ready. Case 0 exposes an instructor worked sample through the same route
 - `GET /v1/teams/{team_id}/scenarios` — the token selects the public or hidden scenario set
 - `GET /v1/teams/{team_id}/scenarios/{scenario_id}` — token-scoped scenario detail
 - `POST /v1/teams/{team_id}/scenarios/{scenario_id}/evaluate` — server-side scoring using the internal scenario
@@ -221,7 +243,9 @@ For Teams 1–5, the service resolves data by the `team_id` in the request:
 - team-specific hidden scenarios: `data/scenarios/team_X/hidden.json`;
 - scenario sharing policy and team-scoped public/hidden tokens: `data/scenario_access.json`.
 
-The API merges common base data with the requested team's case overrides, then returns only the requested team's knowledge, raw training source and authorized scenarios. The raw training source is JSON and is intentionally not converted into supervised training CSVs by the service.
+The API merges common base data with the requested team's case overrides, then returns only the requested team's knowledge, raw training source and authorized scenarios. Team case payloads include realistic company context and hard budget/operating constraints.
+
+The raw training source is JSON and is intentionally not converted into supervised training CSVs by the service. Its metadata describes expected imperfections and analysis questions, while the raw records retain missing values, duplicates/inconsistencies, notes and other realistic evidence problems.
 
 The checked-in credentials are for development/course control. If students can read this branch, those values and any hidden JSON stored here are not secret. For a real exam deployment, run the service from an instructor-only source or inject production credentials and hidden scenario files at deployment time.
 
@@ -233,6 +257,42 @@ Teams 1–5 remain the graded cases. Their supervised training rows are not gene
 
 Public scenarios currently live in `data/teams/team_X.yaml`. Hidden scenario definitions live under `data/scenarios/team_X/hidden.json`. The API projects only fields allowed for the presented token; realized outcomes and evaluator expectations stay server-side.
 
+
+
+## New configuration-driven student process
+
+Students are not expected to modify the runtime Python implementation. The challenge package exposes controlled YAML/JSON/Markdown decision surfaces:
+
+```text
+training/training_config.yaml
+training/feature_config.yaml
+rag/config.yaml
+rag/document_priorities.yaml
+skills/*.md
+config/forecast_policy.yaml
+config/risk_policy.yaml
+config/planning_objectives.yaml
+config/tool_policy.yaml
+config/manager_llm.yaml
+assumptions/business_assumptions.yaml
+```
+
+These settings affect the challenge runtime, but they do not change the evaluator or weaken hard case constraints.
+
+Every Team 1–5 case now provides enough business context to reason about:
+- customers and service priorities;
+- budget and operating limits;
+- inventory/capacity/supplier trade-offs;
+- raw-data quality;
+- disagreement among model/statistical/confirmed-order/operational signals;
+- source authority across current, obsolete, draft and irrelevant RAG documents.
+
+The evaluation strategy, score weights, hidden scenarios/holdouts and benchmark/oracle remain instructor-controlled.
+
+Case 0 is the worked reference for this entire process. See:
+- `demo_case_0_solution/SOLUTION_DECISIONS.md`;
+- `demo_case_0_solution/training/RAW_DATA_WALKTHROUGH.md`;
+- `GET /demo/api/config`.
 
 ## Choose Gemini, OpenAI/ChatGPT, Claude, or DeepSeek
 
