@@ -14,16 +14,22 @@ Su equipo debe enseñar al sistema cómo operar su caso mediante:
 
 No existe un endpoint que entregue un dataset supervisado listo.
 
-Cada equipo recibe dentro de su paquete:
+Cada equipo recibe localmente dentro de su paquete:
 
 ```text
 student/team_X/training/
 ├── CASE_TRAINING.md
-├── raw_case_history.csv
 └── model_contract.json
 ```
 
-`raw_case_history.csv` contiene evidencia histórica de negocio, no features/targets ya preparados. El equipo debe transformar esa historia en:
+El historial crudo **no se distribuye como CSV local**. Cada equipo debe obtener su propia evidencia histórica desde la Data API:
+
+```text
+GET /v1/teams/{team_id}/training-source.json
+X-Scenario-Token: <token asignado al equipo>
+```
+
+La respuesta es JSON crudo, imperfecto y específico del equipo. Puede guardarse localmente, por ejemplo como `student/team_X/training/raw_source.json`, únicamente como copia de trabajo. A partir de ese JSON el equipo debe construir:
 
 ```text
 model_a_training.csv
@@ -51,7 +57,9 @@ https://course-agentic-api.idgomezj.com
 El paquete del estudiante ya usa esta URL como valor predeterminado. No es necesario ejecutar la Data API localmente.
 
 
-La Data API se utiliza **durante la ejecución de escenarios** para obtener el estado autorizado del negocio, documentos y escenarios públicos. No entrega training rows ni un generador de respuestas para los modelos.
+La Data API es la fuente autorizada de los datos del caso. `/start-context` entrega el contexto público inicial y es abierto. Los demás endpoints de datos requieren el token asignado al equipo y solo entregan información correspondiente a ese equipo.
+
+Además del estado del negocio, documentos y escenarios autorizados, la Data API entrega el historial crudo de entrenamiento como JSON mediante `/v1/teams/{team_id}/training-source.json`. No entrega filas supervisadas listas, features/targets precalculados ni un generador de respuestas para los modelos.
 
 La evaluación final utilizará escenarios y holdouts no vistos durante el desarrollo.
 
@@ -59,7 +67,7 @@ La evaluación final utilizará escenarios y holdouts no vistos durante el desar
 
 Como parte del trabajo de modelos pueden:
 
-- construir sus CSV supervisados locales a partir del historial entregado;
+- descargar el historial crudo JSON de su equipo desde la Data API y construir sus CSV supervisados locales;
 - modificar el trainer/arquitectura/hyperparámetros;
 - entrenar y exportar `model_a.pt2` y `model_b.pt2`;
 - modificar RAG dentro del alcance permitido;
