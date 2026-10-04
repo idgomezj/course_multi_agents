@@ -24,8 +24,10 @@ Only for their authorized team:
 - policies and known cost parameters;
 - RAG source documents;
 - PyTorch model contract;
-- public training data;
+- raw historical model-development data as team-specific JSON;
 - public scenarios.
+
+The public `/v1/teams/{team_id}/start-context` endpoint may be called without a token and returns the public starting context. The case, knowledge, training-source, scenario, and evaluation endpoints remain token-controlled; a team token is authorized only for its assigned team and scenario scope.
 
 ## Do NOT put in the student application
 
