@@ -210,7 +210,47 @@
       </section>
 
       <section class="help-card help-full">
-        <h3>11. Recommended workflow</h3>
+        <h3>11. What your team actually changes</h3>
+        <p>The challenge is configuration-driven. You should not edit the Manager, tools, simulator, cost engine or evaluator.</p>
+        <ul>
+          <li><b>training/training_config.yaml</b>: network size, activation, dropout, epochs, learning rate, optimizer, loss and validation settings.</li>
+          <li><b>training/feature_config.yaml</b>: test which fixed-contract features help; disabled features are masked consistently in training and inference.</li>
+          <li><b>rag/config.yaml</b>: chunking and retrieval settings.</li>
+          <li><b>rag/document_priorities.yaml</b>: current/contract/advisory/draft/obsolete/irrelevant source authority.</li>
+          <li><b>skills/*.md</b>: operational procedures used by the Manager.</li>
+          <li><b>config/forecast_policy.yaml</b>: how demand signals are blended when relevant.</li>
+          <li><b>config/risk_policy.yaml</b>: risk thresholds and safety-stock behavior.</li>
+          <li><b>config/planning_objectives.yaml</b>: planning preferences. These never override hard company constraints.</li>
+          <li><b>config/tool_policy.yaml</b>: when the Manager should use existing tools.</li>
+          <li><b>config/manager_llm.yaml</b>: authorized Manager settings such as temperature/context limits.</li>
+          <li><b>assumptions/business_assumptions.yaml</b>: explicit evidence-backed assumptions.</li>
+        </ul>
+        <p>You can inspect the currently validated configuration through <code>GET /api/config/{team_id}</code>.</p>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>12. How to solve a case</h3>
+        <ol>
+          <li>Read the complete <code>/start-context</code> before changing anything.</li>
+          <li>Understand the company, customer priorities, budget and hard operating constraints.</li>
+          <li>Analyze the raw historical JSON for missing values, duplicates, corrections, drift and suspicious observations.</li>
+          <li>Build leakage-safe supervised datasets and tune Model A / Model B through the provided configs.</li>
+          <li>Read the RAG documents and identify which sources are current, obsolete, draft or irrelevant.</li>
+          <li>Improve Skills and the relevant decision policies.</li>
+          <li>Run multiple public scenarios and diagnose failures from the plan, violations and tool trace.</li>
+          <li>Change one controlled area at a time and keep/revert based on evidence.</li>
+          <li>Do not hardcode public scenarios; hidden evaluation recombines known conditions.</li>
+        </ol>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>13. Hard constraints vs student preferences</h3>
+        <p>Company service targets, budgets, warehouse limits, overtime/expedite caps, supplier authorization/MOQ, capacity and approval rules come from the case and evaluator. Your YAML cannot weaken them.</p>
+        <p>Planning priorities, assumptions and policies are decision aids that help the Manager find a good plan inside those hard limits.</p>
+      </section>
+
+      <section class="help-card help-full">
+        <h3>14. Recommended workflow</h3>
         <ol>
           <li>Select your assigned team and a public scenario.</li>
           <li>Read the scenario and note the Expected Optimized Cost.</li>
