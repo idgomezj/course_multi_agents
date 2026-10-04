@@ -2,6 +2,44 @@ name: Team 4 — Unreliable Supply Network
 description: Critical materials come from suppliers with long lead-time variability, quality failures and disruption risk.
 objective: Protect service and production continuity through risk-aware sourcing and economically justified buffers.
 cost_priorities: [supplier failure, quality, line shutdown, expedite]
+
+company_profile:
+  legal_name: Sentinel Supply Manufacturing
+  industry: manufacturing with critical imported raw materials
+  operating_model: multi-supplier procurement under delivery and quality uncertainty
+  customer_mix:
+    strategic_contracts: 0.65
+    standard_accounts: 0.35
+  planning_horizon_weeks: 4
+  management_concerns:
+    - long lead-time variability
+    - quality rejection on critical materials
+    - correlated supplier disruptions
+    - emergency sourcing cost
+
+customer_priorities:
+  strategic_contracts:
+    service_target: 0.99
+    priority: high
+  standard_accounts:
+    service_target: 0.96
+    priority: normal
+
+constraints:
+  monthly_operating_budget: 82000
+  max_monthly_overtime_hours: 64
+  max_expedited_units: 450
+  max_finished_goods_inventory_units: 4500
+
+data_quality_context:
+  raw_history_is_imperfect: true
+  expected_issues: [missing reliability observations, missing quality scores, partial receipts, inconsistent supplier IDs, process-change notes]
+  instruction: Delay risk and quality risk are distinct outcomes; do not collapse them into a single supplier score.
+
+decision_signals:
+  may_disagree: [Model A delay risk, Model B quality risk, nominal lead time, unit price, supplier reliability, recent rejection rate]
+  principle: No supplier is globally best; choose using material criticality, timing, quality, cost and contract evidence.
+
 costs:
   holding_per_unit_week: 0.55
   line_stop_per_hour: 24000
