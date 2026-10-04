@@ -4,7 +4,7 @@
 
 This is the **raw historical evidence for your assigned business case**. It is intentionally not a training-ready ML table.
 
-Retrieve the raw historical evidence as JSON from `GET /v1/teams/team_1/training-source.json` using Team 1's assigned token. Treat that API response and `model_contract.json` as read-only assignment inputs. You may save the response locally as `raw_source.json` for analysis, but create new derived files rather than editing the source evidence or contract.
+Retrieve the raw historical evidence as JSON from `GET https://course-agentic-api.idgomezj.com/v1/teams/team_1/training-source.json` using Team 1's assigned token in the `X-Team-Token` header. This hosted URL is the canonical Data API; do not inspect or depend on the Data API source repository to solve the case. Treat that API response and `model_contract.json` as read-only assignment inputs. You may save the response locally as `raw_source.json` for analysis, but create new derived files rather than editing the source evidence or contract.
 
 You must build the supervised learning dataset yourself. That means deciding how historical rows become examples, deriving the required model inputs from the raw observations, constructing defensible targets from later outcomes, handling missing/noisy observations, choosing train/validation splits, and documenting your assumptions.
 
