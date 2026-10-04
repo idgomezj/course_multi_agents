@@ -33,3 +33,21 @@ For downtime risk, derive the classification target from a documented realized-d
 For production feasibility, derive `required_hours_ratio` from the planned workload and available line hours, use an estimated/predicted downtime-risk input rather than the realized future downtime, and derive the target from the actual completion outcome.
 
 Use validation that tests whether the model generalizes across later runs and different lines/products.
+
+## How to solve the complete Team 5 case
+
+Team 5 is capacity constrained. The models help estimate risk, but the final decision must reconcile capacity, downtime, overtime, line compatibility, materials and service.
+
+After building the datasets:
+
+1. tune Model A (downtime risk) and Model B (production feasibility);
+2. test feature choices such as utilization, maintenance age, overload, labor ratio and changeovers;
+3. configure risk thresholds for when downtime/feasibility signals require replanning;
+4. use planning priorities to balance service, overtime cost, inventory and plan stability without overriding hard capacity limits;
+5. review RAG for maintenance, overtime, customer-priority and line policies;
+6. improve Skills for capacity checks, line selection, changeovers, overtime and replanning;
+7. always validate candidate plans because a plausible production quantity can still be infeasible;
+8. test combined downtime, labor shortage, urgent-customer and line-compatibility conditions.
+
+The case may intentionally create situations where producing everything requested is impossible. The student must configure the system to make defensible trade-offs rather than pretending all objectives can be satisfied.
+
