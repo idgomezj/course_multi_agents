@@ -55,7 +55,7 @@ Una arquitectura o Skill diseñada para “protegerse” comprando buffer puede 
 
 ## Evidencia para entrenamiento
 
-El equipo recibe `student/team_2/training/raw_case_history.csv`, con historia semanal de demanda, posición de inventario, recibos y costo de almacenamiento.
+El equipo obtiene mediante `GET /v1/teams/team_2/training-source.json` la historia cruda **en JSON** de demanda, posición de inventario, recibos y costo de almacenamiento. Este endpoint requiere el token asignado a Team 2; no existe un `raw_case_history.csv` local suministrado.
 
 No existe un dataset supervisado listo. El equipo debe crear ventanas de forecast y definir/documentar el target de riesgo de exceso de inventario a partir de los resultados reales posteriores. La construcción debe reflejar el contexto estable del caso y evitar fabricar volatilidad artificial que no existe en la operación.
 
