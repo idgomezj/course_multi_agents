@@ -2,6 +2,45 @@ name: Team 2 — Stable Make-to-Stock
 description: Mature products have stable demand; inventory carrying cost and working capital are the dominant concerns.
 objective: Meet service with a simple stable plan while minimizing excess inventory, warehouse use and capital tied up.
 cost_priorities: [holding inventory, working capital, excess inventory]
+
+company_profile:
+  legal_name: Harbor Essentials Manufacturing
+  industry: mature household staples
+  operating_model: stable make-to-stock production with high inventory and working-capital sensitivity
+  customer_mix:
+    wholesale: 0.55
+    retail: 0.35
+    direct: 0.10
+  planning_horizon_weeks: 4
+  management_concerns:
+    - excess stock from bulk purchasing
+    - warehouse utilization
+    - working capital tied up in slow-moving goods
+    - maintaining service without reacting to normal noise
+
+customer_priorities:
+  core_accounts:
+    service_target: 0.97
+    priority: high
+  other_channels:
+    service_target: 0.95
+    priority: normal
+
+constraints:
+  monthly_operating_budget: 54000
+  max_monthly_overtime_hours: 56
+  max_expedited_units: 180
+  max_finished_goods_inventory_units: 4200
+
+data_quality_context:
+  raw_history_is_imperfect: true
+  expected_issues: [missing values, duplicate uploads, inconsistent identifiers, corrected receipts, occasional planner notes]
+  instruction: Stable business behavior means extreme observations require investigation rather than automatic extrapolation.
+
+decision_signals:
+  may_disagree: [Model A forecast, Model B excess-inventory risk, confirmed orders, moving average, open purchase orders, volume-discount economics]
+  principle: A cheap bulk order can still be economically wrong when inventory and working-capital costs are included.
+
 products:
   FG01: {demand_history: [1010, 1005, 1020, 995, 1008, 1012, 1001, 1007]}
   FG02: {demand_history: [810, 815, 805, 820, 812, 808, 818, 811]}

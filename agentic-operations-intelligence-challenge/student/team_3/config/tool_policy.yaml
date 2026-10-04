@@ -1,0 +1,5 @@
+required_before_finalize: [calculate_plan_cost, validate_plan]
+max_replans: 2
+guidance:
+  - Investigate conflicting evidence before a high-impact action.
+  - Avoid exact duplicate tool calls when information has not changed.

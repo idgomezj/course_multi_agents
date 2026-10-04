@@ -40,13 +40,31 @@ Este directorio define **su parte** del proyecto. No contiene hidden tests reale
 - revisar que las tools “distractoras” sean plausibles;
 - realizar defensa oral y live challenge.
 
-## Lo que construyen los estudiantes
+## Lo que construyen/configuran los estudiantes
 
-Solo:
-- construcción del dataset supervisado a partir de la evidencia histórica entregada;
-- entrenamiento/experimentación de los PyTorch models;
-- RAG;
-- Skills.
+El reto es deliberadamente configuration-driven. Los estudiantes no deben necesitar modificar el runtime Python.
+
+Pueden trabajar sobre:
+- construcción del dataset supervisado a partir de evidencia histórica imperfecta;
+- `training_config.yaml` y `feature_config.yaml`;
+- entrenamiento/export de los PyTorch models;
+- RAG y `document_priorities.yaml`;
+- Skills;
+- políticas de forecast y riesgo;
+- prioridades de planificación;
+- política de uso de tools;
+- settings autorizados del Manager LLM;
+- supuestos de negocio documentados.
+
+La evaluación, sus pesos, hidden tests/holdouts, benchmark/oracle, simulator, cost engine y tool implementations permanecen bloqueados.
+
+## Diseño obligatorio de los casos
+
+Cada caso debe entregar suficiente información empresarial en `start-context` para que el estudiante pueda razonar: compañía, clientes, proveedores, capacidad, inventario, servicio, presupuesto, restricciones, calidad de datos y señales que pueden entrar en conflicto.
+
+Los casos deben incluir evidencia imperfecta pero analizable, restricciones simultáneas, presión presupuestaria y RAG con documentos actuales, obsoletos, draft e irrelevantes.
+
+Ver [CASE_DESIGN_REQUIREMENTS.md](./CASE_DESIGN_REQUIREMENTS.md).
 
 ## Recomendación
 
@@ -78,7 +96,7 @@ For Team 3:
 
 ```bash
 curl -H "X-Client-Type: <<identify>>" \
-  http://localhost:8100/v1/teams/team_3/start-context
+  https://course-agentic-api.idgomezj.com/v1/teams/team_3/start-context
 ```
 
 Replace `<<identify>>` with the actual identity of the caller and replace `team_3` with the assigned team.

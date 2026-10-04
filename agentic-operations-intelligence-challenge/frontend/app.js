@@ -122,6 +122,9 @@ async function loadRuntimeStatus() {
     '<span class="pill">RAG: ' + (status.rag_ready ? 'READY' : 'MISSING') + '</span>',
     '<span class="pill">Knowledge: ' + Number(status.knowledge_documents || 0) + '</span>',
     '<span class="pill">Skills: ' + Number(status.skill_count || 0) + '</span>',
+    ...Object.entries(status.student_config_files || {}).map(([name, ready]) => (
+      '<span class="pill">' + escapeHtml(name) + ': ' + (ready ? 'READY' : 'MISSING') + '</span>'
+    )),
     ...modelPills,
     ...providerPills
   ].join('');

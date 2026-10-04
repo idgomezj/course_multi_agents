@@ -2,6 +2,45 @@ name: Team 5 — Capacity-Constrained Plant
 description: Materials and demand are manageable, but line capacity, downtime, changeovers and overtime dominate decisions.
 objective: Meet customer demand with a feasible schedule while minimizing downtime, overtime, changeovers and outsourcing pressure.
 cost_priorities: [downtime, late delivery, overtime, changeovers]
+
+company_profile:
+  legal_name: ForgeLine Products
+  industry: capacity-constrained discrete manufacturing
+  operating_model: two-line shared production with expensive downtime, changeovers and overtime
+  customer_mix:
+    strategic_accounts: 0.58
+    standard_accounts: 0.42
+  planning_horizon_weeks: 4
+  management_concerns:
+    - maintenance-related downtime
+    - overloaded production lines
+    - labor availability
+    - costly changeovers and overtime
+    - prioritizing demand when not everything fits
+
+customer_priorities:
+  strategic_accounts:
+    service_target: 0.99
+    priority: high
+  standard_accounts:
+    service_target: 0.96
+    priority: normal
+
+constraints:
+  monthly_operating_budget: 85000
+  max_monthly_overtime_hours: 70
+  max_expedited_units: 300
+  max_finished_goods_inventory_units: 4200
+
+data_quality_context:
+  raw_history_is_imperfect: true
+  expected_issues: [missing utilization, missing labor ratios, corrected shift notes, inconsistent line IDs, incomplete completion outcomes]
+  instruction: Planned workload and realized downtime/completion must be separated so future outcomes never leak into model inputs.
+
+decision_signals:
+  may_disagree: [Model A downtime risk, Model B production feasibility, nominal line hours, utilization, labor ratio, maintenance age, customer urgency]
+  principle: A nominally available line can still be a poor assignment when credible downtime or labor constraints make completion unlikely.
+
 costs:
   holding_per_unit_week: 0.45
   line_stop_per_hour: 21000

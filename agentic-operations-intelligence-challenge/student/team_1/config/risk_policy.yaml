@@ -1,0 +1,5 @@
+# Generic baseline. Students should justify changes from business evidence.
+medium_threshold: 0.25
+high_threshold: 0.50
+safety_stock_factor: 1.65
+forecast_disagreement_review: 0.25

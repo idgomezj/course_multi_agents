@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import logging
 
@@ -22,12 +23,29 @@ class Chunk:
 
 
 class RagIndex:
-    """Student-editable RAG over documents delivered by the Data API."""
+    """Student-editable RAG over documents delivered by the Data API.
 
-    def __init__(self, documents: list[dict[str, str]], config_path: Path):
+    Besides chunk/search settings, students may assign source authority/priority
+    through rag/document_priorities.yaml. The original document content is never
+    modified; priority only changes retrieval ranking.
+    """
+
+    def __init__(
+        self,
+        documents: list[dict[str, str]],
+        config_path: Path,
+        document_priorities: dict[str, Any] | None = None,
+        max_top_k: int | None = None,
+    ):
         self.documents = documents
         self.config_path = config_path
         self.config = self._load_config()
+        self.document_priorities = document_priorities or {
+            "default_weight": 1.0,
+            "authority_weights": {},
+            "documents": {},
+        }
+        self.max_top_k = max_top_k
         self.chunks = self._load_chunks()
         self.vectorizer = TfidfVectorizer(
             ngram_range=(1, int(self.config.get("ngram_max", 2))),
@@ -43,6 +61,8 @@ class RagIndex:
             sources=[d.get("name") for d in self.documents],
             chunk_count=len(self.chunks),
             config=self.config,
+            document_priorities=self.document_priorities,
+            max_top_k=self.max_top_k,
         )
 
     def _load_config(self) -> dict:
@@ -75,28 +95,57 @@ class RagIndex:
                     break
         return chunks
 
+    def _source_weight(self, source: str) -> tuple[float, str]:
+        default_weight = float(self.document_priorities.get("default_weight", 1.0))
+        authorities = self.document_priorities.get("authority_weights", {}) or {}
+        documents = self.document_priorities.get("documents", {}) or {}
+        entry = documents.get(source, {})
+        if not isinstance(entry, dict):
+            entry = {}
+        authority = str(entry.get("authority", "advisory")).lower()
+        authority_weight = float(authorities.get(authority, 1.0))
+        document_weight = float(entry.get("weight", default_weight))
+        return max(0.01, document_weight * authority_weight), authority
+
     def search(self, query: str, top_k: int | None = None) -> list[dict]:
         if not self.chunks or self.matrix is None:
             log_event(logger, "rag.search.empty_index", query=query, requested_top_k=top_k)
             return []
-        k = top_k or int(self.config.get("top_k", 4))
+
+        configured_k = int(self.config.get("top_k", 4))
+        k = int(top_k or configured_k)
+        if self.max_top_k is not None:
+            k = min(k, int(self.max_top_k))
+        k = max(1, k)
+
         min_score = float(self.config.get("min_score", 0.04))
         query_vec = self.vectorizer.transform([query])
-        scores = cosine_similarity(query_vec, self.matrix)[0]
-        ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)
+        raw_scores = cosine_similarity(query_vec, self.matrix)[0]
+
+        ranked: list[tuple[int, float, float, str]] = []
+        for idx, raw_score in enumerate(raw_scores):
+            chunk = self.chunks[idx]
+            source_weight, authority = self._source_weight(chunk.source)
+            adjusted = float(raw_score) * source_weight
+            ranked.append((idx, float(raw_score), adjusted, authority))
+        ranked.sort(key=lambda x: x[2], reverse=True)
+
         results = []
-        for idx, score in ranked[: max(k * 2, k)]:
-            if float(score) < min_score:
+        for idx, raw_score, score, authority in ranked[: max(k * 3, k)]:
+            if score < min_score:
                 continue
             chunk = self.chunks[idx]
             results.append({
                 "chunk_id": chunk.chunk_id,
                 "source": chunk.source,
-                "score": round(float(score), 4),
+                "score": round(score, 4),
+                "raw_score": round(raw_score, 4),
+                "authority": authority,
                 "text": chunk.text,
             })
             if len(results) >= k:
                 break
+
         log_event(
             logger,
             "rag.search.completed",
@@ -106,7 +155,13 @@ class RagIndex:
             min_score=min_score,
             result_count=len(results),
             hits=[
-                {"source": x["source"], "chunk_id": x["chunk_id"], "score": x["score"]}
+                {
+                    "source": x["source"],
+                    "chunk_id": x["chunk_id"],
+                    "score": x["score"],
+                    "raw_score": x["raw_score"],
+                    "authority": x["authority"],
+                }
                 for x in results
             ],
         )

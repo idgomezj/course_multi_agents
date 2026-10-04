@@ -3,6 +3,49 @@ description: A balanced manufacturing operation used only as the worked example 
 objective: Build a feasible four-week production and procurement plan, maintain full service, use evidence from RAG and specialist PyTorch models, and minimize total operational cost.
 cost_priorities: [service, total cost, inventory, supplier reliability]
 
+company_profile:
+  legal_name: Northstar Home Products — Reference Plant
+  industry: household consumer products
+  operating_model: make-to-stock manufacturing with weekly production and centralized procurement
+  customer_mix:
+    national_retailers: 0.60
+    regional_distributors: 0.25
+    direct_to_consumer: 0.15
+  planning_horizon_weeks: 4
+  management_concerns:
+    - protect strategic-retailer service
+    - avoid unnecessary emergency procurement
+    - control working capital and inventory
+    - demonstrate evidence-based decisions when forecasts or supplier signals disagree
+
+customer_priorities:
+  strategic_retailers:
+    service_target: 0.99
+    priority: high
+  other_channels:
+    service_target: 0.96
+    priority: normal
+
+constraints:
+  monthly_operating_budget: 85000
+  max_monthly_overtime_hours: 72
+  max_expedited_units: 600
+  max_finished_goods_inventory_units: 4200
+
+data_quality_context:
+  raw_history_is_imperfect: true
+  expected_issues: [missing values, duplicate uploads, inconsistent identifiers, corrected orders, suspicious outliers]
+  instruction: Treat anomalies as evidence to analyze. Do not drop a record only because it is inconvenient.
+
+decision_signals:
+  may_disagree: [pytorch forecast, confirmed orders, moving average, exponential smoothing, seasonal forecast, supplier delay model, recent supplier observations]
+  principle: Investigate disagreement and use business context; no signal is universally authoritative.
+
+case0_solution_map:
+  purpose: This is the fully worked instructor example for every student-configurable surface.
+  includes: [training settings, feature selection, RAG tuning, document authority, Skills, forecast policy, risk policy, planning priorities, tool policy, Manager LLM settings, business assumptions, reference plans]
+
+
 products:
   FG01:
     initial_fg: 200

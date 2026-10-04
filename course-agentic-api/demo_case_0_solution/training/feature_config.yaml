@@ -1,0 +1,19 @@
+# Solved Case 0 feature selection. All fixed-contract features are retained.
+models:
+  model_a:
+    enabled_features:
+      - last4_mean
+      - last4_std
+      - trend
+      - promotion
+      - price_index
+      - confirmed_orders
+      - seasonal_index
+  model_b:
+    enabled_features:
+      - reliability
+      - recent_late_rate
+      - lead_time_days
+      - order_qty_ratio
+      - urgency
+      - season_risk

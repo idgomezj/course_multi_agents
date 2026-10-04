@@ -1,0 +1,8 @@
+provider: null
+temperature: 0.20
+max_tokens: 3000
+reasoning_mode: medium
+max_rag_documents: 5
+include_model_diagnostics: true
+include_cost_breakdown: true
+include_previous_plan: false

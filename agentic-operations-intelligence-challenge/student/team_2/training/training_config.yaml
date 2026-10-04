@@ -1,0 +1,5 @@
+# Generic baseline — tune and justify; this is not a solution.
+models:
+  model_a: {architecture: medium, hidden_layers: null, activation: relu, dropout: 0.0, epochs: 120, learning_rate: 0.003, batch_size: 64, optimizer: adamw, loss: auto, weight_decay: 0.0001}
+  model_b: {architecture: medium, hidden_layers: null, activation: relu, dropout: 0.0, epochs: 120, learning_rate: 0.003, batch_size: 64, optimizer: adamw, loss: auto, weight_decay: 0.0001}
+validation: {method: chronological, validation_fraction: 0.20, seed: 42}

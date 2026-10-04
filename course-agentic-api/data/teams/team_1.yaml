@@ -2,6 +2,45 @@ name: Team 1 — Volatile Demand Consumer Products
 description: Demand is highly volatile because promotions, price changes and seasonal events alter weekly sales.
 objective: Maintain high service under uncertain demand while avoiding unjustified buffers and emergency procurement.
 cost_priorities: [lost sales, stockout, emergency procurement, forecast uncertainty]
+
+company_profile:
+  legal_name: Meridian Consumer Care
+  industry: promoted household consumer products
+  operating_model: make-to-stock with retailer promotions and volatile weekly sell-through
+  customer_mix:
+    national_retailers: 0.68
+    regional_distributors: 0.22
+    direct_to_consumer: 0.10
+  planning_horizon_weeks: 4
+  management_concerns:
+    - recent stockouts during successful promotions
+    - excess inventory after cancelled promotions
+    - confirmed retailer orders that change near delivery
+    - emergency procurement eroding promotion margin
+
+customer_priorities:
+  strategic_retailers:
+    service_target: 0.99
+    priority: high
+  other_channels:
+    service_target: 0.97
+    priority: normal
+
+constraints:
+  monthly_operating_budget: 82000
+  max_monthly_overtime_hours: 72
+  max_expedited_units: 500
+  max_finished_goods_inventory_units: 5200
+
+data_quality_context:
+  raw_history_is_imperfect: true
+  expected_issues: [missing demand, duplicate uploads, inconsistent product identifiers, late CRM confirmations, promotion corrections, suspicious outliers]
+  instruction: Use chronology and surrounding evidence to distinguish noise from genuine demand shocks.
+
+decision_signals:
+  may_disagree: [Model A forecast, Model B uncertainty, confirmed orders, moving average, exponential smoothing, seasonality, promotion status]
+  principle: Confirmed orders are informative but not perfect; promotion status can change and model disagreement must be investigated.
+
 products:
   FG01:
     demand_history: [780, 1210, 860, 1490, 910, 1660, 840, 1380]

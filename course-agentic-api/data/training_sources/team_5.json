@@ -3616,5 +3616,25 @@
       "source_system": "maintenance_log",
       "shift_note": null
     }
-  ]
+  ],
+  "purpose": "Raw production-run evidence for a capacity-constrained plant. Students must separate planned/known features from realized downtime/completion outcomes.",
+  "data_quality_notes": {
+    "raw_source": true,
+    "not_training_ready": true,
+    "expected_issues": [
+      "missing utilization",
+      "missing labor ratios",
+      "inconsistent line IDs",
+      "incomplete completion outcomes",
+      "operator notes",
+      "mixed MES/maintenance sources"
+    ]
+  },
+  "analysis_expectations": [
+    "Which features are available before the run?",
+    "How does maintenance age relate to downtime?",
+    "When does overload make nominal capacity misleading?",
+    "How should class imbalance or line/product differences be validated?"
+  ],
+  "student_warning": "Do not modify the raw evidence or treat every anomaly as an error. Create derived supervised datasets and document cleaning/label assumptions."
 }

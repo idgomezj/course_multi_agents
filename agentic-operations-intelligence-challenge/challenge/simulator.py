@@ -60,6 +60,7 @@ def simulate_month(case: dict[str, Any], scenario: dict[str, Any], plan: Monthly
     purchase_cost = 0.0
     expedite_cost = 0.0
     working_capital_cost = 0.0
+    expedited_units = 0.0
 
     # Student POs.
     for po in plan.purchase_orders:
@@ -76,6 +77,7 @@ def simulate_month(case: dict[str, Any], scenario: dict[str, Any], plan: Monthly
         working_capital_cost += po_cost * float(costs.get("working_capital_rate", 0.0))
         if po.expedite:
             expedite_cost += po.quantity * float(costs.get("expedite_per_unit", 0.0))
+            expedited_units += po.quantity
 
         lead = float(supplier.get("lead_time_days", 7))
         delay = float(realized.get("supplier_delay_days", {}).get(po.supplier_id, 0.0))
@@ -131,6 +133,8 @@ def simulate_month(case: dict[str, Any], scenario: dict[str, Any], plan: Monthly
     line_stop_hours = 0.0
     total_demand = 0.0
     total_served = 0.0
+    total_overtime_hours = 0.0
+    peak_finished_inventory = sum(max(0.0, q) for q in fg_inv.values())
     line_last_product: dict[str, str] = {}
 
     for week in range(1, 5):
@@ -193,6 +197,7 @@ def simulate_month(case: dict[str, Any], scenario: dict[str, Any], plan: Monthly
             used_hours[line] += min(base_hours, max(0.0, line_capacity[line][week - 1] - used_hours[line]))
             actual_ot = max(0.0, base_hours - line_capacity[line][week - 1])
             overtime_cost += actual_ot * float(costs.get("overtime_per_hour", 0.0))
+            total_overtime_hours += actual_ot
             production_cost += actual_qty * float(product.get("production_cost", 0.0))
             fg_inv[order.product_id] += actual_qty
             week_produced[order.product_id] = week_produced.get(order.product_id, 0.0) + actual_qty
@@ -231,6 +236,10 @@ def simulate_month(case: dict[str, Any], scenario: dict[str, Any], plan: Monthly
         holding_rate = float(costs.get("holding_per_unit_week", 0.0))
         holding_cost += sum(max(0.0, q) for q in material_inv.values()) * holding_rate
         holding_cost += sum(max(0.0, q) for q in fg_inv.values()) * holding_rate
+        peak_finished_inventory = max(
+            peak_finished_inventory,
+            sum(max(0.0, q) for q in fg_inv.values()),
+        )
         log_event(
             logger,
             "simulation.week.completed",
@@ -272,6 +281,43 @@ def simulate_month(case: dict[str, Any], scenario: dict[str, Any], plan: Monthly
         "line_stop": downtime_cost,
         "changeover": changeover_cost,
     }
+    constraints = case.get("constraints", {})
+
+    monthly_budget = constraints.get("monthly_operating_budget", policy.get("monthly_operating_budget"))
+    if monthly_budget is not None and total > float(monthly_budget) + 1e-9:
+        violations.append(ConstraintViolation(
+            code="OPERATING_BUDGET",
+            message=f"Realized monthly cost {total:.2f} exceeds operating budget {float(monthly_budget):.2f}",
+        ))
+
+    max_purchase_spend = constraints.get("max_purchase_spend", policy.get("max_purchase_spend"))
+    if max_purchase_spend is not None and purchase_cost > float(max_purchase_spend) + 1e-9:
+        violations.append(ConstraintViolation(
+            code="PURCHASE_BUDGET",
+            message=f"Purchase spend {purchase_cost:.2f} exceeds limit {float(max_purchase_spend):.2f}",
+        ))
+
+    max_monthly_ot = constraints.get("max_monthly_overtime_hours", policy.get("max_monthly_overtime_hours"))
+    if max_monthly_ot is not None and total_overtime_hours > float(max_monthly_ot) + 1e-9:
+        violations.append(ConstraintViolation(
+            code="MONTHLY_OVERTIME",
+            message=f"Monthly overtime {total_overtime_hours:.2f} exceeds limit {float(max_monthly_ot):.2f}",
+        ))
+
+    max_expedited = constraints.get("max_expedited_units", policy.get("max_expedited_units"))
+    if max_expedited is not None and expedited_units > float(max_expedited) + 1e-9:
+        violations.append(ConstraintViolation(
+            code="EXPEDITE_LIMIT",
+            message=f"Expedited units {expedited_units:.2f} exceed limit {float(max_expedited):.2f}",
+        ))
+
+    max_fg_inventory = constraints.get("max_finished_goods_inventory_units", policy.get("max_finished_goods_inventory_units"))
+    if max_fg_inventory is not None and peak_finished_inventory > float(max_fg_inventory) + 1e-9:
+        violations.append(ConstraintViolation(
+            code="WAREHOUSE_CAPACITY",
+            message=f"Peak finished-goods inventory {peak_finished_inventory:.2f} exceeds limit {float(max_fg_inventory):.2f}",
+        ))
+
     critical = [v for v in violations if v.critical]
     log_event(
         logger,
@@ -284,6 +330,9 @@ def simulate_month(case: dict[str, Any], scenario: dict[str, Any], plan: Monthly
         total_served=total_served,
         lost_units=lost_units,
         line_stop_hours=line_stop_hours,
+        total_overtime_hours=total_overtime_hours,
+        expedited_units=expedited_units,
+        peak_finished_inventory=peak_finished_inventory,
         total_cost=round(total, 2),
         cost_breakdown={k: round(v, 2) for k, v in breakdown.items()},
         ending_material_inventory={k: round(v, 3) for k, v in material_inv.items()},

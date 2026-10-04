@@ -1,0 +1,28 @@
+# Generic starter baseline — not a solution. Change settings and compare results.
+models:
+  model_a:
+    architecture: medium   # small | medium | large | custom
+    hidden_layers: null    # used when architecture: custom, e.g. [48, 24]
+    activation: relu       # relu | silu | tanh
+    dropout: 0.0
+    epochs: 120
+    learning_rate: 0.003
+    batch_size: 64
+    optimizer: adamw       # adam | adamw
+    loss: auto             # auto | mse | mae | huber | bce
+    weight_decay: 0.0001
+  model_b:
+    architecture: medium
+    hidden_layers: null
+    activation: relu
+    dropout: 0.0
+    epochs: 120
+    learning_rate: 0.003
+    batch_size: 64
+    optimizer: adamw
+    loss: auto
+    weight_decay: 0.0001
+validation:
+  method: chronological    # chronological | random
+  validation_fraction: 0.20
+  seed: 42

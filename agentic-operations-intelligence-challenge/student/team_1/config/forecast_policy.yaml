@@ -1,0 +1,10 @@
+# Generic baseline — intentionally not optimized for any team.
+weights:
+  model_a: 0.40
+  confirmed_orders: 0.25
+  moving_average: 0.15
+  exponential_smoothing: 0.10
+  seasonal: 0.10
+high_uncertainty_threshold: 0.35
+high_uncertainty_model_multiplier: 0.70
+high_uncertainty_confirmed_multiplier: 1.20

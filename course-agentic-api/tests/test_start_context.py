@@ -33,10 +33,24 @@ def test_start_context_is_canonical_and_contains_full_student_visible_case_conte
     assert payload["case"]["bom"]
     assert payload["case"]["policies"]
     assert payload["case"]["costs"]
+    assert payload["case"]["company_profile"]
+    assert payload["case"]["customer_priorities"]
+    assert payload["case"]["constraints"]["monthly_operating_budget"] > 0
+    assert payload["case"]["data_quality_context"]["raw_history_is_imperfect"] is True
+    assert payload["case"]["decision_signals"]["may_disagree"]
     assert payload["knowledge"]
     assert payload["authorized_scenarios"]
     assert payload["resources"]["training_source"].endswith("/training-source.json")
     assert payload["resources"]["local_model_contract"] == "student/team_3/training/model_contract.json"
+    assert payload["resources"]["local_training_config"] == "student/team_3/training/training_config.yaml"
+    assert payload["resources"]["local_feature_config"] == "student/team_3/training/feature_config.yaml"
+    assert payload["resources"]["local_document_priorities"] == "student/team_3/rag/document_priorities.yaml"
+    assert payload["resources"]["local_forecast_policy"] == "student/team_3/config/forecast_policy.yaml"
+    assert payload["worked_reference"]["team_id"] == "team_0"
+    assert payload["worked_reference"]["demo"] == "/demo"
+    assert payload["worked_reference"]["solved_config_api"] == "/demo/api/config"
+    assert "student/team_X/config/tool_policy.yaml" in payload["student_editable"]
+    assert "evaluation strategy, weights, hidden scenarios/holdouts and benchmark solutions" in payload["student_read_only"]
     assert response.headers["X-Course-Context"] == "canonical-start-context"
 
 
@@ -208,3 +222,25 @@ def test_start_context_logs_full_request_details(caplog):
     assert details["body_bytes"] == len("diagnostic-body")
     assert details["detected_client"]["kind"] == "ai"
     assert details["resolved_scenario_scope"] == "public"
+
+
+def test_case0_start_context_points_to_solved_reference_assets():
+    response = CLIENT.get("/v1/teams/team_0/start-context")
+    assert response.status_code == 200
+    payload = response.json()
+    resources = payload["resources"]
+    assert resources["training_source"] == "/v1/teams/team_0/training-source.json"
+    assert resources["training_config"] == "demo_case_0_solution/training/training_config.yaml"
+    assert resources["feature_config"] == "demo_case_0_solution/training/feature_config.yaml"
+    assert resources["document_priorities"] == "demo_case_0_solution/rag/document_priorities.yaml"
+    assert resources["solution_decisions"] == "demo_case_0_solution/SOLUTION_DECISIONS.md"
+    assert resources["solved_config_api"] == "/demo/api/config"
+
+
+def test_case0_worked_training_source_is_public():
+    response = CLIENT.get("/v1/teams/team_0/training-source.json")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["team_id"] == "team_0"
+    assert payload["dataset"] == "case0_worked_raw_training_sample"
+    assert payload["data_quality_notes"]["not_training_ready"] is True

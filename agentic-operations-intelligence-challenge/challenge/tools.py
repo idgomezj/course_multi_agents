@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import math
 from statistics import mean, pstdev
 from typing import Any
@@ -78,6 +76,32 @@ def search_knowledge(ctx: RunContext[RuntimeDeps], query: str, top_k: int | None
     for item in out:
         ctx.deps.rag_hits.add(item["source"])
     return ctx.deps.record("search_knowledge", {"query": query, "top_k": top_k}, out)
+
+
+def get_business_constraints(ctx: RunContext[RuntimeDeps]) -> dict[str, Any]:
+    """Return authoritative case constraints plus student planning preferences."""
+    out = {
+        "hard_policies": ctx.deps.case.get("policies", {}),
+        "hard_constraints": ctx.deps.case.get("constraints", {}),
+        "customer_priorities": ctx.deps.case.get("customer_priorities", {}),
+        "student_planning_objectives": ctx.deps.student_config.get("planning_objectives", {}),
+    }
+    return ctx.deps.record("get_business_constraints", {}, out)
+
+
+def get_student_configuration(ctx: RunContext[RuntimeDeps]) -> dict[str, Any]:
+    """Return the student-editable decision configuration currently loaded by runtime."""
+    cfg = ctx.deps.student_config
+    out = {
+        "forecast_policy": cfg.get("forecast_policy", {}),
+        "risk_policy": cfg.get("risk_policy", {}),
+        "planning_objectives": cfg.get("planning_objectives", {}),
+        "tool_policy": cfg.get("tool_policy", {}),
+        "manager_llm": cfg.get("manager_llm", {}),
+        "business_assumptions": cfg.get("business_assumptions", {}),
+        "feature_config": cfg.get("feature_config", {}),
+    }
+    return ctx.deps.record("get_student_configuration", {}, out)
 
 
 def get_inventory(ctx: RunContext[RuntimeDeps]) -> dict[str, Any]:
@@ -186,6 +210,73 @@ def estimate_forecast_uncertainty(ctx: RunContext[RuntimeDeps], product_id: str)
     return ctx.deps.record("estimate_forecast_uncertainty", {"product_id": product_id}, out)
 
 
+def forecast_consensus(ctx: RunContext[RuntimeDeps], product_id: str) -> dict[str, Any]:
+    """Combine model/statistical/confirmed-order signals using the student's forecast policy."""
+    product = ctx.deps.case["products"][product_id]
+    visible = ctx.deps.scenario.get("visible", {})
+    history = [float(x) for x in product["demand_history"]]
+    avg = mean(history[-4:])
+
+    moving = [mean(history[-4:])] * 4
+    level = float(history[0])
+    for x in history[1:]:
+        level = 0.35 * float(x) + 0.65 * level
+    exponential = [level] * 4
+    seasonal = [avg * float(i) for i in product.get("seasonal_indices", [1, 1, 1, 1])[:4]]
+
+    pytorch_pred = _predict_or_none(
+        ctx,
+        "demand_forecast",
+        {
+            "last4_mean": avg,
+            "last4_std": pstdev(history[-4:]) if len(history[-4:]) > 1 else 0.0,
+            "trend": (history[-1] - history[-4]) / max(1.0, history[-4]),
+            "promotion": 1.0 if product_id in visible.get("promotion_products", []) else 0.0,
+            "price_index": float(visible.get("price_index", {}).get(product_id, 1.0)),
+            "confirmed_orders": float(visible.get("confirmed_orders", {}).get(product_id, avg) if not isinstance(visible.get("confirmed_orders", {}).get(product_id, avg), list) else visible.get("confirmed_orders", {}).get(product_id, [avg])[0]),
+            "seasonal_index": float(product.get("seasonal_indices", [1.0])[0]),
+        },
+    )
+    model_values = [max(0.0, float(x)) for x in (pytorch_pred[:4] if pytorch_pred else [avg] * 4)]
+
+    confirmed_raw = visible.get("confirmed_orders", {}).get(product_id, avg)
+    if isinstance(confirmed_raw, list):
+        confirmed = [float(confirmed_raw[min(i, len(confirmed_raw) - 1)]) for i in range(4)]
+    else:
+        confirmed = [float(confirmed_raw)] * 4
+
+    uncertainty = estimate_forecast_uncertainty(ctx, product_id)
+    policy = ctx.deps.student_config.get("forecast_policy", {})
+    weights = dict(policy.get("weights", {}))
+    if uncertainty >= float(policy.get("high_uncertainty_threshold", 0.35)):
+        weights["model_a"] = float(weights.get("model_a", 0.0)) * float(policy.get("high_uncertainty_model_multiplier", 0.70))
+        weights["confirmed_orders"] = float(weights.get("confirmed_orders", 0.0)) * float(policy.get("high_uncertainty_confirmed_multiplier", 1.20))
+    total_weight = sum(max(0.0, float(v)) for v in weights.values()) or 1.0
+    weights = {k: max(0.0, float(v)) / total_weight for k, v in weights.items()}
+
+    components = {
+        "model_a": model_values,
+        "confirmed_orders": confirmed,
+        "moving_average": moving,
+        "exponential_smoothing": exponential,
+        "seasonal": seasonal,
+    }
+    consensus = []
+    for week in range(4):
+        value = sum(weights.get(name, 0.0) * values[week] for name, values in components.items())
+        consensus.append(round(max(0.0, value), 2))
+
+    out = {
+        "product_id": product_id,
+        "consensus": consensus,
+        "uncertainty": uncertainty,
+        "weights": {k: round(v, 4) for k, v in weights.items()},
+        "components": {k: [round(float(x), 2) for x in v] for k, v in components.items()},
+        "high_uncertainty": uncertainty >= float(policy.get("high_uncertainty_threshold", 0.35)),
+    }
+    return ctx.deps.record("forecast_consensus", {"product_id": product_id}, out)
+
+
 def predict_excess_inventory_risk(ctx: RunContext[RuntimeDeps], product_id: str, planned_production: float, forecast_total: float) -> float:
     """Predict risk of ending the horizon with economically excessive finished inventory."""
     product = ctx.deps.case["products"][product_id]
@@ -204,10 +295,26 @@ def predict_excess_inventory_risk(ctx: RunContext[RuntimeDeps], product_id: str,
 
 
 def calculate_safety_stock(ctx: RunContext[RuntimeDeps], average_weekly_demand: float, uncertainty_ratio: float, lead_time_weeks: float = 1.0) -> float:
-    """Calculate demand-uncertainty safety stock."""
-    qty = average_weekly_demand * uncertainty_ratio * math.sqrt(max(0.1, lead_time_weeks)) * 1.65
+    """Calculate demand-uncertainty safety stock using the student's risk factor."""
+    factor = float(ctx.deps.student_config.get("risk_policy", {}).get("safety_stock_factor", 1.65))
+    qty = average_weekly_demand * uncertainty_ratio * math.sqrt(max(0.1, lead_time_weeks)) * factor
     out = round(max(0.0, qty), 2)
-    return ctx.deps.record("calculate_safety_stock", {"average_weekly_demand": average_weekly_demand, "uncertainty_ratio": uncertainty_ratio, "lead_time_weeks": lead_time_weeks}, out)
+    return ctx.deps.record(
+        "calculate_safety_stock",
+        {"average_weekly_demand": average_weekly_demand, "uncertainty_ratio": uncertainty_ratio, "lead_time_weeks": lead_time_weeks, "safety_stock_factor": factor},
+        out,
+    )
+
+
+def classify_risk(ctx: RunContext[RuntimeDeps], risk_value: float, label: str = "risk") -> dict[str, Any]:
+    """Classify a 0-1 risk value using the student's configured thresholds."""
+    policy = ctx.deps.student_config.get("risk_policy", {})
+    medium = float(policy.get("medium_threshold", 0.25))
+    high = float(policy.get("high_threshold", 0.50))
+    value = max(0.0, min(1.0, float(risk_value)))
+    level = "high" if value >= high else ("medium" if value >= medium else "low")
+    out = {"label": label, "value": round(value, 4), "level": level, "medium_threshold": medium, "high_threshold": high}
+    return ctx.deps.record("classify_risk", {"risk_value": risk_value, "label": label}, out)
 
 
 def calculate_reorder_point(ctx: RunContext[RuntimeDeps], average_daily_usage: float, lead_time_days: float, safety_stock: float) -> float:
@@ -410,12 +517,12 @@ def validate_plan(
 
 
 ALL_TOOLS = [
-    list_skills, load_skill, search_knowledge,
+    list_skills, load_skill, search_knowledge, get_business_constraints, get_student_configuration,
     get_inventory, get_open_purchase_orders, get_bom, calculate_bom_requirements,
     get_supplier_options, get_production_capacity,
-    forecast_moving_average, forecast_exponential_smoothing, forecast_seasonal, forecast_pytorch,
+    forecast_moving_average, forecast_exponential_smoothing, forecast_seasonal, forecast_pytorch, forecast_consensus,
     estimate_forecast_uncertainty, predict_excess_inventory_risk,
-    calculate_safety_stock, calculate_reorder_point, calculate_jit_requirement, calculate_inventory_projection,
+    calculate_safety_stock, classify_risk, calculate_reorder_point, calculate_jit_requirement, calculate_inventory_projection,
     predict_supplier_delay, predict_arrival_time, predict_supplier_quality,
     find_alternative_supplier, calculate_expedite_option,
     predict_downtime, predict_production_feasibility, calculate_overtime_option, optimize_production_plan,

@@ -2,6 +2,44 @@ name: Team 3 — Just-in-Time Manufacturing
 description: The plant holds minimal raw-material inventory and depends on frequent, precisely timed supplier deliveries.
 objective: Synchronize supply and production so inventory stays very low without exposing the plant to costly line stops.
 cost_priorities: [line stop, late material, excess inventory, delivery timing]
+
+company_profile:
+  legal_name: Apex JIT Components
+  industry: high-throughput just-in-time manufacturing
+  operating_model: minimal raw-material inventory with frequent supplier deliveries synchronized to production
+  customer_mix:
+    contract_manufacturing: 0.75
+    aftermarket: 0.25
+  planning_horizon_weeks: 4
+  management_concerns:
+    - production line stops from late materials
+    - excessive buffers defeating the JIT model
+    - supplier delivery variability
+    - expensive emergency freight
+
+customer_priorities:
+  contract_customers:
+    service_target: 0.99
+    priority: high
+  aftermarket:
+    service_target: 0.96
+    priority: normal
+
+constraints:
+  monthly_operating_budget: 72000
+  max_monthly_overtime_hours: 48
+  max_expedited_units: 260
+  max_finished_goods_inventory_units: 3000
+
+data_quality_context:
+  raw_history_is_imperfect: true
+  expected_issues: [missing lead times, partial receipts, inconsistent supplier identifiers, corrected buyer records, late-rate gaps]
+  instruction: Separate information known at order time from realized delivery outcomes to avoid leakage.
+
+decision_signals:
+  may_disagree: [Model A delay probability, Model B arrival time, nominal lead time, recent late rate, production need date, open POs]
+  principle: Cheap supply is not automatically best when timing risk can stop production, but generic large buffers are also unacceptable.
+
 costs:
   holding_per_unit_week: 7.5
   line_stop_per_hour: 18000

@@ -1,0 +1,8 @@
+# Tool implementations are locked. This file guides when/how the Manager should use them.
+required_before_finalize:
+  - calculate_plan_cost
+  - validate_plan
+max_replans: 2
+guidance:
+  - Investigate conflicting evidence before committing to a high-impact action.
+  - Avoid exact duplicate tool calls when the underlying information has not changed.

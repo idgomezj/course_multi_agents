@@ -14,6 +14,7 @@ from .manager import run_manager
 from .observability import log_event, new_trace_id, reset_trace_context, set_trace_context, setup_logging
 from .scenarios import get_public_scenario, list_public_scenarios, student_visible_scenario
 from .training_data import load_model_spec
+from .student_config import config_file_status, student_config_summary
 
 setup_logging("agentic-operations-challenge")
 logger = logging.getLogger(__name__)
@@ -158,7 +159,18 @@ def team_status(team_id: str):
         "models": models,
         "manager_model_id": default_manager_model_id(),
         "manager_models": manager_model_status(),
+        "student_config_files": config_file_status(team_id),
     }
+
+
+@app.get("/api/config/{team_id}")
+def team_config(team_id: str):
+    """Return the validated student-editable configuration currently loaded."""
+    _require_student_team(team_id)
+    try:
+        return student_config_summary(team_id)
+    except (FileNotFoundError, ValueError) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @app.post("/api/evaluate")
@@ -167,8 +179,9 @@ async def evaluate(request: EvaluateRequest):
     log_event(logger, "evaluation.requested", team_id=request.team_id, scenario_id=request.scenario_id, model_id=request.model_id)
     try:
         scenario = get_public_scenario(request.team_id, request.scenario_id)
-        selected_model, _settings = resolve_manager_model(request.model_id)
         plan, deps = await run_manager(request.team_id, scenario, request.model_id)
+        selected_id = request.model_id or deps.student_config.get("manager_llm", {}).get("provider")
+        selected_model, _settings = resolve_manager_model(selected_id)
         payload = get_data_client().evaluate_scenario(
             request.team_id,
             request.scenario_id,
@@ -176,7 +189,7 @@ async def evaluate(request: EvaluateRequest):
             deps.trace,
             sorted(deps.rag_hits),
         )
-        payload["manager_model_id"] = request.model_id or default_manager_model_id()
+        payload["manager_model_id"] = selected_id or default_manager_model_id()
         payload["manager_model"] = selected_model
         log_event(
             logger,

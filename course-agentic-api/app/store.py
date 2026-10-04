@@ -79,12 +79,12 @@ def load_model_spec(team_id: str) -> dict[str, Any]:
 def load_training_source(team_id: str) -> dict[str, Any]:
     """Load the raw historical JSON source used for student model development.
 
-    This is intentionally not a model-ready training dataset: it contains raw,
-    imperfect business observations that students must inspect, clean, filter,
-    transform and label themselves.
+    This is intentionally not a model-ready training dataset. Team 1-5 payloads
+    contain raw imperfect evidence that students must inspect, clean, transform
+    and label. Team 0 returns a worked imperfect sample that demonstrates the same
+    analysis process before the committed reference CSVs are used for reproducible
+    instructor model training.
     """
-    if team_id == "team_0":
-        raise KeyError("Case 0 uses the instructor's internal worked-example training flow")
     if team_id not in available_teams():
         raise KeyError(team_id)
 
@@ -239,5 +239,11 @@ def reference_solution(team_id: str, scenario_id: str = "T0-P01") -> dict[str, A
         "reference_evaluation": {
             "benchmark_cost": scenario.get("benchmark_cost"),
             "service_level_target": load_case(team_id).get("policies", {}).get("service_level_target"),
+            "hard_constraints": deepcopy(load_case(team_id).get("constraints", {})),
+        },
+        "solved_configuration": {
+            "endpoint": "/demo/api/config",
+            "decision_document": "demo_case_0_solution/SOLUTION_DECISIONS.md",
+            "raw_data_walkthrough": "demo_case_0_solution/training/RAW_DATA_WALKTHROUGH.md",
         },
     }
