@@ -4,7 +4,7 @@
 
 This is the **raw historical evidence for your assigned business case**. It is intentionally not a training-ready ML table.
 
-Treat `raw_case_history.csv` and `model_contract.json` as read-only assignment inputs. Create new derived files rather than editing the supplied evidence or contract.
+Retrieve the raw historical evidence as JSON from `GET /v1/teams/team_3/training-source.json` using Team 3's assigned token. Treat that API response and `model_contract.json` as read-only assignment inputs. You may save the response locally as `raw_source.json` for analysis, but create new derived files rather than editing the source evidence or contract.
 
 You must build the supervised learning dataset yourself. That means deciding how historical rows become examples, deriving the required model inputs from the raw observations, constructing defensible targets from later outcomes, handling missing/noisy observations, choosing train/validation splits, and documenting your assumptions.
 
@@ -26,7 +26,7 @@ The starter trainer refuses to create the supervised rows for you; it only train
 
 ## Raw file
 
-`raw_case_history.csv` contains historical supplier orders with order size, normal order size, order/need dates, nominal lead time, realized lead time, reliability, recent late-rate and seasonal-risk observations.
+The JSON returned by `/v1/teams/team_3/training-source.json` contains historical supplier orders with order size, normal order size, order/need dates, nominal lead time, realized lead time, reliability, recent late-rate and seasonal-risk observations.
 
 Derive `order_qty_ratio` from order quantity versus typical quantity. Derive an urgency measure from the time available between order placement, expected arrival and the material need date. Define the delay classification target from the realized delivery outcome and define arrival-time regression from realized lead time.
 
