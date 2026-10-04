@@ -1,0 +1,9 @@
+# Solved Case 0 planning preferences. Hard limits remain in team_0.yaml.
+priorities:
+  service: 0.45
+  total_cost: 0.35
+  ending_inventory: 0.10
+  plan_stability: 0.10
+soft_constraints:
+  prefer_orders_close_to_need: true
+  avoid_unnecessary_expedite: true
