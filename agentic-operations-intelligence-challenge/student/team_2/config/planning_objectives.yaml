@@ -1,0 +1,2 @@
+priorities: {service: 0.40, total_cost: 0.35, ending_inventory: 0.15, plan_stability: 0.10}
+soft_constraints: {}
