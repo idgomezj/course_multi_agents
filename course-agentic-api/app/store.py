@@ -239,5 +239,11 @@ def reference_solution(team_id: str, scenario_id: str = "T0-P01") -> dict[str, A
         "reference_evaluation": {
             "benchmark_cost": scenario.get("benchmark_cost"),
             "service_level_target": load_case(team_id).get("policies", {}).get("service_level_target"),
+            "hard_constraints": deepcopy(load_case(team_id).get("constraints", {})),
+        },
+        "solved_configuration": {
+            "endpoint": "/demo/api/config",
+            "decision_document": "demo_case_0_solution/SOLUTION_DECISIONS.md",
+            "raw_data_walkthrough": "demo_case_0_solution/training/RAW_DATA_WALKTHROUGH.md",
         },
     }
