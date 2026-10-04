@@ -1,23 +1,38 @@
-# Case 0 clean training datasets
+# Case 0 training reference
 
-Case 0 is the instructor validation case. Unlike Teams 1–5, its model-training data is intentionally **clean, deterministic and ready for training**.
+Case 0 teaches both parts of the new workflow:
 
-These files are the canonical inputs for validating the complete model pipeline:
+1. **an imperfect raw-data review example** exposed by the Data API;
+2. **clean deterministic supervised CSVs** used to validate the reference training/export pipeline.
+
+See [RAW_DATA_WALKTHROUGH.md](./RAW_DATA_WALKTHROUGH.md) for the worked data-quality analysis.
+
+## Configuration-driven training
+
+The reference trainer reads:
 
 ```text
-training/
-├── model_a_training.csv
-└── model_b_training.csv
+training_config.yaml
+feature_config.yaml
 ```
 
-## model_a_training.csv
+It does not require editing `train_models.py` to experiment with the allowed architecture/hyperparameter/feature settings.
+
+## Deterministic supervised reference datasets
+
+```text
+model_a_training.csv
+model_b_training.csv
+```
+
+### Model A
 
 Task: four-week demand forecast regression.
 
-- Rows: 3,000
-- Missing model values: 0
-- Exact duplicate rows: 0
-- Features:
+- rows: 3,000;
+- no missing model values;
+- no exact duplicate rows;
+- fixed contract features:
   - `last4_mean`
   - `last4_std`
   - `trend`
@@ -25,59 +40,49 @@ Task: four-week demand forecast regression.
   - `price_index`
   - `confirmed_orders`
   - `seasonal_index`
-- Targets:
-  - `target_w1`
-  - `target_w2`
-  - `target_w3`
-  - `target_w4`
+- targets: `target_w1..target_w4`.
 
-## model_b_training.csv
+### Model B
 
 Task: supplier-delay classification.
 
-- Rows: 3,000
-- Missing model values: 0
-- Exact duplicate rows: 0
-- Class distribution in the committed dataset:
-  - delay = 1: 1,768
-  - delay = 0: 1,232
-- Features:
+- rows: 3,000;
+- no missing model values;
+- no exact duplicate rows;
+- fixed contract features:
   - `reliability`
   - `recent_late_rate`
   - `lead_time_days`
   - `order_qty_ratio`
   - `urgency`
   - `season_risk`
-- Target:
-  - `target_delay`
+- target: `target_delay`.
 
-## Why Case 0 is different
+## Why keep clean committed CSVs in the solved case?
 
-Case 0 exists to validate that the platform itself works:
+The raw sample teaches the reasoning. The committed CSVs make this pipeline deterministic:
 
 ```text
-clean training data
+training_config + feature_config
 → PyTorch training
 → .pt2 export
-→ model loading
+→ runtime model loading
 → tool inference
 → Manager
 → simulator/evaluator
 ```
 
-Because it is a reference/diagnostic case, data preparation ambiguity is intentionally removed.
-
-Teams 1–5 are the exam cases. They receive raw historical JSON and must perform data selection, cleaning, feature engineering and target construction themselves.
+Teams 1–5 do not receive ready-made clean supervised tables. They must create their own from the team-scoped raw history.
 
 ## Train
 
-From `agentic-operations-data-api/`:
+From `course-agentic-api/`:
 
 ```bash
 python demo_case_0_solution/train_models.py
 ```
 
-The script reads these CSV files directly and writes:
+The script reads the solved YAML configuration and writes:
 
 ```text
 demo_case_0_solution/models/model_a.pt2
