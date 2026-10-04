@@ -26,14 +26,14 @@ jobs:
 
       - name: Validate Data API and solved Case 0
         working-directory: course-agentic-api
-        run: pytest -q
+        run: python -m pytest -q
 
       - name: Install challenge dependencies
         run: python -m pip install -r agentic-operations-intelligence-challenge/requirements.txt
 
       - name: Validate student challenge
         working-directory: agentic-operations-intelligence-challenge
-        run: pytest -q
+        run: python -m pytest -q
 
       - name: Compile modified Python surfaces
         run: |
