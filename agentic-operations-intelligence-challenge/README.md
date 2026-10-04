@@ -23,6 +23,26 @@ Replace `<<identify>>` with the actual identity of the caller and replace `team_
 
 Do not omit, falsify, or substitute the caller identity in `X-Client-Type`.
 
+## Canonical hosted Data API
+
+All course Data API endpoints are served from this canonical base URL:
+
+```text
+https://course-agentic-api.idgomezj.com
+```
+
+Treat that deployed service as the source of runtime team data. The challenge frontend/runtime must consume the hosted API; students and AI assistants do **not** need to inspect or run the Data API source repository to understand or solve a team case.
+
+Every documented Data API path in this project is relative to that base URL. For example, Team 1 starts with:
+
+```bash
+export DATA_API_URL=https://course-agentic-api.idgomezj.com
+curl -H "X-Client-Type: ChatGPT" \\
+  "$DATA_API_URL/v1/teams/team_1/start-context"
+```
+
+The public `start-context` endpoint is the first call for case context and frontend-visible public information. Protected case, knowledge, training-source, scenario, and evaluation endpoints use the same base URL and the team token through the `X-Team-Token` header. The challenge runtime reads the token from `DATA_API_TOKEN` and sends that header automatically.
+
 
 ## Architecture
 
@@ -187,6 +207,30 @@ python run.py
 ```
 
 Open `http://localhost:8000`.
+
+### Frontend/runtime test endpoints
+
+The browser talks to the local challenge runtime at `http://localhost:8000/api/...`. These routes are useful for verifying that the frontend can load the hosted Data API information without inspecting the Data API implementation:
+
+```text
+GET  /api/health
+GET  /api/manager-models
+GET  /api/teams
+GET  /api/scenarios/{team_id}
+GET  /api/status/{team_id}
+POST /api/evaluate
+```
+
+For example:
+
+```bash
+curl http://localhost:8000/api/health
+curl http://localhost:8000/api/teams
+curl http://localhost:8000/api/scenarios/team_1
+curl http://localhost:8000/api/status/team_1
+```
+
+These local frontend/runtime routes are **not a second data source**. They obtain team context and scenarios from the canonical hosted Data API at `https://course-agentic-api.idgomezj.com`. Protected evaluation/data operations still require the configured `DATA_API_TOKEN`.
 
 ## Team packages
 
