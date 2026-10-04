@@ -1,0 +1,9 @@
+# Solved reference Manager settings. Provider remains environment/UI selectable.
+provider: null
+temperature: 0.10
+max_tokens: 3500
+reasoning_mode: medium
+max_rag_documents: 5
+include_model_diagnostics: true
+include_cost_breakdown: true
+include_previous_plan: false
