@@ -2340,5 +2340,27 @@
       "source_system": "planning",
       "planner_note": null
     }
-  ]
+  ],
+  "purpose": "Raw weekly volatile-demand evidence. Students must normalize identifiers, handle missing/corrected observations, investigate outliers and construct leakage-safe rolling examples.",
+  "data_quality_notes": {
+    "raw_source": true,
+    "not_training_ready": true,
+    "expected_issues": [
+      "missing demand/commercial inputs",
+      "duplicate uploads",
+      "product ID spacing/case inconsistencies",
+      "late CRM confirmations",
+      "promotion corrections",
+      "suspicious demand outliers",
+      "planner notes from mixed source systems"
+    ]
+  },
+  "analysis_expectations": [
+    "Which observations are unavailable at prediction time?",
+    "Which anomalies are plausible demand shocks versus data defects?",
+    "How stable is promotion lift?",
+    "How reliable are confirmed orders at different horizons?",
+    "Does recent behavior differ from older history?"
+  ],
+  "student_warning": "Do not modify the raw evidence or treat every anomaly as an error. Create derived supervised datasets and document cleaning/label assumptions."
 }
