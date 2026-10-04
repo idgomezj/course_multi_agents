@@ -1,0 +1,7 @@
+# These are student decision preferences, not permission to override hard case constraints.
+priorities:
+  service: 0.40
+  total_cost: 0.35
+  ending_inventory: 0.15
+  plan_stability: 0.10
+soft_constraints: {}
