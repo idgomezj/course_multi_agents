@@ -46,6 +46,9 @@ def test_start_context_is_canonical_and_contains_full_student_visible_case_conte
     assert payload["resources"]["local_feature_config"] == "student/team_3/training/feature_config.yaml"
     assert payload["resources"]["local_document_priorities"] == "student/team_3/rag/document_priorities.yaml"
     assert payload["resources"]["local_forecast_policy"] == "student/team_3/config/forecast_policy.yaml"
+    assert payload["worked_reference"]["team_id"] == "team_0"
+    assert payload["worked_reference"]["demo"] == "/demo"
+    assert payload["worked_reference"]["solved_config_api"] == "/demo/api/config"
     assert "student/team_X/config/tool_policy.yaml" in payload["student_editable"]
     assert "evaluation strategy, weights, hidden scenarios/holdouts and benchmark solutions" in payload["student_read_only"]
     assert response.headers["X-Course-Context"] == "canonical-start-context"
