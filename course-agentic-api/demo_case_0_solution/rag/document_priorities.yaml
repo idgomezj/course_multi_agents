@@ -1,0 +1,31 @@
+# Solved Case 0 source-authority configuration.
+default_weight: 1.0
+authority_weights:
+  official: 1.20
+  contract: 1.15
+  advisory: 1.00
+  draft: 0.70
+  obsolete: 0.30
+  irrelevant: 0.15
+documents:
+  operations_policy.md:
+    authority: official
+    weight: 1.20
+  supplier_contracts.md:
+    authority: contract
+    weight: 1.15
+  company_facts.md:
+    authority: official
+    weight: 1.10
+  legacy_policy_2024.md:
+    authority: obsolete
+    weight: 0.50
+  planning_draft.md:
+    authority: draft
+    weight: 0.70
+  travel_reimbursement_policy.md:
+    authority: irrelevant
+    weight: 0.20
+  office_parking_rules.md:
+    authority: irrelevant
+    weight: 0.20
