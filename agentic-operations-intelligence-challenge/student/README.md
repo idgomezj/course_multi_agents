@@ -8,8 +8,8 @@ The runtime application and evaluator are provided. Your team is responsible for
 student/team_X/
 ├── training/
 │   ├── CASE_TRAINING.md
-│   ├── raw_case_history.csv
 │   ├── model_contract.json
+│   ├── raw_source.json           # optional local copy downloaded from API
 │   ├── model_a_training.csv      # YOU create this
 │   └── model_b_training.csv      # YOU create this
 ├── models/
@@ -21,23 +21,26 @@ student/team_X/
     └── *.md
 ```
 
-## Training is intentionally not provided by the Data API
+## Where the training data comes from
 
-The Data API is used by the running challenge to provide the current business/scenario state and authorized knowledge. It does **not** provide ready-made training rows and it does not provide the student model contract.
+The Data API is the authoritative source for team-specific business data. The canonical public `/start-context` endpoint is open, but protected data endpoints require the token assigned to the team.
 
-Your case package already contains readable historical evidence:
+Raw model-development history is returned as JSON from:
 
 ```text
-student/team_X/training/raw_case_history.csv
+GET /v1/teams/{team_id}/training-source.json
+X-Scenario-Token: <token assigned to this team>
 ```
 
-and the fixed runtime interface:
+The endpoint does **not** provide ready-made supervised training rows, derived features, labels, train/validation splits, or the local model contract. Each team receives only its own authorized data.
+
+The fixed runtime interface remains local:
 
 ```text
 student/team_X/training/model_contract.json
 ```
 
-Treat `raw_case_history.csv` and `model_contract.json` as read-only assignment inputs. Read `CASE_TRAINING.md` and the assigned case description, then build new supervised dataset files yourself.
+You may save the API response locally as `student/team_X/training/raw_source.json` for analysis, but treat that JSON and `model_contract.json` as read-only assignment inputs. Read `CASE_TRAINING.md` and the assigned case description, then build new supervised dataset files yourself.
 
 That work includes, depending on the case:
 
@@ -50,7 +53,7 @@ That work includes, depending on the case:
 - choosing a defensible train/validation strategy;
 - documenting assumptions.
 
-The raw file intentionally does **not** contain columns such as `target_delay`, `target_risk`, `target_downtime`, or four-week forecast targets ready for training.
+The raw JSON intentionally does **not** contain ready-made target columns such as `target_delay`, `target_risk`, `target_downtime`, or four-week forecast targets ready for training.
 
 ## Fixed model contract
 
