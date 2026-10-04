@@ -3348,5 +3348,25 @@
       "source_system": "supplier_portal",
       "buyer_comment": null
     }
-  ]
+  ],
+  "purpose": "Raw unreliable-supply order and inspection evidence. Delay and quality outcomes must be modeled separately.",
+  "data_quality_notes": {
+    "raw_source": true,
+    "not_training_ready": true,
+    "expected_issues": [
+      "missing reliability/late-rate values",
+      "missing quality/reject-rate observations",
+      "partial receipts",
+      "supplier identifier inconsistencies",
+      "process-change notes",
+      "mixed source systems"
+    ]
+  },
+  "analysis_expectations": [
+    "Are delay and quality risks correlated?",
+    "Does a process change alter recent quality behavior?",
+    "Which materials are critical enough to change risk tolerance?",
+    "How should missing inspection fields be handled without leakage?"
+  ],
+  "student_warning": "Do not modify the raw evidence or treat every anomaly as an error. Create derived supervised datasets and document cleaning/label assumptions."
 }
