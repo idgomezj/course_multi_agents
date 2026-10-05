@@ -1,4 +1,4 @@
-from demo_app.manager import _manager_request_limit
+from demo_app.manager import _manager_request_limit, build_agent
 from demo_app.llm_config import manager_model_options, manager_model_status, resolve_manager_model
 
 
@@ -37,3 +37,9 @@ def test_manager_request_limit_defaults_and_is_bounded(monkeypatch):
 
     monkeypatch.setenv("MANAGER_REQUEST_LIMIT", "not-a-number")
     assert _manager_request_limit() == 75
+
+
+def test_case0_manager_agent_builds_with_deepseek(monkeypatch):
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
+    agent = build_agent("deepseek")
+    assert agent is not None
