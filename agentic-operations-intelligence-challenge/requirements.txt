@@ -3,6 +3,8 @@ fastapi>=0.115
 uvicorn[standard]>=0.32
 python-dotenv>=1.0
 httpx>=0.27
+# OpenAI/DeepSeek transport; Brotli 1.2+ is required by httpx2's bounded decoder.
+httpx2[brotli]>=2.12,<3
 torch>=2.4
 numpy>=2.0
 pandas>=2.2
