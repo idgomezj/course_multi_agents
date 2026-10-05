@@ -5,7 +5,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from pydantic_ai.models.openai import OpenAIChatModelSettings
+from pydantic_ai.models.openai import OpenAIChatModel, OpenAIChatModelSettings
+from pydantic_ai.providers.deepseek import DeepSeekProvider
 
 from .observability import log_event
 
@@ -126,7 +127,7 @@ def resolve_manager_model(model_id: str | None = None) -> tuple[Any, Any | None]
         configured=bool(os.getenv(option.api_key_env)) if option else None,
         has_custom_settings=settings is not None,
     )
-    return model, settings
+    return resolved_model, settings
 
 
 def manager_model_status() -> list[dict[str, Any]]:
