@@ -14,7 +14,7 @@ from .config import student_path
 from .data_api import get_data_client
 from .llm_config import resolve_manager_model
 from .model_registry import StudentModelRegistry
-from .observability import current_trace_id, log_event, set_trace_context, reset_trace_context
+from .observability import current_trace_id, log_event, log_exception, set_trace_context, reset_trace_context
 from .rag import RagIndex
 from .runtime import RuntimeDeps
 from .schemas import MonthlyOperationsPlan
@@ -219,13 +219,13 @@ async def run_manager(team_id: str, scenario: dict[str, Any], model_id: str | No
         )
         return plan, deps
     except Exception as exc:
-        log_event(
+        log_exception(
             logger,
             "manager.run.failed",
-            level=logging.ERROR,
             team_id=team_id,
             scenario_id=scenario.get("id"),
             duration_ms=round((perf_counter() - started) * 1000, 2),
+            error_type=type(exc).__name__,
             error=str(exc),
         )
         raise
