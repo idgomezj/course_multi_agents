@@ -81,7 +81,7 @@ def default_manager_model_id() -> str:
     return "google"
 
 
-def resolve_manager_model(model_id: str | None = None) -> tuple[str, Any | None]:
+def resolve_manager_model(model_id: str | None = None) -> tuple[Any, Any | None]:
     """Resolve a UI/provider id to the Pydantic AI model string and optional settings.
 
     MANAGER_MODEL remains supported as a legacy explicit override when no model_id
@@ -106,7 +106,13 @@ def resolve_manager_model(model_id: str | None = None) -> tuple[str, Any | None]
         model = options[normalized].model
 
     settings: Any | None = None
+    resolved_model: Any = model
     if model.startswith("deepseek:"):
+        deepseek_model_name = model.split(":", 1)[1]
+        resolved_model = OpenAIChatModel(
+            deepseek_model_name,
+            provider=DeepSeekProvider(),
+        )
         settings = OpenAIChatModelSettings(thinking=False)
 
     provider = model.split(":", 1)[0] if ":" in model else "custom"
