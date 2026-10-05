@@ -1,3 +1,5 @@
+from pydantic_ai.models.openai import OpenAIChatModel
+
 from demo_app.manager import _manager_request_limit, build_agent
 from demo_app.llm_config import manager_model_options, manager_model_status, resolve_manager_model
 
