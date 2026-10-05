@@ -1,5 +1,5 @@
-from challenge.manager import _manager_request_limit
-from challenge.llm_config import manager_model_options, resolve_manager_model
+from challenge.manager import _manager_request_limit, build_agent
+from challenge.llm_config import manager_model_options, resolve_manager_model\nfrom challenge.student_config import load_runtime_config
 
 
 def test_manager_llm_providers_are_available():
@@ -31,3 +31,11 @@ def test_manager_request_limit_defaults_and_is_bounded(monkeypatch):
 
     monkeypatch.setenv("MANAGER_REQUEST_LIMIT", "not-a-number")
     assert _manager_request_limit() == 75
+
+
+def test_all_team_manager_configs_build_with_deepseek_without_solution_artifacts(monkeypatch):
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
+    for team_id in [f"team_{i}" for i in range(1, 6)]:
+        config = load_runtime_config(team_id)
+        agent = build_agent("deepseek", config)
+        assert agent is not None
