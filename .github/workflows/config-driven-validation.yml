@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - docs/student-configurable-solution-surfaces
+      - fix/deepseek-brotli-transport
   pull_request:
     branches:
       - main
