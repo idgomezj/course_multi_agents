@@ -14,7 +14,7 @@ from .config import student_path
 from .data_api import get_data_client
 from .llm_config import resolve_manager_model
 from .model_registry import StudentModelRegistry
-from .observability import current_trace_id, log_event, log_exception, set_trace_context, reset_trace_context
+from .observability import current_trace_id, log_event, set_trace_context, reset_trace_context, log_exception
 from .rag import RagIndex
 from .runtime import RuntimeDeps
 from .schemas import MonthlyOperationsPlan

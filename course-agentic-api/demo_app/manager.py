@@ -11,7 +11,7 @@ from pydantic_ai import Agent
 from pydantic_ai.usage import UsageLimits
 
 from app.store import load_case, load_knowledge, load_model_spec
-from app.observability import current_trace_id, log_event, log_exception, reset_trace_context, set_trace_context
+from app.observability import current_trace_id, log_event, reset_trace_context, set_trace_context, log_exception
 from .config import DEMO_MODELS_DIR, DEMO_RAG_CONFIG, DEMO_SKILLS_DIR
 from .llm_config import resolve_manager_model
 from .model_registry import StudentModelRegistry
