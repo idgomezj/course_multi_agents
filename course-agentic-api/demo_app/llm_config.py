@@ -98,11 +98,14 @@ def resolve_manager_model(model_id: str | None = None) -> tuple[str, Any | None]
         model = options[normalized].model
 
     settings: Any | None = None
+    resolved_model: Any = model
     if model.startswith("deepseek:"):
-        # Keep this provider-neutral so the service works across Pydantic-AI
-        # versions where OpenAIChatModelSettings may not exist yet/anymore.
-        # Agent accepts ModelSettings-compatible mappings directly.
-        settings = {"thinking": False}
+        deepseek_model_name = model.split(":", 1)[1]
+        resolved_model = OpenAIChatModel(
+            deepseek_model_name,
+            provider=DeepSeekProvider(),
+        )
+        settings = OpenAIChatModelSettings(thinking=False)
 
     provider = model.split(":", 1)[0] if ":" in model else "custom"
     option = next((x for x in manager_model_options() if x.id == (model_id or default_manager_model_id())), None)
