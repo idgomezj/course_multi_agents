@@ -11,7 +11,27 @@ from pydantic_ai.providers.deepseek import DeepSeekProvider
 
 from .observability import log_event
 
-logger = logging.getLogger(__name__)\n\n_DEEPSEEK_ACCEPT_ENCODING = "gzip, deflate"\n_DEEPSEEK_HTTP_CLIENT: AsyncClient | None = None\n\n\ndef _deepseek_http_client() -> AsyncClient:\n    """Return a DeepSeek HTTP client that does not negotiate Brotli.\n\n    Older Brotli bindings can be importable while lacking the output-buffer\n    keyword required by httpx2, causing successful API responses to fail during\n    decompression. DeepSeek works with gzip/deflate, so this transport avoids\n    that environment-dependent failure.\n    """\n    global _DEEPSEEK_HTTP_CLIENT\n    if _DEEPSEEK_HTTP_CLIENT is None:\n        _DEEPSEEK_HTTP_CLIENT = AsyncClient(\n            headers={"Accept-Encoding": _DEEPSEEK_ACCEPT_ENCODING},\n        )\n    return _DEEPSEEK_HTTP_CLIENT\n
+logger = logging.getLogger(__name__)
+
+_DEEPSEEK_ACCEPT_ENCODING = "gzip, deflate"
+_DEEPSEEK_HTTP_CLIENT: AsyncClient | None = None
+
+
+def _deepseek_http_client() -> AsyncClient:
+    """Return a DeepSeek HTTP client that does not negotiate Brotli.
+
+    Older Brotli bindings can be importable while lacking the output-buffer
+    keyword required by httpx2, causing successful API responses to fail during
+    decompression. DeepSeek works with gzip/deflate, so this transport avoids
+    that environment-dependent failure.
+    """
+    global _DEEPSEEK_HTTP_CLIENT
+    if _DEEPSEEK_HTTP_CLIENT is None:
+        _DEEPSEEK_HTTP_CLIENT = AsyncClient(
+            headers={"Accept-Encoding": _DEEPSEEK_ACCEPT_ENCODING},
+        )
+    return _DEEPSEEK_HTTP_CLIENT
+
 
 @dataclass(frozen=True)
 class ManagerModelOption:
