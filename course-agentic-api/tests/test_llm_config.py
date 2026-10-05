@@ -16,10 +16,13 @@ def test_manager_model_status_does_not_expose_api_key_values(monkeypatch):
     assert openai["configured"] is True
 
 
-def test_deepseek_disables_thinking_without_version_specific_openai_settings():
+def test_deepseek_uses_explicit_chat_model_and_disables_thinking(monkeypatch):
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
     model, settings = resolve_manager_model("deepseek")
-    assert model.startswith("deepseek:")
-    assert settings == {"thinking": False}
+    assert isinstance(model, OpenAIChatModel)
+    assert model.model_name == "deepseek-v4-flash"
+    assert settings is not None
+    assert settings["thinking"] is False
 
 
 def test_manager_request_limit_defaults_and_is_bounded(monkeypatch):
