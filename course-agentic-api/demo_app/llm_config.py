@@ -5,7 +5,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from pydantic_ai.models.openai import OpenAIChatModelSettings
+from pydantic_ai.models.openai import OpenAIChatModel, OpenAIChatModelSettings
+from pydantic_ai.providers.deepseek import DeepSeekProvider
 
 from app.observability import log_event
 
@@ -81,7 +82,7 @@ def default_manager_model_id() -> str:
     return "google"
 
 
-def resolve_manager_model(model_id: str | None = None) -> tuple[str, Any | None]:
+def resolve_manager_model(model_id: str | None = None) -> tuple[Any, Any | None]:
     """Resolve a UI/provider id to a Pydantic AI model and provider settings."""
     if model_id is None:
         legacy_model = os.getenv("MANAGER_MODEL", "").strip()
@@ -100,7 +101,13 @@ def resolve_manager_model(model_id: str | None = None) -> tuple[str, Any | None]
         model = options[normalized].model
 
     settings: Any | None = None
+    resolved_model: Any = model
     if model.startswith("deepseek:"):
+        deepseek_model_name = model.split(":", 1)[1]
+        resolved_model = OpenAIChatModel(
+            deepseek_model_name,
+            provider=DeepSeekProvider(),
+        )
         settings = OpenAIChatModelSettings(thinking=False)
 
     provider = model.split(":", 1)[0] if ":" in model else "custom"
@@ -114,7 +121,7 @@ def resolve_manager_model(model_id: str | None = None) -> tuple[str, Any | None]
         configured=bool(os.getenv(option.api_key_env)) if option else None,
         has_custom_settings=settings is not None,
     )
-    return model, settings
+    return resolved_model, settings
 
 
 def manager_model_status() -> list[dict[str, Any]]:
