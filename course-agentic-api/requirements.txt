@@ -6,7 +6,7 @@ httpx>=0.27
 pytest>=8.0
 
 # Case 0 full-stack demo
-pydantic-ai>=2.0
+pydantic-ai==2.54.0
 torch>=2.4
 numpy>=2.0
 pandas>=2.2

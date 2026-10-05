@@ -11,7 +11,7 @@ from pydantic_ai import Agent
 from pydantic_ai.usage import UsageLimits
 
 from app.store import load_case, load_knowledge, load_model_spec
-from app.observability import current_trace_id, log_event, reset_trace_context, set_trace_context
+from app.observability import current_trace_id, log_event, reset_trace_context, set_trace_context, log_exception
 from .config import DEMO_MODELS_DIR, DEMO_RAG_CONFIG, DEMO_SKILLS_DIR
 from .llm_config import resolve_manager_model
 from .model_registry import StudentModelRegistry
@@ -218,13 +218,13 @@ async def run_manager(scenario: dict[str, Any], model_id: str | None = None):
         )
         return plan, deps
     except Exception as exc:
-        log_event(
+        log_exception(
             logger,
             "manager.run.failed",
-            level=logging.ERROR,
             team_id=TEAM_ID,
             scenario_id=scenario.get("id"),
             duration_ms=round((perf_counter()-started)*1000, 2),
+            error_type=type(exc).__name__,
             error=str(exc),
         )
         raise
