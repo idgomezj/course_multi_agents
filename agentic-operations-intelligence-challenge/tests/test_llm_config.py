@@ -1,7 +1,9 @@
+import brotli
+from httpx2._decoders import BrotliDecoder
 from pydantic_ai.models.openai import OpenAIChatModel
 
 from challenge.manager import _manager_request_limit, build_agent
-from challenge.llm_config import manager_model_options, resolve_manager_model
+from challenge.llm_config import _deepseek_http_client, manager_model_options, resolve_manager_model
 from challenge.student_config import load_runtime_config
 
 
@@ -42,3 +44,16 @@ def test_all_team_manager_configs_build_with_deepseek_without_solution_artifacts
         config = load_runtime_config(team_id)
         agent = build_agent("deepseek", config)
         assert agent is not None
+
+
+def test_challenge_deepseek_transport_does_not_negotiate_brotli():
+    client = _deepseek_http_client()
+    assert client.headers["accept-encoding"] == "gzip, deflate"
+
+
+def test_challenge_httpx2_brotli_decoder_matches_installed_brotli():
+    payload = b'{"choices":[{"message":{"content":"ok"}}]}'
+    compressed = brotli.compress(payload)
+    decoder = BrotliDecoder()
+    decoded = b"".join(decoder.decode(compressed)) + b"".join(decoder.flush())
+    assert decoded == payload
