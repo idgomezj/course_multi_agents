@@ -7,7 +7,10 @@ from time import perf_counter
 from typing import Any
 
 from dotenv import load_dotenv
-from pydantic_ai import Agent
+from pydantic_ai import Agent, RunContext
+from pydantic_ai.capabilities import PrepareTools
+from pydantic_ai.output import ToolOutput
+from pydantic_ai.tools import ToolDefinition
 from pydantic_ai.usage import UsageLimits
 
 from app.store import load_case, load_knowledge, load_model_spec
@@ -45,6 +48,45 @@ def _manager_request_limit() -> int:
     return max(10, min(value, 150))
 
 
+def _manager_research_step_limit() -> int:
+    """Maximum model steps that may still expose normal function tools."""
+    raw = os.getenv("MANAGER_RESEARCH_STEP_LIMIT", "12").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        value = 12
+    return max(4, min(value, 24))
+
+
+def _manager_output_retry_limit() -> int:
+    raw = os.getenv("MANAGER_OUTPUT_RETRY_LIMIT", "2").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        value = 2
+    return max(1, min(value, 4))
+
+
+def _prepare_manager_tools(
+    ctx: RunContext[RuntimeDeps],
+    tool_defs: list[ToolDefinition],
+) -> list[ToolDefinition]:
+    """Stop research loops by switching to an output-only finalization phase."""
+    limit = _manager_research_step_limit()
+    if ctx.run_step >= limit:
+        log_event(
+            logger,
+            "manager.finalization_phase",
+            team_id=ctx.deps.team_id,
+            scenario_id=ctx.deps.scenario.get("id"),
+            run_step=ctx.run_step,
+            research_step_limit=limit,
+            hidden_function_tools=len(tool_defs),
+        )
+        return []
+    return tool_defs
+
+
 BASE_INSTRUCTIONS = """
 You are the Operations Manager Agent for the fully solved Case 0 manufacturing planning demo.
 
@@ -66,7 +108,10 @@ Rules:
 8. Respect capacity, supplier authorization, MOQ, approvals, budget, inventory and service constraints.
 9. Follow the solved tool policy and retain cost/validation discipline.
 10. Run validate_plan before finalizing; revise if critical violations remain.
-11. Return a plan matching the structured output schema.
+11. Do not repeat an identical tool call unless its inputs or the underlying evidence changed.
+12. Once validate_plan is feasible, or additional research is unlikely to materially improve the plan, immediately call submit_monthly_operations_plan.
+13. The investigation phase is bounded; if normal tools disappear, finalize the best evidence-backed plan immediately.
+14. Return only a plan matching the structured output schema.
 """
 
 
@@ -132,14 +177,31 @@ def build_agent(model_id: str | None = None, student_config: dict[str, Any] | No
         resolved_model=model,
         model_settings=model_settings,
         tool_count=len(ALL_TOOLS),
+        research_step_limit=_manager_research_step_limit(),
+        output_retry_limit=_manager_output_retry_limit(),
+        end_strategy="early",
     )
     return Agent(
         model,
         deps_type=RuntimeDeps,
-        output_type=MonthlyOperationsPlan,
+        output_type=ToolOutput(
+            MonthlyOperationsPlan,
+            name="submit_monthly_operations_plan",
+            description=(
+                "Submit the final four-week production and procurement plan. "
+                "Use this as soon as the candidate plan is sufficiently investigated and validated; "
+                "calling it ends the Manager run."
+            ),
+            max_retries=_manager_output_retry_limit(),
+        ),
         tools=ALL_TOOLS,
         instructions=BASE_INSTRUCTIONS,
-        retries={"tools": _manager_tool_retry_limit()},
+        retries={
+            "tools": _manager_tool_retry_limit(),
+            "output": _manager_output_retry_limit(),
+        },
+        capabilities=[PrepareTools(_prepare_manager_tools)],
+        end_strategy="early",
         model_settings=model_settings,
     )
 
@@ -198,7 +260,14 @@ async def run_manager(scenario: dict[str, Any], model_id: str | None = None):
             visible_information=scenario.get("visible", {}),
         )
         request_limit = _manager_request_limit()
-        log_event(logger, "manager.usage_limits", request_limit=request_limit, tool_retry_limit=_manager_tool_retry_limit())
+        log_event(
+            logger,
+            "manager.usage_limits",
+            request_limit=request_limit,
+            research_step_limit=_manager_research_step_limit(),
+            tool_retry_limit=_manager_tool_retry_limit(),
+            output_retry_limit=_manager_output_retry_limit(),
+        )
         result = await agent.run(prompt, deps=deps, usage_limits=UsageLimits(request_limit=request_limit))
         plan = result.output
         plan.team_id = TEAM_ID
