@@ -1,5 +1,8 @@
+from pydantic_ai.models.openai import OpenAIChatModel
+
 from challenge.manager import _manager_request_limit, build_agent
-from challenge.llm_config import manager_model_options, resolve_manager_model\nfrom challenge.student_config import load_runtime_config
+from challenge.llm_config import manager_model_options, resolve_manager_model
+from challenge.student_config import load_runtime_config
 
 
 def test_manager_llm_providers_are_available():
