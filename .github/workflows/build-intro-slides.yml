@@ -1,0 +1,42 @@
+name: Build introductory AI slides
+on:
+  push:
+    branches:
+      - teaching/intro-ia-vs-algoritmos
+    paths:
+      - "modern-multi-agent-systems-course/00_introduccion_ia_vs_algoritmos/**"
+      - ".github/workflows/build-intro-slides.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  create-powerpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: python -m pip install python-pptx scikit-learn
+      - name: Test teaching exercises
+        run: |
+          python -m unittest discover -s modern-multi-agent-systems-course/00_introduccion_ia_vs_algoritmos -p "test_basico.py" -v
+          python modern-multi-agent-systems-course/00_introduccion_ia_vs_algoritmos/comparar.py --metodos reglas ml
+      - name: Generate editable PowerPoint
+        run: python modern-multi-agent-systems-course/00_introduccion_ia_vs_algoritmos/build_slides.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: presentacion-introduccion-ia
+          path: modern-multi-agent-systems-course/00_introduccion_ia_vs_algoritmos/presentacion_intro_ia.pptx
+      - name: Commit slides to course branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f modern-multi-agent-systems-course/00_introduccion_ia_vs_algoritmos/presentacion_intro_ia.pptx
+          if ! git diff --staged --quiet; then
+            git commit -m "docs: add generated Spanish AI introduction PowerPoint"
+            git push
+          fi
