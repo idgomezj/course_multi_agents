@@ -35,7 +35,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add modern-multi-agent-systems-course/00_introduccion_ia_vs_algoritmos/presentacion_intro_ia.pptx
+          git add -f modern-multi-agent-systems-course/00_introduccion_ia_vs_algoritmos/presentacion_intro_ia.pptx
           if ! git diff --staged --quiet; then
             git commit -m "docs: add generated Spanish AI introduction PowerPoint"
             git push
