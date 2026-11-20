@@ -15,11 +15,18 @@ Existing directories in this repository remain untouched and can be used as supp
 - `pydantic-ai-lab/` — earlier focused Pydantic AI experiments.
 - `sistemas-multiagentes-course/` — academic MAS material in the earlier course structure.
 
+## Before Module 1 — introductory workshop
+
+For students without a strong AI background, begin with **[Module 0: algorithms vs. artificial intelligence](00_introduccion_ia_vs_algoritmos/README.md)**.
+
+The 100–120 minute Spanish workshop compares explicit rules, supervised ML, embeddings, and a local LLM on the same text-classification task. It includes a student problem, instructor guide, runnable Python examples, evaluation and an animated Spanish PowerPoint, then introduces the model-to-agent transition. Existing Modules 1–4 remain unchanged.
+
 ## Course Structure
 
 ```text
 modern-multi-agent-systems-course/
 │
+├── 00_introduccion_ia_vs_algoritmos/                  # optional beginner-friendly prerequisite
 ├── 01_agent_foundations_and_llm_integration/
 ├── 02_capabilities_knowledge_and_communication/
 ├── 03_engineering_coordination_and_reliability/
