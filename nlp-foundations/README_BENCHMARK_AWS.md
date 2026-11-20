@@ -8,6 +8,20 @@ Este script ejecuta de verdad los tres programas del curso:
 
 La ejecución ocurre **en tres procesos Python separados**, para no contaminar las mediciones de RAM. Los datos provienen de los 20 mensajes docentes, repetidos cuando se requieren más solicitudes. No constituye una evaluación de precisión en producción.
 
+## Scenario: 1,000 requests/s × 8 hours/day × 30 days
+
+**[Open the interactive AWS cost dashboard](informe_costos_1000_rps.html)**. It calculates **864,000,000 requests/month** using the measured three-model GitHub Actions benchmark saved in [datos/benchmark_three_models_20261120.json](datos/benchmark_three_models_20261120.json).
+
+| Approach | Measured sequential rate (GitHub runner) | Modeled EC2 replicas at 70% utilization | EC2 active compute | EBS full month | **Projected month** |
+|---|---:|---:|---:|---:|---:|
+| Rules | 111,111 req/s | 1 m7i.large | $24.19 | $2.40 | **$26.59** |
+| Supervised ML | 1,485 req/s | 1 m7i.large | $24.19 | $2.40 | **$26.59** |
+| Pretrained NLI | 37.3 req/s | 39 c7i.xlarge | $1,670.76 | $156.00 | **$1,826.76** |
+
+The math is `ceil(target_rps / (measured_runner_rps × 0.7))`. This is a **capacity extrapolation, NOT an AWS benchmark**: the GitHub runner had 4 logical CPUs but m7i.large has 2 vCPUs. One ML instance and 39 pretrained instances are *illustrative counts*, not validated service guarantees. The benchmark load test was short and offered only 100 req/s. Full HTTP load, network overhead, load balancer, public IPv4, observability, snapshots and taxes are excluded. The interactive HTML recalculates at different loads and utilization budgets without running models.
+
+The source benchmark timestamps and performance metrics are in the archived JSON. To **measure** 1,000 req/s instead of merely extrapolating, rerun the existing benchmark on candidate EC2 hardware with `--target-rps 1000 --duration-s 60` and a sufficiently sized thread pool and queue, then test real HTTP service for 30–60 minutes or longer.
+
 ## Instalación
 
 Desde la raíz de `course_multi_agents`, con Python 3.11–3.12 recomendado:
