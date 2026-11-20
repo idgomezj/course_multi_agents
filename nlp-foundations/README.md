@@ -80,3 +80,7 @@ Son demostraciones opcionales; la actividad principal sigue siendo manual y part
 **No repetir** Bigram, predicción del siguiente token, tokenizadores internos, embeddings, redes neuronales, attention, Transformers, Qwen, fine-tuning, LoRA o QLoRA. Esos contenidos pertenecen a [llm-lab](../llm-lab/).
 
 **Pregunta de cierre:** si el programa funciona bien con ejemplos preparados, ¿cómo podemos conseguir que generalice mejor a textos desconocidos?
+
+## Costos y rendimiento de los tres enfoques
+
+[Benchmark técnico y generación de informe HTML de costos AWS](README_BENCHMARK_AWS.md).
