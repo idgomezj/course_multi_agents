@@ -2,6 +2,11 @@ name: Full NLP benchmark (all 3)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "nlp-foundations/benchmark_nlp_aws.py"
+      - ".github/workflows/nlp-full-benchmark.yml"
   pull_request:
     branches: [main]
     paths:
