@@ -18,26 +18,6 @@ Al terminar, el estudiante podrá:
 4. Separar datos de referencia (verdad de terreno) de predicciones y comparar ambos mediante métricas.
 5. Interpretar **exact match, precision, recall y F1** sin confundir desempeño en una muestra pequeña con generalización.
 
-## Contenidos y tiempos
-
-| Bloque | Tiempo | Actividad |
-|---|---:|---|
-| Panorama de tareas NLP | 10 min | Un mensaje, varias preguntas |
-| Intenciones, entidades y urgencia | 15 min | Descomponer una solicitud |
-| Ambigüedad y revisión humana | 15 min | Resolver casos discutibles |
-| Diseño de etiquetas y referencia | 15 min | Anotar mensajes y acordar criterios |
-| Medición y discusión de errores | 20 min | Ejecutar evaluador, revisar desacuerdos |
-| **Total** | **75 min** | |
-
-## Materiales
-
-- [Guía docente](GUIA_DOCENTE.md): secuencia, preguntas y criterios de corrección.
-- [Actividad para estudiantes](ACTIVIDAD.md): enunciado y entregable.
-- [Presentación en Markdown](DIAPOSITIVAS.md): guion de 10 diapositivas sin contenido redundante con llm-lab.
-- [Datos de mensajes](datos/mensajes.csv): 20 mensajes para anotar.
-- [Referencia docente](datos/referencia_docente.csv): decisión consensuada para cada caso, **visible en el repositorio; no es una prueba oculta**.
-- [Predicciones de demostración](datos/predicciones_demo.csv): errores intencionales para aprender métricas.
-- [Evaluador](evaluar.py) y [generador de plantilla](crear_plantilla.py): Python estándar, sin paquetes externos.
 
 ## Práctica paso a paso
 
@@ -55,7 +35,6 @@ Para comenzar con una evaluación que ya contiene algunos errores:
 python3 nlp-foundations/evaluar.py --respuestas nlp-foundations/datos/predicciones_demo.csv
 ```
 
-La plantilla puede dejarse incompleta durante el trabajo. Para la evaluación final, anotar todas las filas.
 
 ## Contrato de anotación
 
@@ -70,8 +49,4 @@ CSV: `id,intenciones,urgente,revision,pedido_id`. Consultar [ACTIVIDAD.md](ACTIV
 
 No se busca adivinar sentimientos, inferir departamentos a partir de cualquier palabra aislada ni crear anotaciones infalibles: hay decisiones discutibles. El objetivo es **documentar acuerdos**.
 
-## Qué se deja expresamente para llm-lab
 
-Bigram, predicción del siguiente token, construcción de tokenizadores y vocabularios para LLM, embeddings de modelos generativos, ventanas de contexto, PyTorch, attention, Transformers, inferencia con Qwen y ajuste fino (Full/LoRA/QLoRA). Véase [llm-lab](../llm-lab/).
-
-**Siguiente etapa:** en llm-lab se estudia cómo aprende un modelo de lenguaje; este módulo prepara la necesidad de representaciones y modelos más expresivos sin adelantarse a su implementación.

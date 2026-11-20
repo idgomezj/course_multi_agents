@@ -1,7 +1,5 @@
 # Actividad: un mensaje, múltiples problemas de NLP
 
-**Duración:** 45–50 min dentro de la clase · **Modalidad:** grupos de 2–3 estudiantes · **No utilizar modelos generativos para hacer las anotaciones**.
-
 ## Contexto
 
 La empresa del ejercicio anterior quiere automatizar la atención al cliente. Inicialmente solo enviaba cada mensaje a **un** departamento. Sin embargo, encuentra solicitudes con varias intenciones, datos relevantes y expresiones ambiguas.
@@ -46,16 +44,6 @@ Generar el archivo a completar:
 ```bash
 python3 nlp-foundations/crear_plantilla.py
 ```
-
-### Parte C. Comparar y evaluar
-
-Al terminar las anotaciones, comparar con la referencia consensuada del docente:
-
-```bash
-python3 nlp-foundations/evaluar.py --respuestas nlp-foundations/datos/respuestas_estudiante.csv
-```
-
-Revisar las métricas: coincidencia exacta de intenciones, precision/recall/F1 micro, accuracy de urgencia, revisión y pedido.
 
 **Preguntas de reflexión:**
 
