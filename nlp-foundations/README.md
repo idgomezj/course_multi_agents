@@ -52,6 +52,16 @@ python3 nlp-foundations/crear_plantilla.py
 
 El archivo `datos/respuestas_estudiante.csv` contiene el texto del mensaje junto con columnas vacías.
 
+## Tres enfoques comparativos de NLP
+
+**[Ejecutar y comparar: reglas, ML entrenado y un modelo preentrenado](README_TRES_ENFOQUES.md).**
+
+- [01_reglas.py](01_reglas.py) — reglas escritas por nosotros.
+- [02_ml_supervisado.py](02_ml_supervisado.py) — clasificador que entrenamos con 40 ejemplos.
+- [03_preentrenado.py](03_preentrenado.py) — modelo multilingüe que descargamos ya entrenado.
+
+Son demostraciones opcionales; la actividad principal sigue siendo manual y participativa.
+
 ## Recursos
 
 - [ACTIVIDAD.md](ACTIVIDAD.md): enunciado y preguntas para los estudiantes.
