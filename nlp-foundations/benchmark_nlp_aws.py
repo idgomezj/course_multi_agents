@@ -532,7 +532,9 @@ def parse_args(argv=None):
     parser.add_argument("--samples", type=int, default=180)
     parser.add_argument("--samples-pretrained", type=int, default=14)
     parser.add_argument("--warmups", type=int, default=2)
-    parser.add_argument("--target-rps", type=float, default=100)
+    parser.add_argument("--target-rps", type=float, default=100, help="Actual short load-test rate")
+    parser.add_argument("--projection-rps", type=float, default=1000, help="Monthly infrastructure demand; independent of load test")
+    parser.add_argument("--rebuild-from-json", type=Path, default=None, help="Use saved real measurements to recreate informe_benchmark_real.html without rerunning models")
     parser.add_argument("--duration-s", type=float, default=2.5)
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--max-in-flight", type=int, default=9)
@@ -583,6 +585,19 @@ def run(argv=None):
         args._child_result.write_text(json.dumps(child_row, ensure_ascii=False,indent=2), encoding="utf-8")
         return 0
 
+    if args.rebuild_from_json:
+        from benchmark_capacity_report import enhance_html
+        saved=json.loads(args.rebuild_from_json.read_text(encoding="utf-8"))
+        html,projection=enhance_html(make_html(saved),saved,
+            target_rps=args.projection_rps,hours_day=args.hours_day,
+            days=args.days,capacity_fraction=args.capacity_fraction)
+        args.html_out.parent.mkdir(parents=True,exist_ok=True)
+        args.html_out.write_text(html,encoding="utf-8")
+        projection_path=args.html_out.with_name("proyeccion_benchmark_1000_rps.json")
+        projection_path.write_text(json.dumps(projection,ensure_ascii=False,indent=2),encoding="utf-8")
+        print("Updated original HTML from recorded measurements:",args.html_out.resolve())
+        return 0
+
     corpus=get_data()
     results=[]
     # Each model starts in a clean Python interpreter with its own process RSS.
@@ -627,8 +642,13 @@ def run(argv=None):
           "network_notice":"psutil.net_io_counters is system-wide and may include other processes; local inference requires no per-token paid network API."}
     args.json_out.parent.mkdir(parents=True,exist_ok=True)
     args.html_out.parent.mkdir(parents=True,exist_ok=True)
+    from benchmark_capacity_report import enhance_html
+    html,projection=enhance_html(make_html(data),data,
+        target_rps=args.projection_rps,hours_day=args.hours_day,
+        days=args.days,capacity_fraction=args.capacity_fraction)
+    data["monthly_capacity_projection"]=projection
     args.json_out.write_text(json.dumps(data,ensure_ascii=False,indent=2,default=str),encoding="utf-8")
-    args.html_out.write_text(make_html(data),encoding="utf-8")
+    args.html_out.write_text(html,encoding="utf-8")
     print("JSON:",args.json_out.resolve())
     print("HTML:",args.html_out.resolve())
     if not data["all_three_measured"] and not args.allow_partial:
