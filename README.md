@@ -5,7 +5,7 @@ Material docente organizado en rutas complementarias. No todas son requisitos se
 ## Ruta recomendada (grupo que comienza en IA)
 
 1. [Introducción: problema de clasificación](introduction/actividad.md) — reglas frente a aprendizaje supervisado.
-2. [Fundamentos de NLP](nlp-foundations/README.md) — tareas, ambigüedad, clasificación manual, entidades y comparación en vivo con un programa (**sin entrenar un LLM**).
+2. [Fundamentos de NLP](nlp-foundations/README.md) ([tres ejemplos ejecutables](nlp-foundations/README_TRES_ENFOQUES.md)) — tareas, ambigüedad, clasificación manual, entidades y comparación en vivo con un programa (**sin entrenar un LLM**).
 3. [Laboratorios de modelos de lenguaje](llm-lab/) — 01 Bigram, 02 Contexto, 03 Attention, 04 Transformer, 05 modelo preentrenado; 06–08 fine-tuning, LoRA y QLoRA como profundización opcional.
 4. [Curso principal de sistemas multiagentes modernos](modern-multi-agent-systems-course/) — 4 módulos de fundamentos, herramientas, confiabilidad y colaboración entre agentes.
 5. [Case 0 — ejemplo completo resuelto](course-agentic-api/demo_case_0_solution/).
