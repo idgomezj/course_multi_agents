@@ -111,3 +111,18 @@ Esas mediciones son del **runner de GitHub**, no de EC2. Si la descarga falla po
 - [AWS EBS gp3](https://aws.amazon.com/ebs/pricing/)
 - [AWS pricing calculator](https://calculator.aws/)
 - [Pretrained MiniLM multilingual zero-shot NLI](https://huggingface.co/MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli)
+
+## Integrated report: 1,000 requests/s × 8 h/day × 30 days
+
+The **original** [informe_benchmark_real.html](informe_benchmark_real.html) contains measured latency, startup, throughput, CPU, RSS memory, network and load results for all three scripts, and now includes the monthly projection **864,000,000 requests**.
+
+With the November 20, 2026 GitHub Actions measured model results, the conditional estimate is **1 × m7i.large for rules ($26.59/month)**, **2 × m7i.large for ML ($53.18/month)** and **39 × c7i.xlarge for pretrained ($1,826.76/month)**, for 240 hours of active processing and monthly EBS storage. These are not EC2 measurements. The CPU-seconds check conservatively raises the ML estimate from 1 to 2 instances. Network payload cost uses the report's original assumptions, omitting load balancers, TLS, HA, NAT and logs.
+
+**Regenerate the original benchmark HTML using saved actual three-model measurements without running the models again:**
+
+```bash
+python3 nlp-foundations/benchmark_nlp_aws.py --rebuild-from-json nlp-foundations/datos/benchmark_three_models_20261120.json --projection-rps 1000 --hours-day 8 --days 30 --html-out nlp-foundations/informe_benchmark_real.html
+```
+
+The default benchmark test rate (`--target-rps 100`) measures a short burst; the separate `--projection-rps 1000` governs the 1,000 RPS monthly simulation. When running the benchmark with actual models, it automatically produces the integrated HTML. The HTML also includes adjustable RPS, hours/day, days and utilization controls. Self-hosted models have no externally billed per-token inference fee; their costs are EC2, disk and transfer. The original machine was a non-EC2 GitHub Actions runner, so EC2 capacities remain unverified.
+

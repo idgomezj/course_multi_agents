@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>NLP | CPU, RAM, Network & AWS Cost Benchmark</title><style>
+:root{color-scheme:dark;font-family:Inter,'Segoe UI',Arial,sans-serif}*{box-sizing:border-box}
+body{margin:0;background:#081421;color:#e8f3ff;line-height:1.52}main{max-width:1210px;margin:auto;padding:40px 26px 80px}
+h1{font-size:clamp(36px,5vw,61px);line-height:1.08;letter-spacing:-.047em;margin:18px 0}
+h2{margin:42px 0 15px;font-size:26px;letter-spacing:-.02em}h3{margin:0 0 15px;font-size:16px}
+.hero{border:1px solid #285976;padding:42px;border-radius:25px;background:radial-gradient(ellipse at 92% 15%,#226b70,transparent 44%),linear-gradient(130deg,#162f52,#081421)}
+.eyebrow{text-transform:uppercase;letter-spacing:.18em;color:#52dfd0;font-size:12px;font-weight:800}
+.sub{color:#a3bcd0;max-width:760px}.chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}.chips span{padding:7px 11px;border:1px solid #4c7385;border-radius:25px;font-size:12px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.metric{border:1px solid #2c4662;background:#102438;border-radius:17px;padding:20px;border-top:4px solid var(--accent)}
+.metric h3{font-size:20px}.big{font-size:33px;font-weight:820;letter-spacing:-.03em}.small{font-size:12px;color:#a6bfd0}
+.info{display:flex;justify-content:space-between;border-top:1px solid #2b4359;padding:9px 0;font-size:13px;gap:15px}.info strong{text-align:right}
+.status{font-size:11px;letter-spacing:.08em;font-weight:800;text-transform:uppercase}.ok{color:#5ce4ca}.warn{color:#f1c074}
+.panel,.chartbox{border:1px solid #2b465f;border-radius:17px;background:#112438;padding:22px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.number{font-size:31px;letter-spacing:-.025em;font-weight:800}
+.chart-row{display:grid;grid-template-columns:112px 1fr 120px;align-items:center;gap:15px;margin:14px 0}
+.track{height:14px;background:#243c53;border-radius:18px;overflow:hidden}.track i{display:block;height:100%;border-radius:16px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #2e4960}th{font-size:11px;text-transform:uppercase;color:#a4dcdf;letter-spacing:.06em}td.num,th.num{text-align:right}
+.critical{border-left:4px solid #e9b468;background:#2b2c35;border-radius:12px;padding:17px 20px}.sources a,a{color:#75e5da}
+footer{margin-top:44px;font-size:12px;color:#91aabf}.bullets{color:#b1c6d8;font-size:14px}.bullets li{margin:7px 0}
+@media(max-width:850px){main{padding:16px}.hero{padding:25px}.metrics,.stats{grid-template-columns:1fr}.chart-row{grid-template-columns:70px 1fr 80px}}
+</style><style id="capacity-style">
+      .capacity-inputs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:20px}
+      .capacity-inputs label{color:#9fcbd0;font-size:12px;display:flex;flex-direction:column;gap:6px}
+      .capacity-inputs input,.capacity-inputs select{background:#203b53;border:1px solid #457087;border-radius:9px;padding:11px;color:white;font-size:16px;width:100%}
+      code{background:#1e384e;padding:2px 5px;border-radius:4px} .panel .stats{gap:22px}
+      @media(max-width:850px){.capacity-inputs{grid-template-columns:repeat(2,1fr)}}
+    </style></head><body><main>
+    <header class="hero"><div class="eyebrow">Measured performance · AWS scenarios · 2026-11-20 21:18:13 UTC</div>
+    <h1>Three NLP approaches.<br>One honest benchmark.</h1>
+    <p class="sub">Real code execution where available. CPU, peak RAM, latency, measured 100 requests/s and projected 1,000 requests/s, and host network I/O. Cloud costs are projections, not AWS invoices.</p>
+    <div class="chips"><span>3/3 executed</span><span>Non-EC2 / unverified host</span><span>100 req/s measured load test</span><span>1000 req/s cost projection</span><span>us-east-1 On-Demand</span><span>USD · prices 2026-11-20</span></div></header>
+    <h2>Data provenance</h2><p class="critical"><strong>ALL THREE models were measured.</strong> Machine: Linux-7.0.0-1020-azure-x86_64-with-glibc2.43, 4 logical CPUs,
+    15.61 GiB RAM. Never treat results from this host as measured on EC2. A hypothetical EC2 replica count is not a capacity guarantee.</p>
+    <h2>Measured model performance</h2><div class="metrics"><article class="metric" style="--accent:#3ad6c2">
+        <div class="status ok">MEASURED</div>
+        <h3>Reglas</h3><div class="big">111,111.1</div><div class="small">frases/s · secuencial</div>
+        <div class="info"><span>Inferencia p95</span><strong>0.011 ms</strong></div>
+        <div class="info"><span>CPU durante inferencia</span><strong>1.2 % de 1 núcleo</strong></div>
+        <div class="info"><span>RAM pico (inferencia)</span><strong>20.8 MiB</strong></div>
+        <div class="info"><span>Carga/entrenamiento</span><strong>0.00 s</strong></div>
+        <div class="info"><span>Prueba 100 req/s</span><strong>100.4 req/s</strong></div>
+        <div class="small"></div></article><article class="metric" style="--accent:#7298fa">
+        <div class="status ok">MEASURED</div>
+        <h3>ML supervisado</h3><div class="big">1,484.8</div><div class="small">frases/s · secuencial</div>
+        <div class="info"><span>Inferencia p95</span><strong>0.756 ms</strong></div>
+        <div class="info"><span>CPU durante inferencia</span><strong>7.2 % de 1 núcleo</strong></div>
+        <div class="info"><span>RAM pico (inferencia)</span><strong>140.3 MiB</strong></div>
+        <div class="info"><span>Carga/entrenamiento</span><strong>1.07 s</strong></div>
+        <div class="info"><span>Prueba 100 req/s</span><strong>100.4 req/s</strong></div>
+        <div class="small"></div></article><article class="metric" style="--accent:#f0b463">
+        <div class="status ok">MEASURED</div>
+        <h3>Preentrenado</h3><div class="big">37.3</div><div class="small">frases/s · secuencial</div>
+        <div class="info"><span>Inferencia p95</span><strong>32.591 ms</strong></div>
+        <div class="info"><span>CPU durante inferencia</span><strong>367.5 % de 1 núcleo</strong></div>
+        <div class="info"><span>RAM pico (inferencia)</span><strong>989.3 MiB</strong></div>
+        <div class="info"><span>Carga/entrenamiento</span><strong>9.60 s</strong></div>
+        <div class="info"><span>Prueba 100 req/s</span><strong>38.8 req/s</strong></div>
+        <div class="small"></div></article></div>
+    <h2>In-depth performance</h2><div class="stats">
+    <section class="chartbox"><h3>Sequential inference: phrases/second</h3><div class="chart-row"><span>rules</span><div class="track"><i style="width:100.00%;background:#3ad6c2"></i></div><b>111,111.11 rps</b></div><div class="chart-row"><span>ml</span><div class="track"><i style="width:1.34%;background:#7298fa"></i></div><b>1,484.78 rps</b></div><div class="chart-row"><span>pretrained</span><div class="track"><i style="width:0.03%;background:#f0b463"></i></div><b>37.30 rps</b></div></section>
+    <section class="chartbox"><h3>Peak process RAM (MiB)</h3><div class="chart-row"><span>rules</span><div class="track"><i style="width:2.10%;background:#3ad6c2"></i></div><b>20.78 MiB</b></div><div class="chart-row"><span>ml</span><div class="track"><i style="width:14.18%;background:#7298fa"></i></div><b>140.29 MiB</b></div><div class="chart-row"><span>pretrained</span><div class="track"><i style="width:100.00%;background:#f0b463"></i></div><b>989.31 MiB</b></div></section>
+    </div>
+    <h2>Time, CPU, memory and network</h2><div class="panel scroll"><table><thead><tr>
+    <th>Approach</th><th>Status</th><th class="num">Init s</th><th class="num">p50 ms</th><th class="num">p95 ms</th><th class="num">p99 ms</th><th class="num">RSS MiB</th><th class="num">CPU %*</th><th class="num">Completed</th><th class="num">Rejected</th><th class="num">Load RPS</th><th class="num">Host RX B (load)</th><th class="num">Host TX B (load)</th></tr></thead><tbody><tr><td>Reglas</td><td>MEASURED</td><td class="num">0.00</td><td class="num">0.007</td><td class="num">0.011</td><td class="num">0.019</td><td class="num">20.78</td><td class="num">1.20</td><td class="num">250</td><td class="num">0</td><td class="num">100.39</td><td class="num">11,772</td><td class="num">57,786</td></tr><tr><td>ML supervisado</td><td>MEASURED</td><td class="num">1.07</td><td class="num">0.698</td><td class="num">0.756</td><td class="num">0.786</td><td class="num">140.29</td><td class="num">7.22</td><td class="num">250</td><td class="num">0</td><td class="num">100.36</td><td class="num">806</td><td class="num">3,578</td></tr><tr><td>Preentrenado</td><td>MEASURED</td><td class="num">9.60</td><td class="num">25.829</td><td class="num">32.591</td><td class="num">35.021</td><td class="num">989.31</td><td class="num">367.53</td><td class="num">100</td><td class="num">150</td><td class="num">38.78</td><td class="num">330</td><td class="num">516</td></tr></tbody></table></div>
+    <p class="small">* Process CPU % and network RX/TX refer to the paced load test (the sequential loops are too short for reliable CPU sampling). Process CPU % is relative to one logical CPU (200% means about two cores). Network values use HOST counters, include unrelated traffic, and are NOT attributable to this model. Inference is local in-process, so there is no remote inference API call.</p>
+    <h2>Demand and monthly infrastructure estimate</h2>
+      <div class="critical" style="margin-bottom:16px"><strong>PRIMARY WORKLOAD: 1,000 requests/second × 8 hours/day × 30 days.</strong>
+       These are projections using the measured GitHub Actions CPU, RAM and throughput figures below. The original load test offered <b>100 req/s for 2.5 seconds</b>, not 1,000 req/s on EC2.</div>
+      <section class="panel" style="margin-bottom:16px"><div class="capacity-inputs">
+       <label>Requested RPS <input id="proj-rps" type="number" min="1" value="1000"></label>
+       <label>Hours/day <input id="proj-hours" type="number" min="0.5" max="24" step="0.5" value="8"></label>
+       <label>Days/month <input id="proj-days" type="number" min="1" max="31" value="30"></label>
+       <label>Capacity reserve <select id="proj-util"><option value="0.5">50% utilization</option><option value="0.7" selected>70% utilization</option><option value="0.8">80% utilization</option></select></label>
+       </div><div class="number" id="projection-monthly-volume">864,000,000 requests/month</div>
+       <p class="small">Change the inputs to recalculate all three monthly projections. The measured benchmark results do not change.</p></section>
+      <div class="metrics"><article class="metric" style="--accent:#3ad6c2">
+          <div class="status ok">Rules · calculated from measured execution</div>
+          <div class="big" id="projection-total-rules">$26.59</div>
+          <div class="small">USD / month · EC2 + monthly EBS + estimated internet egress</div>
+          <div class="info"><span>EC2 instances (proxy)</span><strong id="projection-count-rules">1 × m7i.large</strong></div>
+          <div class="info"><span>Observed host throughput</span><strong>111,111.1 req/s</strong></div>
+          <div class="info"><span>Measured process RAM peak</span><strong>20.8 MiB</strong></div>
+          <div class="info"><span>Measured CPU during 100/s load</span><strong>1.2% of 1 core</strong></div>
+          <div class="info"><span>Compute only (240 h)</span><strong id="projection-compute-rules">$24.19</strong></div>
+          <div class="info"><span>Storage for full month</span><strong id="projection-storage-rules">$2.40</strong></div>
+        </article><article class="metric" style="--accent:#7298fa">
+          <div class="status ok">Supervised ML · calculated from measured execution</div>
+          <div class="big" id="projection-total-ml">$53.18</div>
+          <div class="small">USD / month · EC2 + monthly EBS + estimated internet egress</div>
+          <div class="info"><span>EC2 instances (proxy)</span><strong id="projection-count-ml">2 × m7i.large</strong></div>
+          <div class="info"><span>Observed host throughput</span><strong>1,484.8 req/s</strong></div>
+          <div class="info"><span>Measured process RAM peak</span><strong>140.4 MiB</strong></div>
+          <div class="info"><span>Measured CPU during 100/s load</span><strong>7.2% of 1 core</strong></div>
+          <div class="info"><span>Compute only (240 h)</span><strong id="projection-compute-ml">$48.38</strong></div>
+          <div class="info"><span>Storage for full month</span><strong id="projection-storage-ml">$4.80</strong></div>
+        </article><article class="metric" style="--accent:#f0b463">
+          <div class="status ok">Pretrained NLP · calculated from measured execution</div>
+          <div class="big" id="projection-total-pretrained">$1,826.76</div>
+          <div class="small">USD / month · EC2 + monthly EBS + estimated internet egress</div>
+          <div class="info"><span>EC2 instances (proxy)</span><strong id="projection-count-pretrained">39 × c7i.xlarge</strong></div>
+          <div class="info"><span>Observed host throughput</span><strong>37.3 req/s</strong></div>
+          <div class="info"><span>Measured process RAM peak</span><strong>1,022.3 MiB</strong></div>
+          <div class="info"><span>Measured CPU during 100/s load</span><strong>367.5% of 1 core</strong></div>
+          <div class="info"><span>Compute only (240 h)</span><strong id="projection-compute-pretrained">$1,670.76</strong></div>
+          <div class="info"><span>Storage for full month</span><strong id="projection-storage-pretrained">$156.00</strong></div>
+        </article></div>
+      <h3 style="margin-top:26px">Full AWS infrastructure cost and provisioned resources</h3>
+      <div class="panel scroll"><table><thead><tr><th>Model</th><th>EC2 type</th><th class="num">EC2 count</th><th class="num">vCPU total</th><th class="num">RAM GiB total</th><th class="num">Compute (active)</th><th class="num">EBS (monthly)</th><th class="num">Internet egress</th><th class="num">Total (active)</th><th class="num">730h always-on</th><th class="num">USD / 1M req</th></tr></thead>
+       <tbody><tr><td>Rules</td><td>m7i.large</td>
+          <td class="num" id="projection-n-rules">1</td>
+          <td class="num" id="projection-vcpu-rules">2</td>
+          <td class="num" id="projection-ram-rules">8.0</td>
+          <td class="num" id="projection-compute-row-rules">$24.19</td>
+          <td class="num" id="projection-ebs-rules">$2.40</td>
+          <td class="num" id="projection-egress-rules">$0.00</td>
+          <td class="num" id="projection-total-row-rules">$26.59</td>
+          <td class="num" id="projection-always-rules">$75.98</td>
+          <td class="num" id="projection-million-rules">$0.03</td></tr><tr><td>Supervised ML</td><td>m7i.large</td>
+          <td class="num" id="projection-n-ml">2</td>
+          <td class="num" id="projection-vcpu-ml">4</td>
+          <td class="num" id="projection-ram-ml">16.0</td>
+          <td class="num" id="projection-compute-row-ml">$48.38</td>
+          <td class="num" id="projection-ebs-ml">$4.80</td>
+          <td class="num" id="projection-egress-ml">$0.00</td>
+          <td class="num" id="projection-total-row-ml">$53.18</td>
+          <td class="num" id="projection-always-ml">$151.97</td>
+          <td class="num" id="projection-million-ml">$0.06</td></tr><tr><td>Pretrained NLP</td><td>c7i.xlarge</td>
+          <td class="num" id="projection-n-pretrained">39</td>
+          <td class="num" id="projection-vcpu-pretrained">156</td>
+          <td class="num" id="projection-ram-pretrained">312.0</td>
+          <td class="num" id="projection-compute-row-pretrained">$1,670.76</td>
+          <td class="num" id="projection-ebs-pretrained">$156.00</td>
+          <td class="num" id="projection-egress-pretrained">$0.00</td>
+          <td class="num" id="projection-total-row-pretrained">$1,826.76</td>
+          <td class="num" id="projection-always-pretrained">$5,237.89</td>
+          <td class="num" id="projection-million-pretrained">$2.11</td></tr></tbody></table></div>
+      <h3 style="margin-top:26px">Exact measurement basis and network payload estimates</h3>
+      <div class="panel scroll"><table><thead><tr><th>Model</th><th class="num">Measured host req/s</th><th class="num">Measured p95 (ms)</th><th class="num">Peak process RSS (MiB)</th><th class="num">CPU load (% 1 core)</th><th class="num">Count from throughput</th><th class="num">Count from CPU seconds</th><th class="num">Request input/month*</th><th class="num">Response output/month*</th></tr></thead><tbody><tr><td>Rules</td><td class="num">111,111.1</td>
+          <td class="num">0.011</td><td class="num">20.8</td>
+          <td class="num">1.2%</td>
+          <td class="num" id="proj-throughput-only-rules">1</td>
+          <td class="num" id="proj-cpu-only-rules">Not reliable</td>
+          <td class="num">55.56 GB</td>
+          <td class="num">23.59 GB</td></tr><tr><td>Supervised ML</td><td class="num">1,484.8</td>
+          <td class="num">0.756</td><td class="num">140.4</td>
+          <td class="num">7.2%</td>
+          <td class="num" id="proj-throughput-only-ml">1</td>
+          <td class="num" id="proj-cpu-only-ml">2</td>
+          <td class="num">55.56 GB</td>
+          <td class="num">20.48 GB</td></tr><tr><td>Pretrained NLP</td><td class="num">37.3</td>
+          <td class="num">32.591</td><td class="num">1022.3</td>
+          <td class="num">367.5%</td>
+          <td class="num" id="proj-throughput-only-pretrained">39</td>
+          <td class="num" id="proj-cpu-only-pretrained">20</td>
+          <td class="num">55.56 GB</td>
+          <td class="num">19.35 GB</td></tr></tbody></table></div>
+      <p class="small">* Payload-size estimates use observed average input/output JSON body bytes (no HTTP/TLS headers). Measured host RX/TX counters are retained in the original table above and include other processes. Per-model monthly input/output volumes are NOT per-instance traffic.</p>
+      <p class="small">Sizing proxy: <code>ceil(target RPS / (sequential host RPS × utilization))</code>, increased if <code>ceil(target RPS × measured CPU seconds/request / (EC2 vCPU × utilization))</code> is greater. The CPU measurement is short and noisy; this added conservative check increases ML from 1 to 2 instances. This still does not validate EC2 throughput, latency under sustained 1,000 RPS, or memory under multi-worker concurrency.</p>
+      <div class="critical"><b>Not verified on AWS.</b> Reference prices: us-east-1 On-Demand Linux, 2026-11-20. Instances are assumptions—not actual EC2 measurements. Stop EC2 outside the 240 active hours to achieve "active" compute costs; storage remains billed throughout the month. Internet egress pricing uses 100 GB free at the account level and $0.09/GB above that. Real-world costs also include HTTP/LB, TLS, public IPv4, NAT, logging, autoscaling, redundancy, support and taxes. Values use the *recorded* hourly price snapshot, not live billing.</div>
+      <h2>Model tokens and cost attribution</h2><div class="panel">
+      <p>The self-hosted scripts have <b>US$0 paid API token charges</b>. Their real expense is CPU/RAM, instance uptime, storage and network.</p>
+      <div class="stats"><section><span class="small">Measured pretrained NLI input tokens per request</span><div class="number">107</div><p class="small">Includes the four candidate-label text pairs.</p></section>
+      <section><span class="small">Projected monthly pretrained NLI tokens</span><div class="number" id="proj-monthly-tokens">92,448,000,000</div><p class="small" id="proj-per-million-tokens">Effective self-hosted infrastructure: $0.02 per 1M NLI input tokens; NOT an API token price.</p></section></div>
+      </div><h2>How token costs work here</h2><div class="panel"><p>All three examples use <strong>locally executed</strong> algorithms/models. There is <strong>no billable per-token provider charge</strong>, even for the pretrained model. Its tokenizer produces NLI input tokens; those are workload measurements, not AWS invoices. Per-message infrastructure cost depends on EC2 hours, memory fit, storage and egress. On Bedrock or an external paid model API, you must select that provider's specific model and pricing separately.</p>
+    <ul class="bullets"><li>Approximate service request/response payload sizes are included in JSON; network transfer assumes JSON bodies and excludes HTTP/TLS headers.</li><li>Internet inbound is generally free; outbound price assumes 100 GB free and USD 0.09 / GB above that; these are editable assumptions.</li><li>EC2 rates: m7i.large $0.1008/h, c7i.xlarge $0.1785/h, g5.xlarge $1.006/h. gp3: USD 0.08/GB-month.</li></ul></div>
+    <h2>Limitations & reproducibility</h2><div class="critical">The stress test is an in-process, bounded-arrival experiment, NOT an HTTP server load test. Shared pipeline calls under threads may not scale like multiple independent workers. Repeating 20 classroom messages is not an independent accuracy benchmark. All AWS totals are scenarios until measured on the specific EC2 hardware under real networking.</div>
+    <h2>Pricing/model sources</h2><section class="panel sources"><a href="https://aws.amazon.com/ec2/pricing/on-demand/">Amazon EC2 On-Demand</a> · <a href="https://aws.amazon.com/ebs/pricing/">EBS gp3 pricing</a> · <a href="https://instances.usage.ai/aws/ec2/region/us-east-1">EC2 instance price reference</a> · <a href="https://huggingface.co/MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli">Pretrained model</a></section>
+    <footer>Generated at 2026-11-20 21:18:13 UTC. Full raw measurements and assumptions: accompanying JSON. No fabricated measurements.</footer>
+    </main><script id="capacity-projection-js">(function(){const d={"models":[{"id":"rules","instance_hourly_usd":0.1008,"vcpu_per_instance":2,"memory_gib_per_instance":8.0,"host_sequential_rps":111111.11,"cpu_time_s_per_request":null,"memory_fit_under_80pct":true,"tokens_per_request":null},{"id":"ml","instance_hourly_usd":0.1008,"vcpu_per_instance":2,"memory_gib_per_instance":8.0,"host_sequential_rps":1484.78,"cpu_time_s_per_request":0.0018,"memory_fit_under_80pct":true,"tokens_per_request":null},{"id":"pretrained","instance_hourly_usd":0.1785,"vcpu_per_instance":4,"memory_gib_per_instance":8.0,"host_sequential_rps":37.3,"cpu_time_s_per_request":0.05333333333333334,"memory_fit_under_80pct":true,"tokens_per_request":107}],"price":{"region":"us-east-1","reference_date":"2026-11-20","egress_price_per_gb":0.09,"free_egress_gb":100,"ebs_price_gb_month":0.08,"storage_gb":30,"storage_gb_pretrained":50},"always":730};
+       const by=id=>document.getElementById(id);const fmt=n=>Number(n).toLocaleString('en-US',{maximumFractionDigits:0});
+       const usd=n=>n==null?'—':('$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}));
+       function go(){const rps=Number(by('proj-rps').value),hours=Number(by('proj-hours').value),days=Number(by('proj-days').value),util=Number(by('proj-util').value);
+       if(!(rps>0&&hours>0&&hours<=24&&days>=1&&days<=31&&util>0&&util<=1)){return;}
+       const month=rps*hours*days*3600;
+       by('projection-monthly-volume').textContent=fmt(month)+' requests/month';
+       d.models.forEach(m=>{const id=m.id;const bySpeed=Math.max(1,Math.ceil(rps/(m.host_sequential_rps*util)));
+       const byCpu=m.cpu_time_s_per_request?Math.max(1,Math.ceil(rps*m.cpu_time_s_per_request/(m.vcpu_per_instance*util))):null;
+       const n=m.memory_fit_under_80pct?Math.max(bySpeed,byCpu||1):null;
+       const disk=m.id==='pretrained'?d.price.storage_gb_pretrained:d.price.storage_gb;
+       const outbytes={"rules": 27.3, "ml": 23.7, "pretrained": 22.4}[id];const eg=Math.max(0,(month*outbytes/1e9)-d.price.free_egress_gb)*d.price.egress_price_per_gb;
+       const compute=n==null?null:n*hours*days*m.instance_hourly_usd;
+       const storage=n==null?null:n*disk*d.price.ebs_price_gb_month;
+       const total=n==null?null:compute+storage+eg;
+       const always=n==null?null:n*d.always*m.instance_hourly_usd+storage+eg;
+       const million=total==null?null:total/(month/1e6);
+       const write=(name,val)=>{const node=by(name+'-'+id);if(node)node.textContent=val;};
+       write('projection-total',usd(total));write('projection-count',n==null?'—':(n+' × '+{"rules": "m7i.large", "ml": "m7i.large", "pretrained": "c7i.xlarge"}[id]));
+       write('projection-compute',usd(compute));write('projection-storage',usd(storage));
+       write('projection-n',n==null?'—':fmt(n));write('projection-vcpu',n==null?'—':fmt(n*m.vcpu_per_instance));
+       write('projection-ram',n==null?'—':fmt(n*m.memory_gib_per_instance));
+       write('projection-compute-row',usd(compute));write('projection-ebs',usd(storage));write('projection-egress',usd(n==null?null:eg));
+       write('projection-total-row',usd(total));write('projection-always',usd(always));write('projection-million',usd(million));
+       write('proj-throughput-only',fmt(bySpeed));write('proj-cpu-only',byCpu==null?'Not reliable':fmt(byCpu));
+       if(id==='pretrained'){const tokens=month*(m.tokens_per_request||0);by('proj-monthly-tokens').textContent=fmt(tokens);
+       by('proj-per-million-tokens').textContent='Effective self-hosted infrastructure: '+usd(total==null||!tokens?null:total/(tokens/1e6))+' per 1M NLI input tokens; NOT an API token price.';}
+       });}
+       ['proj-rps','proj-hours','proj-days','proj-util'].forEach(k=>by(k).addEventListener('input',go));go();
+    })();</script></body></html>

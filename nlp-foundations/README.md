@@ -83,4 +83,4 @@ Son demostraciones opcionales; la actividad principal sigue siendo manual y part
 
 ## Costos y rendimiento de los tres enfoques
 
-[Benchmark técnico y generación de informe HTML de costos AWS](README_BENCHMARK_AWS.md).
+[Benchmark técnico y generación de informe HTML de costos AWS](README_BENCHMARK_AWS.md). [Informe integrado (1.000 req/s, 8 h/día)](informe_benchmark_real.html).

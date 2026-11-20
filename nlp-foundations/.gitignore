@@ -2,5 +2,5 @@
 datos/respuestas_estudiante.csv
 __pycache__/
 
-informe_benchmark_real.html
+# Verified three-model benchmark HTML is committed for teaching.
 benchmark_mediciones.json
