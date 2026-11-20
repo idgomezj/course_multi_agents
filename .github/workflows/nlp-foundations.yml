@@ -20,10 +20,10 @@ jobs:
       - name: Install spaCy
         run: python -m pip install -r nlp-foundations/requirements.txt
       - name: Install supervised ML example dependencies
-        run: python -m pip install -r nlp-foundations/requirements_ml.txt
+        run: python -m pip install -r nlp-foundations/requirements_ml.txt && python -m pip install psutil
       - name: Unit tests
         run: python -m unittest discover -s nlp-foundations/tests -v
       - name: Benchmark HTML smoke test
-        run: python nlp-foundations/benchmark_nlp_aws.py --omitir-preentrenado --muestras 20 --salida /tmp/informe_nlp_aws.html
+        run: python nlp-foundations/benchmark_nlp_aws.py --skip-pretrained --allow-partial --samples 30 --duration-s 0.6 --html-out /tmp/informe_nlp_aws.html --json-out /tmp/mediciones_nlp.json
       - name: Instructor demo smoke test
         run: python nlp-foundations/demo_nlp.py --ejemplos
