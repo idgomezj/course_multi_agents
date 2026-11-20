@@ -1,52 +1,72 @@
-# Fundamentos de NLP — del texto al problema de IA
+# Fundamentos de NLP — demostración participativa
 
-**Duración sugerida:** 75 minutos · **Idioma:** español · **Requisitos:** actividad de [clasificación de mensajes](../introduction/actividad.md) y Python básico.
+**Duración:** 75 minutos · **Idioma:** español · **Nivel:** introductorio.
 
-## Pregunta guía
+## Objetivo
 
-> Antes de elegir un algoritmo o un LLM, ¿cómo definimos exactamente qué queremos comprender de un mensaje y cómo sabemos si lo resolvimos bien?
+Después del [ejercicio inicial de clasificación](../introduction/actividad.md), aprender que procesar lenguaje puede significar detectar **varias intenciones**, extraer identificadores, reconocer urgencia y solicitar aclaraciones cuando un mensaje resulta ambiguo.
 
-Este módulo **no construye modelos de lenguaje**. Trabaja la formulación de problemas de Procesamiento del Lenguaje Natural (NLP), el diseño de etiquetas y la evaluación de resultados, utilizando el mismo caso de atención al cliente para no aumentar la carga cognitiva.
+**No hay una evaluación automatizada de estudiantes.** La comparación se hace con toda la clase.
 
-## Resultados de aprendizaje
+## Dinámica
 
-Al terminar, el estudiante podrá:
+1. Proyectar un mensaje de `datos/mensajes.csv` sin mostrar ninguna respuesta.
+2. Los estudiantes lo interpretan **manualmente** (intenciones, urgencia, pedido, revisión).
+3. Votar y explicar la decisión.
+4. El profesor ejecuta `demo_nlp.py`, que pausa antes de revelar la interpretación automática.
+5. Pulsar **Enter** para revelar el resultado. Conversar sobre acuerdos y discrepancias.
+6. Inventar mensajes que no estaban en el ejercicio y descubrir dónde falla el programa.
 
-1. Distinguir clasificación de intenciones, extracción de entidades, sentimiento, resumen y detección de urgencia.
-2. Explicar casos ambiguos, fuera de dominio y solicitudes con **más de una intención**.
-3. Diseñar reglas de anotación consistentes y justificar cuándo solicitar revisión humana.
-4. Separar datos de referencia (verdad de terreno) de predicciones y comparar ambos mediante métricas.
-5. Interpretar **exact match, precision, recall y F1** sin confundir desempeño en una muestra pequeña con generalización.
+## Comandos desde la raíz del repositorio
 
+Instalar una sola vez:
 
-## Práctica paso a paso
+```bash
+python3 -m pip install -r nlp-foundations/requirements.txt
+```
 
-Desde la raíz del repositorio:
+**Demostración para toda la clase (recomendada):**
+
+```bash
+python3 nlp-foundations/demo_nlp.py --ejemplos --pausa
+```
+
+**Un caso concreto o un mensaje inventado:**
+
+```bash
+python3 nlp-foundations/demo_nlp.py --id 6
+python3 nlp-foundations/demo_nlp.py --mensaje "Me debitaron dinero y todavía no recibí el paquete"
+```
+
+**Todos los mensajes, revelando uno a uno:**
+
+```bash
+python3 nlp-foundations/demo_nlp.py --todos --pausa
+```
+
+Para preparar una hoja de respuestas **manual** en CSV, opcionalmente:
 
 ```bash
 python3 nlp-foundations/crear_plantilla.py
-# Editar nlp-foundations/datos/respuestas_estudiante.csv
-python3 nlp-foundations/evaluar.py --respuestas nlp-foundations/datos/respuestas_estudiante.csv
 ```
 
-Para comenzar con una evaluación que ya contiene algunos errores:
+El archivo `datos/respuestas_estudiante.csv` contiene el texto del mensaje junto con columnas vacías.
 
-```bash
-python3 nlp-foundations/evaluar.py --respuestas nlp-foundations/datos/predicciones_demo.csv
-```
+## Recursos
 
+- [ACTIVIDAD.md](ACTIVIDAD.md): enunciado y preguntas para los estudiantes.
+- [GUIA_DOCENTE.md](GUIA_DOCENTE.md): conducción y tiempos de clase.
+- [DIAPOSITIVAS.md](DIAPOSITIVAS.md): guion visual de nueve diapositivas.
+- [datos/mensajes.csv](datos/mensajes.csv): 20 mensajes que la clase puede analizar.
+- [demo_nlp.py](demo_nlp.py): procesamiento automático en vivo.
+- [datos/referencia_docente.csv](datos/referencia_docente.csv): referencia orientativa para el profesor (pública, no prueba privada).
 
-## Contrato de anotación
+## ¿Qué tecnología utiliza?
 
-CSV: `id,intenciones,urgente,revision,pedido_id`. Consultar [ACTIVIDAD.md](ACTIVIDAD.md) para criterios y ejemplos.
+`demo_nlp.py` emplea **spaCy con reglas lingüísticas** (`PhraseMatcher`) y expresiones regulares para reconocer fragmentos, varias intenciones e identificadores. No descarga un modelo grande, ni entrena un clasificador ni utiliza un LLM. Puede equivocarse con sinónimos, ironía o mensajes no previstos. **No confundir coincidencia con comprensión semántica universal.**
 
-- `intenciones`: `ACCESO`, `FACTURACION`, `SOPORTE_TECNICO`, `ENVIOS`, `OTRO` o `REVISAR`.
-- Para varias intenciones justificadas, unir con `|` (ejemplo: `FACTURACION|ENVIOS`). El orden no influye en la evaluación.
-- `REVISAR`: mensaje demasiado ambiguo para asignar una intención; **no combinarlo** con otra etiqueta.
-- `urgente`: `SI` solamente si existe una petición explícita de prioridad o plazo inmediato; `NO` en otro caso.
-- `revision`: `SI` cuando no hay contexto suficiente para asignar una intención; `NO` en los demás casos.
-- `pedido_id`: identificador numérico de pedido mencionado explícitamente, o vacío.
+## Límite curricular
 
-No se busca adivinar sentimientos, inferir departamentos a partir de cualquier palabra aislada ni crear anotaciones infalibles: hay decisiones discutibles. El objetivo es **documentar acuerdos**.
+**No repetir** Bigram, predicción del siguiente token, tokenizadores internos, embeddings, redes neuronales, attention, Transformers, Qwen, fine-tuning, LoRA o QLoRA. Esos contenidos pertenecen a [llm-lab](../llm-lab/).
 
-
+**Pregunta de cierre:** si el programa funciona bien con ejemplos preparados, ¿cómo podemos conseguir que generalice mejor a textos desconocidos?

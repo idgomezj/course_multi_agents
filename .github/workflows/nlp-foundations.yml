@@ -1,16 +1,12 @@
-name: NLP foundations validation
+name: NLP classroom demo validation
 
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "nlp-foundations/**"
-      - ".github/workflows/nlp-foundations.yml"
+    paths: ["nlp-foundations/**", ".github/workflows/nlp-foundations.yml"]
   push:
     branches: [main]
-    paths:
-      - "nlp-foundations/**"
-      - ".github/workflows/nlp-foundations.yml"
+    paths: ["nlp-foundations/**", ".github/workflows/nlp-foundations.yml"]
   workflow_dispatch:
 
 jobs:
@@ -21,7 +17,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Run unit tests
+      - name: Install spaCy
+        run: python -m pip install -r nlp-foundations/requirements.txt
+      - name: Unit tests
         run: python -m unittest discover -s nlp-foundations/tests -v
-      - name: Evaluate demo annotations
-        run: python nlp-foundations/evaluar.py --respuestas nlp-foundations/datos/predicciones_demo.csv
+      - name: Instructor demo smoke test
+        run: python nlp-foundations/demo_nlp.py --ejemplos

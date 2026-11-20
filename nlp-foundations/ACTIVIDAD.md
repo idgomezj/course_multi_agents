@@ -1,58 +1,51 @@
-# Actividad: un mensaje, múltiples problemas de NLP
+# Actividad de NLP: primero interpreta la persona, después el programa
 
-## Contexto
+**Modalidad:** participación en parejas y discusión guiada. **Sin calificaciones automáticas.**
 
-La empresa del ejercicio anterior quiere automatizar la atención al cliente. Inicialmente solo enviaba cada mensaje a **un** departamento. Sin embargo, encuentra solicitudes con varias intenciones, datos relevantes y expresiones ambiguas.
+## El problema
+
+Una empresa recibe mensajes de clientes. Una sola solicitud puede contener **varios problemas**. Queremos distinguir intenciones, información concreta, urgencia e incertidumbre antes de elegir una tecnología de IA.
+
+## Paso 1 — clasificación manual
+
+Lee el mensaje proyectado. Antes de que el profesor muestre el programa, escribe:
+
+| Campo | Qué debes indicar |
+|---|---|
+| Intenciones | ACCESO, FACTURACION, SOPORTE_TECNICO, ENVIOS; pueden ser varias |
+| Pedido | El identificador explícito tras «pedido» u «orden», o vacío |
+| Urgencia | SI solo si la urgencia o plazo inmediato se expresa claramente |
+| Revisión | SI cuando no hay datos suficientes para decidir |
+| OTRO | Tema claramente fuera de los cuatro departamentos |
+
+**Ejemplo para discutir:**
 
 > «Me cobraron dos veces el pedido 4582, todavía no llega y necesito solución urgente».
 
-### Parte A. ¿Cuál es realmente la tarea?
+## Paso 2 — prueba en clase
 
-Identificar, por separado:
+El profesor mostrará el resultado de `demo_nlp.py`. Antes de cada revelación, voten y justifiquen sus respuestas.
 
-1. **Intención o intenciones:** ¿qué departamentos deben participar? Un mensaje puede requerir dos.
-2. **Entidades:** ¿qué número de pedido aparece expresamente?
-3. **Urgencia:** ¿se solicita prioridad o una respuesta inmediata explícita?
-4. **Incertidumbre:** ¿la información basta para decidir o debe revisarla una persona?
-5. **Resumen:** redactar en una frase el problema del cliente (no se califica con el script).
+**Casos recomendados:**
 
-Discutir en clase otras tareas NLP: sentimiento, traducción, resumen, búsqueda de respuestas y extracción de información. No todas son clasificación.
+- «No puedo iniciar sesión y tampoco puedo ver mis facturas».
+- «El banco no funciona».
+- «La página falla y no puedo completar el pago».
+- «Quiero conocer el horario de atención».
+- «El enlace de seguimiento no carga y mi pedido 8821 no aparece».
 
-### Parte B. Crear un conjunto de anotaciones
+## Paso 3 — desafiar al programa
 
-Leer `datos/mensajes.csv`, que incluye 20 casos. Completar una fila por mensaje con las columnas:
+Propongan en parejas mensajes **nuevos**, que no aparezcan en los veinte casos del archivo. El profesor los enviará a `demo_nlp.py --mensaje "..." `. ¿El programa identifica lo mismo que el grupo? ¿Qué información omitió? ¿Cuándo conviene pedir aclaración?
 
-| Columna | Valores permitidos | Regla |
-|---|---|---|
-| `id` | Identificador de fila | Mantenerlo sin cambios |
-| `intenciones` | `ACCESO`, `FACTURACION`, `SOPORTE_TECNICO`, `ENVIOS`, `OTRO`, `REVISAR` | Usar `|` para varias intenciones; `OTRO` y `REVISAR` no se combinan |
-| `urgente` | `SI` o `NO` | Se expresa urgencia explícita o un plazo inmediato |
-| `revision` | `SI` o `NO` | Hace falta aclarar la intención con una persona |
-| `pedido_id` | Dígitos o vacío | Solo el número de pedido que el cliente escribe |
+## Debate final
 
-Ejemplo de anotación:
+1. ¿Por qué podría haber más de una intención?
+2. ¿Cuál es la diferencia entre `OTRO` y `REVISAR`?
+3. ¿Una frase molesta es necesariamente urgente?
+4. ¿El programa interpreta el significado o encuentra expresiones previstas?
+5. ¿Qué tecnología usaríamos para aprender patrones a partir de ejemplos?
 
-```csv
-id,intenciones,urgente,revision,pedido_id
-6,FACTURACION|ENVIOS,SI,NO,4582
-```
+**Material:** `datos/mensajes.csv` y, opcionalmente, `crear_plantilla.py` para tener los mensajes en una tabla que el estudiante completa a mano. No se utiliza `evaluar.py` ni se califica automáticamente.
 
-**Evitar:** deducir el número de pedido; etiquetar automáticamente como urgente todo mensaje negativo; seleccionar una sola categoría cuando hay dos solicitudes independientes; asignar departamento cuando solo se dice «el sistema no funciona» sin más contexto.
-
-Generar el archivo a completar:
-
-```bash
-python3 nlp-foundations/crear_plantilla.py
-```
-
-**Preguntas de reflexión:**
-
-- ¿Por qué accuracy puede ocultar errores importantes de un departamento poco frecuente?
-- ¿Qué consecuencias tiene perder una intención secundaria de un mensaje?
-- ¿Cuál es el costo empresarial de una falsa urgencia frente a una urgencia omitida?
-- Si dos anotadores discrepan, ¿quién determina la etiqueta de referencia?
-- ¿Se puede evaluar confiablemente un modelo con 20 mensajes? ¿Qué falta?
-
-### Entregable
-
-`respuestas_estudiante.csv` completo y un texto de 150–250 palabras con al menos dos casos ambiguos, los desacuerdos, las métricas obtenidas y una propuesta de mejora de las reglas de anotación.
+**Entregable opcional:** una lista de dos casos donde el programa coincidió con los estudiantes y uno donde su respuesta fue discutible, con explicación de por qué.

@@ -20,7 +20,7 @@ Existing directories in this repository remain untouched and can be used as supp
 For students without a strong AI background, use the two separate preparatory units:
 
 1. **[Introduction: classification problem](../introduction/actividad.md)** — traditional algorithms versus supervised learning (student exercise).
-2. **[NLP Foundations](../nlp-foundations/README.md)** — language tasks, ambiguity, multi-label intent, entities, annotation and evaluation, without building an LLM or repeating model training.
+2. **[NLP Foundations](../nlp-foundations/README.md)** — language tasks, ambiguity, multi-label intent, entities and an instructor-led live NLP comparison (no grading), without building an LLM.
 
 Students interested in the internals of language models then follow **[llm-lab](../llm-lab/)** (Bigram → context → attention → Transformers → pretrained LLMs); the NLP unit deliberately does not teach those implementations. The four core agent modules below remain unchanged.
 
