@@ -117,6 +117,10 @@ def project(source: dict, *, target_rps: float = 1000, hours_day: float = 8,
     }
 
 
+def _measured(n, digits=1):
+    return "NOT MEASURED" if n is None else f"{float(n):,.{digits}f}"
+
+
 def _money(n):
     return "—" if n is None else "$" + f"{n:,.2f}"
 
@@ -133,13 +137,13 @@ def enhance_html(base_html: str, source: dict, *, target_rps: float = 1000,
     cards = []
     for m in data:
         cards.append(f'''<article class="metric" style="--accent:{colors[m['id']]}">
-          <div class="status ok">{escape(m['name'])} · calculated from measured execution</div>
+          <div class="status {'ok' if m['status']=='MEASURED' else 'warn'}">{escape(m['name'])} · {'based on measured execution' if m['status']=='MEASURED' else 'NOT MEASURED'}</div>
           <div class="big" id="projection-total-{m['id']}">{_money(m['total_active_usd'])}</div>
           <div class="small">USD / month · EC2 + monthly EBS + estimated internet egress</div>
           <div class="info"><span>EC2 instances (proxy)</span><strong id="projection-count-{m['id']}">{m['replicas_recommended_proxy'] or '—'} × {m['instance']}</strong></div>
           <div class="info"><span>Observed host throughput</span><strong>{m['host_sequential_rps']:,.1f} req/s</strong></div>
           <div class="info"><span>Measured process RAM peak</span><strong>{m['measured_peak_process_ram_mib']:,.1f} MiB</strong></div>
-          <div class="info"><span>Measured CPU during 100/s load</span><strong>{m['observed_load_cpu_pct_one_core']:.1f}% of 1 core</strong></div>
+          <div class="info"><span>Measured CPU during 100/s load</span><strong>{_measured(m['observed_load_cpu_pct_one_core'])}% of 1 core</strong></div>
           <div class="info"><span>Compute only (240 h)</span><strong id="projection-compute-{m['id']}">{_money(m['compute_active_usd'])}</strong></div>
           <div class="info"><span>Storage for full month</span><strong id="projection-storage-{m['id']}">{_money(m['storage_month_usd'])}</strong></div>
         </article>''')
@@ -158,8 +162,8 @@ def enhance_html(base_html: str, source: dict, *, target_rps: float = 1000,
     resource_rows = []
     for m in data:
         resource_rows.append(f'''<tr><td>{m['name']}</td><td class="num">{m['host_sequential_rps']:,.1f}</td>
-          <td class="num">{m['measured_p95_ms']:.3f}</td><td class="num">{m['measured_peak_process_ram_mib']:.1f}</td>
-          <td class="num">{m['observed_load_cpu_pct_one_core']:.1f}%</td>
+          <td class="num">{_measured(m['measured_p95_ms'],3)}</td><td class="num">{m['measured_peak_process_ram_mib']:.1f}</td>
+          <td class="num">{_measured(m['observed_load_cpu_pct_one_core'])}%</td>
           <td class="num" id="proj-throughput-only-{m['id']}">{m['replicas_throughput_only'] or '—'}</td>
           <td class="num" id="proj-cpu-only-{m['id']}">{m['replicas_cpu_bound'] if m['replicas_cpu_bound'] is not None else 'Not reliable'}</td>
           <td class="num">{m['internet_ingress_gb_payload_only']:.2f} GB</td>
@@ -188,8 +192,8 @@ def enhance_html(base_html: str, source: dict, *, target_rps: float = 1000,
       '''
     tokens_panel = f'''<h2>Model tokens and cost attribution</h2><div class="panel">
       <p>The self-hosted scripts have <b>US$0 paid API token charges</b>. Their real expense is CPU/RAM, instance uptime, storage and network.</p>
-      <div class="stats"><section><span class="small">Measured pretrained NLI input tokens per request</span><div class="number">{tokenrow['tokens_per_request']:,.0f}</div><p class="small">Includes the four candidate-label text pairs.</p></section>
-      <section><span class="small">Projected monthly pretrained NLI tokens</span><div class="number" id="proj-monthly-tokens">{tokenrow['model_input_tokens_month']:,.0f}</div><p class="small" id="proj-per-million-tokens">Effective self-hosted infrastructure: {_money(tokenrow['infra_per_million_nli_tokens_usd'])} per 1M NLI input tokens; NOT an API token price.</p></section></div>
+      <div class="stats"><section><span class="small">Measured pretrained NLI input tokens per request</span><div class="number">{_measured(tokenrow['tokens_per_request'],0)}</div><p class="small">Includes the four candidate-label text pairs.</p></section>
+      <section><span class="small">Projected monthly pretrained NLI tokens</span><div class="number" id="proj-monthly-tokens">{_measured(tokenrow['model_input_tokens_month'],0)}</div><p class="small" id="proj-per-million-tokens">Effective self-hosted infrastructure: {_money(tokenrow['infra_per_million_nli_tokens_usd'])} per 1M NLI input tokens; NOT an API token price.</p></section></div>
       </div>'''
     html = re.sub(r'<h2>Demand and monthly infrastructure estimate</h2>.*?(?=<h2>Model tokens and cost attribution</h2>)',
                   lambda _: panel, base_html, count=1, flags=re.S)
@@ -218,7 +222,7 @@ def enhance_html(base_html: str, source: dict, *, target_rps: float = 1000,
        if(!(rps>0&&hours>0&&hours<=24&&days>=1&&days<=31&&util>0&&util<=1)){return;}
        const month=rps*hours*days*3600;
        by('projection-monthly-volume').textContent=fmt(month)+' requests/month';
-       d.models.forEach(m=>{const id=m.id;const bySpeed=Math.max(1,Math.ceil(rps/(m.host_sequential_rps*util)));
+       d.models.forEach(m=>{if(!m.host_sequential_rps)return;const id=m.id;const bySpeed=Math.max(1,Math.ceil(rps/(m.host_sequential_rps*util)));
        const byCpu=m.cpu_time_s_per_request?Math.max(1,Math.ceil(rps*m.cpu_time_s_per_request/(m.vcpu_per_instance*util))):null;
        const n=m.memory_fit_under_80pct?Math.max(bySpeed,byCpu||1):null;
        const disk=m.id==='pretrained'?d.price.storage_gb_pretrained:d.price.storage_gb;
@@ -241,7 +245,7 @@ def enhance_html(base_html: str, source: dict, *, target_rps: float = 1000,
        });}
        ['proj-rps','proj-hours','proj-days','proj-util'].forEach(k=>by(k).addEventListener('input',go));go();
     })();</script>'''
-    javascript = javascript.replace('DATA',jsdata).replace('OUTPUTS',json.dumps({m['id']: float(next(x for x in source['results'] if x['id']==m['id'])['inference']['avg_response_body_bytes']) for m in data})).replace('INSTANCES',json.dumps({m['id']:m['instance'] for m in data}))
+    javascript = javascript.replace('DATA',jsdata).replace('OUTPUTS',json.dumps({m['id']: float((next(x for x in source['results'] if x['id']==m['id']).get('inference') or {}).get('avg_response_body_bytes') or 0) for m in data})).replace('INSTANCES',json.dumps({m['id']:m['instance'] for m in data}))
     html=html.replace('</body>',javascript+'</body>',1)
     # Clarify that the hero describes the benchmark load not the extrapolation.
     html=html.replace(f"<span>{source['config']['target_rps']:g} req/s target</span>",f"<span>{source['config']['target_rps']:g} req/s measured load test</span><span>{target_rps:g} req/s cost projection</span>",1)
