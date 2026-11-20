@@ -1,0 +1,27 @@
+name: NLP foundations validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "nlp-foundations/**"
+      - ".github/workflows/nlp-foundations.yml"
+  push:
+    branches: [main]
+    paths:
+      - "nlp-foundations/**"
+      - ".github/workflows/nlp-foundations.yml"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run unit tests
+        run: python -m unittest discover -s nlp-foundations/tests -v
+      - name: Evaluate demo annotations
+        run: python nlp-foundations/evaluar.py --respuestas nlp-foundations/datos/predicciones_demo.csv

@@ -15,18 +15,22 @@ Existing directories in this repository remain untouched and can be used as supp
 - `pydantic-ai-lab/` — earlier focused Pydantic AI experiments.
 - `sistemas-multiagentes-course/` — academic MAS material in the earlier course structure.
 
-## Before Module 1 — introductory workshop
+## Before Module 1 — preparatory path (Spanish)
 
-For students without a strong AI background, begin with **[Module 0: algorithms vs. artificial intelligence](00_introduccion_ia_vs_algoritmos/README.md)**.
+For students without a strong AI background, use the two separate preparatory units:
 
-The 100–120 minute Spanish workshop compares explicit rules, supervised ML, embeddings, and a local LLM on the same text-classification task. It includes a student problem, instructor guide, runnable Python examples, evaluation and an animated Spanish PowerPoint, then introduces the model-to-agent transition. Existing Modules 1–4 remain unchanged.
+1. **[Introduction: classification problem](../introduction/actividad.md)** — traditional algorithms versus supervised learning (student exercise).
+2. **[NLP Foundations](../nlp-foundations/README.md)** — language tasks, ambiguity, multi-label intent, entities, annotation and evaluation, without building an LLM or repeating model training.
+
+Students interested in the internals of language models then follow **[llm-lab](../llm-lab/)** (Bigram → context → attention → Transformers → pretrained LLMs); the NLP unit deliberately does not teach those implementations. The four core agent modules below remain unchanged.
 
 ## Course Structure
 
 ```text
+introduction/                                  # problem and initial comparison
+nlp-foundations/                               # language tasks, annotation and evaluation
+llm-lab/                                       # optional/preparatory language-model internals
 modern-multi-agent-systems-course/
-│
-├── 00_introduccion_ia_vs_algoritmos/                  # optional beginner-friendly prerequisite
 ├── 01_agent_foundations_and_llm_integration/
 ├── 02_capabilities_knowledge_and_communication/
 ├── 03_engineering_coordination_and_reliability/
