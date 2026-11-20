@@ -1,4 +1,0 @@
-# El método de reglas funciona sin dependencias.
-scikit-learn>=1.3,<2
-# Opcional, instalar por separado: sentence-transformers
-# Opcional, instalar por separado: Ollama + un modelo local

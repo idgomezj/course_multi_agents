@@ -95,3 +95,5 @@ pydantic-ai-lab/**/outputs/*
 *.pt2
 
 
+
+*.pptx
